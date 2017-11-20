@@ -1,3 +1,4 @@
 env/
+logs/
 *.DS_Store
 *.ini

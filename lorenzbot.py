@@ -46,40 +46,26 @@ loop_time = args.loop; logger.debug('loop_time: ' + str(loop_time))
 live_trading = args.live; logger.debug('live_trading: ' + str(live_trading))
 csv_logging = args.nocsv; logger.debug('csv_logging: ' + str(csv_logging))
 
-# Get config file and set program values from it
-working_dir = os.listdir()
+# Warn user of extreme values
+if trade_amount > Decimal(5):
+    logger.warning('Trade amount set to a high value. Confirm before continuing.')
+    user_confirm = input('Continue? (y/n)')
 
-ini = None
-for file in working_dir:
-    if file.endswith('.ini'):
-        ini = str(file)
-
-if not ini:
-    logger.error('No ini configuration file found. Exiting.')
-    sys.exit(1)
-else:
-    config_file = ini
-    logger.info('Found config file: \"' + config_file + '\"')
-
-config = configparser.ConfigParser()
-config.read(config_file)
-
-if live_trading == True:
-    logger.warning('Live trading ENABLED.')
-    # Trade enabled
-    api_key = config['live']['key']
-    api_secret = config['live']['secret']
-else:
-    logger.info('Live trading disabled.')
-    # View only
-    api_key = config['view']['key']
-    api_secret = config['view']['secret']
+    if user_confirm == 'y':
+        pass
+    elif user_confirm == 'n':
+        logger.warning('Startup cancelled. Exiting.')
+        sys.exit()
+    else:
+        logger.error('Unrecognized user input. Exiting.')
+        sys.exit(1)
 
 # Variable modifiers
 product = 'USDT_STR'
 buy_threshold = Decimal(0.000105)
 sell_padding = Decimal(0.9975)  # Proportion of total amount bought to sell when triggered
 mongo_failures = 0
+csv_failures = 0
 
 
 def modify_collections(action):
@@ -101,6 +87,7 @@ def modify_collections(action):
 
 if csv_logging == True:
     log_file = 'logs/' + datetime.datetime.now().strftime('%m%d%Y-%H%M%S') + 'lorenzbot_log.csv'
+    logger.info('CSV log file path: ' + log_file)
     if not os.path.exists('logs'):
         logger.info('Log directory not found. Creating...')
         os.makedirs('logs')
@@ -125,6 +112,32 @@ else:
         # If none found, create new
         logger.info('No collections found in database. Creating new...')
         modify_collections('create')
+
+# Get config file and set program values from it
+working_dir = os.listdir()
+
+for file in working_dir:
+    if file.endswith('.ini'):
+        config_file = str(file)
+        logger.info('Found config file: \"' + config_file + '\"')
+        break
+else:
+    logger.error('No ini configuration file found. Exiting.')
+    sys.exit(1)
+
+config = configparser.ConfigParser()
+config.read(config_file)
+
+if live_trading == True:
+    logger.warning('Live trading ENABLED.')
+    # Trade enabled
+    api_key = config['live']['key']
+    api_secret = config['live']['secret']
+else:
+    logger.info('Live trading disabled.')
+    # View only
+    api_key = config['view']['key']
+    api_secret = config['view']['secret']
 
 try:
     polo = poloniex.Poloniex(api_key, api_secret)
@@ -170,7 +183,7 @@ def calc_base():
         agg = db.command('aggregate', coll_current, pipeline=pipeline)['result']
 
         trade_log_length = len(agg)
-        logger.debug('Trade log length: ' + str(len(agg)))
+        logger.debug('MongoDB collection length: ' + str(len(agg)))
         
         if trade_log_length == 0:
             logger.warning('No trade log found. Making entry buy.')
@@ -313,9 +326,14 @@ def process_trade_response(order_response, order_position):
 
 def log_trade_csv(csv_row): # Must pass list as argument
     logger.info('Logging trade details to csv file.')
-    with open(log_file, 'a', newline='') as csv_file:
-        csv_writer = csv.writer(csv_file, delimiter=',', quotechar='|', quoting=csv.QUOTE_MINIMAL)
-        csv_writer.writerow(csv_row)
+    try:
+        with open(log_file, 'a', newline='') as csv_file:
+            csv_writer = csv.writer(csv_file, delimiter=',', quotechar='|', quoting=csv.QUOTE_MINIMAL)
+            csv_writer.writerow(csv_row)
+
+    except:
+        logger.error('Failed to write to csv file.')
+        csv_failures += 1
 
 
 if __name__ == '__main__':
@@ -372,7 +390,9 @@ if __name__ == '__main__':
 
         except KeyboardInterrupt:
             logger.info('Exit signal received.')
-            logger.info('Mongo Write Errors: ' + str(mongo_failures))
+            logger.info('Mongo write errors: ' + str(mongo_failures))
+            if csv_logging == True:
+                logger.info('CSV write errors: ' + str(csv_failures))
             
             sys.exit(0)
 
