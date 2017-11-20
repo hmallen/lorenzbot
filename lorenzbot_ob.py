@@ -1,4 +1,6 @@
 #!/usr/env python3
+import argparse
+from configparser import ConfigParser
 import csv
 import datetime
 from decimal import *
@@ -7,25 +9,96 @@ import os
 import poloniex
 from pymongo import MongoClient
 import sys
+import textwrap
 import time
 
 global coll_current
 
-clear_collections = False    # Set True to clear collections and start fresh
-# NEED ACCOUNT BALANCE CHECKING ON STARTUP
-csv_logging = True
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
+
+parser = argparse.ArgumentParser(
+    formatter_class=argparse.RawDescriptionHelpFormatter,
+    description=textwrap.dedent('''\
+    
+    ---- Lorenz: Poloniex Trading Bot ----
+    
+    Set custom values for lorenzbot trading program.
+        '''),
+    epilog='\r')
+
+parser.add_argument('-c', '--clean', action='store_true', default=False, help='Add argument to drop all collections and start fresh.')
+parser.add_argument('-a', '--amount', default=0.1, type=float, help='Set trade amount.')
+parser.add_argument('-m', '--max', default=100, type=float, help='Max amount of quote currency allowed for trading.')
+parser.add_argument('-p', '--profit', default=0.05, type=float, help='Set profit threshold for sell triggering.')
+parser.add_argument('--live', action='store_true', default=False, help='Add flag to enable live trading API keys')
+parser.add_argument('--nocsv', action='store_false', default=True, help='Add flag to disable csv logging.')
+#parser.add_argument(?? no - or -- ??, default='USDT_STR', help='Manual selection of currency pair for trading.') --> Product selection
+
+logger.debug('Parsing arguments.')
+args = parser.parse_args()
+clear_collections = args.clean, logger.debug('clear_collections: ' + str(clear_collections))
+trade_amount = Decimal(args.amount), logger.debug('trade_amount: ' + str(trade_amount))
+trade_max = Decimal(args.max), logger.debug('trade_max: ' + str(trade_max))   # CURRENTLY UNUSED
+profit_threshold = Decimal(args.profit), logger.debug('profit_threshold: ' + str(profit_threshold))
+live_trading = args.live, logger.debug('live_trading: ' + str(live_trading))   # CURRENTLY UNUSED
+csv_logging = args.csv, logger.debug('csv_logging: ' + str(csv_logging))
+
+# Get config file and set program values from it
+working_dir = os.listdir()
+
+ini = None
+for file in working_dir:
+    if file.endswith('.ini'):
+        ini = str(file)
+
+if not ini:
+    logger.error('No ini configuration file found. Exiting.')
+    sys.exit(1)
+else:
+    config_file = ini
+    logger.info('Found config file ' + config_file + '.')
+
+config = configparser.ConfigParser()
+config.read(config_file)
+
+if live_trading == True:
+    logger.warning('Live trading ENABLED.')
+    # Trade enabled
+    api_key = config['live']['key']
+    api_secret = config['live']['secret']
+else:
+    logger.info('Live trading disabled.')
+    # View only
+    api_key = config['view']['key']
+    api_secret = config['view']['secret']
 
 # Variable modifiers
 product = 'USDT_STR'
-trade_amount = Decimal(1)    # Amount of trade product to buy at regular intervals
-trade_max = 100
 loop_time = 60
-profit_threshold = Decimal(0.05)
 buy_threshold = Decimal(0.000105)
 sell_padding = Decimal(0.9975)  # Proportion of total amount bought to sell when triggered
+mongo_failures = 0
 
-logging.basicConfig(level=logging.DEBUG)
-logger = logging.getLogger(__name__)
+# NEED ACCOUNT BALANCE CHECKING ON STARTUP
+
+
+def modify_collections(action):
+    if action == 'create':
+        global coll_current
+
+        #coll_current = 'lorenzbot_collection'
+        coll_current = datetime.datetime.now().strftime('%m%d%Y_%H%M%S')
+        
+        db.create_collection(coll_current)
+        
+        logger.info('Created new collection: ' + coll_current)
+
+    elif action == 'drop':
+        for name in db.collection_names():
+            db.drop_collection(name)
+            logger.debug('Dropped collection: ' + name)
+
 
 if csv_logging == True:
     log_file = 'logs/' + datetime.datetime.now().strftime('%m%d%Y-%H%M%S') + '_polo_arbitrage_log.csv'
@@ -33,47 +106,26 @@ if csv_logging == True:
         logger.info('Log directory not found. Creating...')
         os.makedirs('logs')
 
-
-def create_collection():
-    global coll_current
-    
-    #coll_current = datetime.datetime.now().strftime('%m%d%Y_%H%M%S')
-    coll_current = 'lorenzbot_collection'
-    db.create_collection(coll_current)
-    logger.info('Created new collection: ' + coll_current)
-
-
-def drop_collections():
-    for name in db.collection_names():
-        db.drop_collection(name)
-        logger.debug('Dropped collection: ' + name)
-
-
-db = MongoClient().lorenzbot
+b = MongoClient().lorenzbot
 
 coll_names = db.collection_names()
 
 if clear_collections == True:
     logger.info('Dropping all collections from database.')
-    drop_collections()
-    logger.info('Process complete. Please switch drop_collections to \'False\' and restart program.')
+    modify_collections('drop')
+    logger.info('Process complete. Restart program without boolean switch.')
+    # COULD JUST PROCEED WITH MAIN PROGRAM...
     sys.exit()
+
 else:
     try:
-        # Retrieve latest collection
+        # Try to retrieve latest collection
         coll_current = coll_names[(len(coll_names) - 1)]
         logger.info('Found existing collection: ' + str(coll_current))
     except:
         # If none found, create new
         logger.info('No collections found in database. Creating new...')
-        create_collection()
-
-# View only
-#api_key = 'QDYU02XD-2GPXRUEO-DBN67ZGB-Z4H198FP'
-#api_secret = '17a6db6142f1576ec37c4692294d671acb969846939e7ae2e875f27fe6347f88dbcdcd19cff60f5d516ca96ab2c55802e67eceb974f7cce61cbd73180a8729ba'
-# Trade enabled
-api_key = 'FOGUZX5E-HI79NPQ8-M02Q87GS-24GH5XZA'
-api_secret = 'ea5151e99c8d9595864f843839f3bacf145cd1c15dfa3f7ae25597c263e5d433537e06a6783267f88ea6350a4d876b48ee6e3f4eb536f01a2d1cd57af13b7baa'
+        modify_collections('create')
 
 try:
     polo = poloniex.Poloniex(api_key, api_secret)
@@ -133,7 +185,7 @@ def calc_base():
 
     weighted_avg = amount_spent / amount_bought
 
-    #logger.debug('amount_spent:  ' + str(amount_spent))
+    logger.debug('amount_spent:  ' + str(amount_spent))
     logger.debug('amount_bought: ' + "{:.8f}".format(amount_bought))
     logger.debug('weighted_avg:  ' + "{:.8f}".format(weighted_avg))
 
@@ -160,17 +212,22 @@ def sell_amount():
 
 
 # NEED TO FIX THE BUY/SELL FUNCTIONS
-def exec_trade(position, trigger=None):
+def exec_trade(position, price_limit=None):
     if position == 'buy':
-        trade_response = polo.buy('USDT_STR', trigger, trade_amount, 'immediateOrCancel')
+        trade_response = polo.buy('USDT_STR', price_limit, trade_amount, 'immediateOrCancel')
         order_details = process_trade_response(trade_response, position)
         logger.debug('order_details: ' + str(order_details))
-        
-        mongo_response = db[coll_current].insert_one({'amount': float(order_details['amount']), 'price': float(order_details['rate'])})
-        logger.debug('Mongo ' + position + ' log response: ' + str(mongo_response))
+
+        try:
+            mongo_response = db[coll_current].insert_one({'amount': float(order_details['amount']), 'price': float(order_details['rate'])})
+            logger.debug('mongo_response: ' + str(mongo_response))
+        except:
+            logger.exception('Failed to write to MongoDB log!')
+            mongo_failures += 1
         # Add some try/except or if result == '????' to ensure successful write
 
     elif position == 'sell':
+        pass
     
     if csv_logging == True:
         log_trade_csv(order_details)
@@ -241,18 +298,23 @@ if __name__ == '__main__':
             if highest_bid >= sell_price_calc and lowest_ask_volume >= trade_amount:
                 logger.debug('TRADE CONDITIONS MET ---> SELLING')
                 exec_trade('sell')
-                drop_collections()
-                create_collection()
+                modify_collections('drop')
+                modify_collections('create')
                 
             elif lowest_ask_actual < base_price_trigger:
                 logger.debug('TRADE CONDITIONS MET ---> BUYING')
                 exec_trade('buy', base_price_trigger)
+
+            #trade_amount_adjust()
+            #loop_time_adjust()
+                
 
         except Exception as e:
             logger.exception(e)
 
         except KeyboardInterrupt:
             logger.info('Exit signal received.')
+            logger.info('Mongo Write Errors: ' + str(mongo_failures))
             sys.exit(0)
 
         time.sleep(loop_time)
