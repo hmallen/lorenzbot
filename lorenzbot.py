@@ -49,7 +49,7 @@ csv_logging = args.nocsv; logger.debug('csv_logging: ' + str(csv_logging))
 # Warn user of extreme values
 if trade_amount > Decimal(5):
     logger.warning('Trade amount set to a high value. Confirm before continuing.')
-    user_confirm = input('Continue? (y/n)')
+    user_confirm = input('Continue? (y/n): ')
 
     if user_confirm == 'y':
         pass
