@@ -1,6 +1,6 @@
 #!/usr/env python3
 import argparse
-import configparser
+from configparser import ConfigParser
 import csv
 import datetime
 from decimal import *
@@ -27,7 +27,7 @@ parser = argparse.ArgumentParser(
         '''),
     epilog='\r')
 
-parser.add_argument('-c', '--clean', action='store_true', default=False, help='Add argument to drop all collections and start fresh.')
+parser.add_argument('-c', '--clean', help='Add argument to drop all collections and start fresh.')
 parser.add_argument('-a', '--amount', default=0.1, type=float, help='Set trade amount.')
 parser.add_argument('-m', '--max', default=100, type=float, help='Max amount of quote currency allowed for trading.')
 parser.add_argument('-p', '--profit', default=0.05, type=float, help='Set profit threshold for sell triggering.')
@@ -37,12 +37,19 @@ parser.add_argument('--nocsv', action='store_false', default=True, help='Add fla
 
 logger.debug('Parsing arguments.')
 args = parser.parse_args()
-clear_collections = args.clean; logger.debug('clear_collections: ' + str(clear_collections))
-trade_amount = Decimal(args.amount); logger.debug('trade_amount: ' + "{:.8f}".format(trade_amount))
-trade_max = Decimal(args.max); logger.debug('trade_max: ' + "{:.2f}".format(trade_max))   # CURRENTLY UNUSED
-profit_threshold = Decimal(args.profit); logger.debug('profit_threshold: ' + "{:.4f}".format(profit_threshold))
-live_trading = args.live; logger.debug('live_trading: ' + str(live_trading))
-csv_logging = args.nocsv; logger.debug('csv_logging: ' + str(csv_logging))
+sys.exit()
+print(args.clean)
+sys.exit()
+
+"""
+clear_collections = args.clean
+logger.debug('clear_collections: ' + str(clear_collections))
+trade_amount = Decimal(args.amount), logger.debug('trade_amount: ' + str(trade_amount))
+trade_max = Decimal(args.max), loggerfsdf.debug('trade_max: ' + str(trade_max))   # CURRENTLY UNUSED
+profit_threshold = Decimal(args.profit), logger.debug('profit_threshold: ' + str(profit_threshold))
+live_trading = args.live, logger.debug('live_trading: ' + str(live_trading))   # CURRENTLY UNUSED
+csv_logging = args.csv, logger.debug('csv_logging: ' + str(csv_logging))
+"""
 
 # Get config file and set program values from it
 working_dir = os.listdir()
@@ -57,12 +64,10 @@ if not ini:
     sys.exit(1)
 else:
     config_file = ini
-    logger.info('Found config file: \"' + config_file + '\"')
+    logger.info('Found config file ' + config_file + '.')
 
 config = configparser.ConfigParser()
 config.read(config_file)
-
-sys.exit()
 
 if live_trading == True:
     logger.warning('Live trading ENABLED.')

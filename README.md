@@ -10,3 +10,5 @@ TO DO:
 - Add function for trade amount adjustment (?)
 - Add function for loop time adjustment (?)
 - Add max trade limit option (?)
+- Add account balance checking on startup
+-- And regular checks
