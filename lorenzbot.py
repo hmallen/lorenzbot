@@ -31,6 +31,7 @@ parser.add_argument('-c', '--clean', action='store_true', default=False, help='A
 parser.add_argument('-a', '--amount', default=0.1, type=float, help='Set trade amount.')
 parser.add_argument('-m', '--max', default=100, type=float, help='Max amount of quote currency allowed for trading.')
 parser.add_argument('-p', '--profit', default=0.05, type=float, help='Set profit threshold for sell triggering.')
+parser.add_argument('-l', '--loop', default=60, type=float, help='Main program loop time (seconds).')
 parser.add_argument('--live', action='store_true', default=False, help='Add flag to enable live trading API keys')
 parser.add_argument('--nocsv', action='store_false', default=True, help='Add flag to disable csv logging.')
 #parser.add_argument(?? no - or -- ??, default='USDT_STR', help='Manual selection of currency pair for trading.') --> Product selection
@@ -41,6 +42,7 @@ clear_collections = args.clean; logger.debug('clear_collections: ' + str(clear_c
 trade_amount = Decimal(args.amount); logger.debug('trade_amount: ' + "{:.8f}".format(trade_amount))
 trade_max = Decimal(args.max); logger.debug('trade_max: ' + "{:.2f}".format(trade_max))   # CURRENTLY UNUSED
 profit_threshold = Decimal(args.profit); logger.debug('profit_threshold: ' + "{:.4f}".format(profit_threshold))
+loop_time = args.loop; logger.debug('loop_time: ' + str(loop_time))
 live_trading = args.live; logger.debug('live_trading: ' + str(live_trading))
 csv_logging = args.nocsv; logger.debug('csv_logging: ' + str(csv_logging))
 
@@ -62,8 +64,6 @@ else:
 config = configparser.ConfigParser()
 config.read(config_file)
 
-sys.exit()
-
 if live_trading == True:
     logger.warning('Live trading ENABLED.')
     # Trade enabled
@@ -77,12 +77,9 @@ else:
 
 # Variable modifiers
 product = 'USDT_STR'
-loop_time = 60
 buy_threshold = Decimal(0.000105)
 sell_padding = Decimal(0.9975)  # Proportion of total amount bought to sell when triggered
 mongo_failures = 0
-
-# NEED ACCOUNT BALANCE CHECKING ON STARTUP
 
 
 def modify_collections(action):
@@ -103,12 +100,12 @@ def modify_collections(action):
 
 
 if csv_logging == True:
-    log_file = 'logs/' + datetime.datetime.now().strftime('%m%d%Y-%H%M%S') + '_polo_arbitrage_log.csv'
+    log_file = 'logs/' + datetime.datetime.now().strftime('%m%d%Y-%H%M%S') + 'lorenzbot_log.csv'
     if not os.path.exists('logs'):
         logger.info('Log directory not found. Creating...')
         os.makedirs('logs')
 
-b = MongoClient().lorenzbot
+db = MongoClient().lorenzbot
 
 coll_names = db.collection_names()
 
@@ -133,6 +130,19 @@ try:
     polo = poloniex.Poloniex(api_key, api_secret)
 except:
     logger.exception('Poloniex API key and/or secret incorrect. Exiting.')
+    sys.exit(1)
+
+user_balances = polo.returnAvailableAccountBalances()['exchange']
+balance_str = Decimal(user_balances['STR'])
+balance_usdt = Decimal(user_balances['USDT'])
+logger.info('Balance STR:  ' + "{:.2f}".format(balance_str))
+logger.info('Balance USDT: ' + "{:.2f}".format(balance_usdt))
+
+trade_max_calc = Decimal(polo.returnTicker()['USDT_STR']['last']) * trade_max
+logger.debug('trade_max_calc: ' + "{:.2f}".format(trade_max_calc))
+
+if balance_usdt < trade_max_calc:
+    logger.error('Insufficient USDT balance -- need at least ' + "{:.2f}".format(trade_max_calc) + ' USDT. Exiting.')
     sys.exit(1)
 
 user_fees = polo.returnFeeInfo()
@@ -164,7 +174,7 @@ def calc_base():
         
         if trade_log_length == 0:
             logger.warning('No trade log found. Making entry buy.')
-            exec_trade('buy')
+            exec_trade('buy', polo.returnTicker()['USDT_STR']['lowestAsk'])
         else:
             break
 
@@ -183,11 +193,11 @@ def calc_base():
     logger.debug('agg: ' + str(agg))
 
     amount_bought = Decimal(agg[0]['amount_bought'])
-    logger.debug('agg[0][\'amount_bought\']: ' + "{:.8f}".format(agg[0]['amount_bought']))
+    logger.debug('amount_bought: ' + "{:.8f}".format(agg[0]['amount_bought']))
 
     weighted_avg = amount_spent / amount_bought
 
-    logger.debug('amount_spent:  ' + str(amount_spent))
+    logger.debug('amount_spent:  ' + "{:.8f}".format(amount_spent))
     logger.debug('amount_bought: ' + "{:.8f}".format(amount_bought))
     logger.debug('weighted_avg:  ' + "{:.8f}".format(weighted_avg))
 
@@ -218,21 +228,34 @@ def exec_trade(position, price_limit=None):
     if position == 'buy':
         trade_response = polo.buy('USDT_STR', price_limit, trade_amount, 'immediateOrCancel')
         order_details = process_trade_response(trade_response, position)
-        logger.debug('order_details: ' + str(order_details))
+        logger.debug('[BUY]order_details: ' + str(order_details))
 
         try:
-            mongo_response = db[coll_current].insert_one({'amount': float(order_details['amount']), 'price': float(order_details['rate'])})
-            logger.debug('mongo_response: ' + str(mongo_response))
+            mongo_response = db[coll_current].insert_one({'amount': float(order_details['amount']), 'price': float(order_details['rate']), 'side': 'buy'})
+            logger.debug('[BUY]mongo_response: ' + str(mongo_response))
         except:
-            logger.exception('Failed to write to MongoDB log!')
+            logger.exception('[BUY]Failed to write to MongoDB log!')
             mongo_failures += 1
         # Add some try/except or if result == '????' to ensure successful write
 
     elif position == 'sell':
-        pass
+        total_bought = sell_amount()
+        logger.debug('total_bought[sell_amount()]: ' + "{:.2f}".format(total_bought))
+        
+        trade_response = polo.sell('USDT_STR', price_limit, total_bought, 'immediateOrCancel')
+        order_details = process_trade_response(trade_response, 'sell')
+        logger.debug('[SELL]order_details: ' + str(order_details))
+
+        try:
+            mongo_response = db[coll_current].insert_one({'amount': float(order_details['amount']), 'price': float(order_details['rate']), 'side': 'sell'})
+            logger.debug('[SELL]mongo_response: ' + str(mongo_response))
+        except:
+            logger.exception('[SELL]Failed to write to MongoDB log!')
+            mongo_failures += 1
     
     if csv_logging == True:
-        log_trade_csv(order_details)
+        csv_list = [position, order_details['amount'], order_details['rate']]
+        log_trade_csv(csv_list)
 
     # FEE INFO #
     # Buys:  taker_fee * STR
@@ -243,7 +266,7 @@ def process_trade_response(order_response, order_position):
     amount_unfilled = Decimal(order_response['amountUnfilled'])
     
     order_trades = polo.returnOrderTrades(order_response['orderNumber'])
-    logger.debug('returnOrderTrades: ' + str(r))
+    logger.debug('returnOrderTrades: ' + str(order_trades))
 
     order_list = []
     trade_total = Decimal(0)
@@ -272,15 +295,21 @@ def log_trade_csv(csv_row): # Must pass list as argument
     logger.info('Logging trade details to csv.')
     with open(log_file, 'a', newline='') as csv_file:
         csv_writer = csv.writer(csv_file, delimiter=',', quotechar='|', quoting=csv.QUOTE_MINIMAL)
-        csv_writer.writerow([csv_row])
+        csv_writer.writerow(csv_row)
 
 
 if __name__ == '__main__':
     while (True):
         try:
+            logger.debug('----[LOOP START]----')
+            
             # Calculate base price
             base_price = calc_base()
             base_price_trigger = base_price - buy_threshold
+
+            balances = polo.returnAvailableAccountBalances()['exchange']
+            balance_str = Decimal(balances['STR'])
+            balance_usdt = Decimal(balances['USDT'])
 
             ob = polo.returnOrderBook('USDT_STR')
             lowest_ask = Decimal(ob['asks'][0][0])
@@ -289,26 +318,33 @@ if __name__ == '__main__':
             #highest_bid_volume = Decimal(ob['bids'][0][1])
                         
             lowest_ask_actual = lowest_ask / (Decimal(1) - taker_fee)
-            sell_price_calc = base_price * (Decimal(1) + profit_threshold)
+            sell_price_calc = base_price * (Decimal(1) + profit_threshold + taker_fee)
 
             logger.debug('base_price:         ' + "{:.8f}".format(base_price))
             logger.debug('base_price_trigger: ' + "{:.8f}".format(base_price_trigger))
             logger.debug('lowest_ask_actual:  ' + "{:.8f}".format(lowest_ask_actual))
-            logger.debug('Difference:         ' + "{:.8f}".format(base_price - lowest_ask_actual))
+            logger.debug('Difference:         ' + "{:.8f}".format(base_price_trigger - lowest_ask_actual))
             logger.debug('sell_price_calc:    ' + "{:.8f}".format(sell_price_calc))
+            logger.debug('lowest_ask_volume:  ' + "{:.2f}".format(lowest_ask_volume))
 
-            if highest_bid >= sell_price_calc and lowest_ask_volume >= trade_amount:
+            if (highest_bid >= sell_price_calc) and (lowest_ask_volume >= sell_amount()):
                 logger.debug('TRADE CONDITIONS MET ---> SELLING')
-                exec_trade('sell')
-                modify_collections('drop')
+                exec_trade('sell', sell_price_calc)
+                #modify_collections('drop')
                 modify_collections('create')
                 
-            elif lowest_ask_actual < base_price_trigger:
-                logger.debug('TRADE CONDITIONS MET ---> BUYING')
-                exec_trade('buy', base_price_trigger)
+            elif (lowest_ask_actual < base_price_trigger):
+                logger.debug('Price good for buy. Checking account balance.')
+                if ((balance_usdt * trade_amount) > base_price_trigger):
+                    logger.debug('TRADE CONDITIONS MET ---> BUYING')
+                    exec_trade('buy', base_price_trigger)
+                else:
+                    logger.warning('Insufficient balance to execute buy trade. Skipping buy.')
 
             #trade_amount_adjust()
             #loop_time_adjust()
+
+            logger.debug('----[LOOP END]----')
                 
 
         except Exception as e:
@@ -317,6 +353,7 @@ if __name__ == '__main__':
         except KeyboardInterrupt:
             logger.info('Exit signal received.')
             logger.info('Mongo Write Errors: ' + str(mongo_failures))
+            
             sys.exit(0)
 
         time.sleep(loop_time)
