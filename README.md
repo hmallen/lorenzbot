@@ -3,11 +3,13 @@ Poloniex exchange trading bot
 
 TO DO:
 - Test everything so far
+- Add check for sell completion and create new collection only after
+- Add check to make sure arguments passed to program aren't too extreme due to typo
+- Add handling for max trade limit
 
 LATER:
 - Add function for trade amount adjustment (?)
 - Add function for loop time adjustment (?)
-- Add max trade limit function
 
 IF TIME:
 - Add argument for product selection

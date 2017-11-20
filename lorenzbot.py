@@ -231,7 +231,7 @@ def exec_trade(position, price_limit=None):
         logger.debug('[BUY]order_details: ' + str(order_details))
 
         try:
-            mongo_response = db[coll_current].insert_one({'amount': float(order_details['amount']), 'price': float(order_details['rate']), 'side': 'buy'})
+            mongo_response = db[coll_current].insert_one({'amount': float(order_details['amount']), 'price': float(order_details['rate']), 'side': position, 'date': order_details['date']})
             logger.debug('[BUY]mongo_response: ' + str(mongo_response))
         except:
             logger.exception('[BUY]Failed to write to MongoDB log!')
@@ -243,18 +243,24 @@ def exec_trade(position, price_limit=None):
         logger.debug('total_bought[sell_amount()]: ' + "{:.2f}".format(total_bought))
         
         trade_response = polo.sell('USDT_STR', price_limit, total_bought, 'immediateOrCancel')
-        order_details = process_trade_response(trade_response, 'sell')
+        logger.debug('trade_response: ' + str(trade_response))
+        
+        order_details = process_trade_response(trade_response, position)
         logger.debug('[SELL]order_details: ' + str(order_details))
 
         try:
-            mongo_response = db[coll_current].insert_one({'amount': float(order_details['amount']), 'price': float(order_details['rate']), 'side': 'sell'})
+            mongo_response = db[coll_current].insert_one({'amount': float(order_details['amount']), 'price': float(order_details['rate']), 'side': position, 'date': order_details['date']})
             logger.debug('[SELL]mongo_response: ' + str(mongo_response))
         except:
             logger.exception('[SELL]Failed to write to MongoDB log!')
             mongo_failures += 1
     
     if csv_logging == True:
-        csv_list = [position, order_details['amount'], order_details['rate']]
+        csv_list = [order_details['date'],
+                    position,
+                    "{:.8f}".format(order_details['amount']),
+                    "{:.8f}".format(order_details['rate'])]
+        logger.debug('csv_list: ' + str(csv_list))
         log_trade_csv(csv_list)
 
 
@@ -263,24 +269,26 @@ def process_trade_response(order_response, order_position):
     logger.debug('amount_unfilled: ' + "{:.2f}".format(amount_unfilled))
     
     order_trades = polo.returnOrderTrades(order_response['orderNumber'])
+    trade_date = order_trades[(len(order_trades) - 1)]['date']
     logger.debug('returnOrderTrades: ' + str(order_trades))
+    logger.debug('trade_date: ' + trade_date)
 
     # FEE INFO #
-    # Buys:  taker_fee * STR
-    # Sells: taker_fee * USDT
-
-    if order_position == 'buy':
-        pass
-
-    elif order_position == 'sell':
-        pass
+    # Buys:  STR x (1 - taker_fee)
+    # Sells: USDT x (1 - taker_fee)
 
     # Build list with rates and actual trade amounts (trade amounts - fee)
     order_list = []
     logger.debug('len(order_trades): ' + str(len(order_trades)))
     for x in range(0, len(order_trades)):
-        order_rate = Decimal(order_trades[x]['rate'])
-        order_amount = Decimal(order_trades[x]['amount']) * (Decimal(1) - Decimal(order_trades[x]['fee']))
+        if order_position == 'buy':
+            order_rate = Decimal(order_trades[x]['rate'])
+            order_amount = Decimal(order_trades[x]['amount']) * (Decimal(1) - Decimal(order_trades[x]['fee']))
+
+        elif order_position == 'sell':
+            order_rate = ((Decimal(order_trades[x]['amount']) * Decimal(order_trades[x]['rate'])) * (Decimal(1) - Decimal(order_trades[x]['fee']))) / Decimal(order_trades[x]['amount'])
+            order_amount = Decimal(order_trades[x]['amount'])
+        
         order_list.append([order_amount, order_rate])
 
     logger.debug('len(order_list): ' + str(len(order_list)))
@@ -300,11 +308,11 @@ def process_trade_response(order_response, order_position):
     
     logger.debug('Calc. Error Margin: ' + "{:.2f}".format((trade_amount - amount_unfilled) - amount_total))
     
-    return {'amount': amount_total, 'rate': order_average_rate}
+    return {'date': trade_date, 'amount': amount_total, 'rate': order_average_rate}
 
 
 def log_trade_csv(csv_row): # Must pass list as argument
-    logger.info('Logging trade details to csv.')
+    logger.info('Logging trade details to csv file.')
     with open(log_file, 'a', newline='') as csv_file:
         csv_writer = csv.writer(csv_file, delimiter=',', quotechar='|', quoting=csv.QUOTE_MINIMAL)
         csv_writer.writerow(csv_row)
@@ -330,7 +338,7 @@ if __name__ == '__main__':
             #highest_bid_volume = Decimal(ob['bids'][0][1])
                         
             lowest_ask_actual = lowest_ask / (Decimal(1) - taker_fee)
-            sell_price_calc = base_price * (Decimal(1) + profit_threshold + taker_fee)
+            sell_price_calc = base_price * (Decimal(1) + profit_threshold)# + taker_fee)    # Fees already factored in
 
             logger.debug('base_price:         ' + "{:.8f}".format(base_price))
             logger.debug('base_price_trigger: ' + "{:.8f}".format(base_price_trigger))
