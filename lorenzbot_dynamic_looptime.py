@@ -269,9 +269,9 @@ def exec_trade(position, price_limit=None):
             mongo_failures += 1
         # Add some try/except or if result == '????' to ensure successful write
 
-    elif position == 'sell':
+    elif position == 'sell':        
         sell_amount = calc_sell_amount()
-        logger.debug('calc_sell_amount(): ' + "{:.2f}".format(sell_amount))
+        logger.debug('sell_amount: ' + "{:.2f}".format(sell_amount))
 
         account_balances = get_balances()
         balance_str = account_balances['str']
@@ -280,31 +280,45 @@ def exec_trade(position, price_limit=None):
             logger.warning('Account balance now less than total bought. Adjusting sell amount to current balance.')
             sell_amount = balance_str
             logger.warning('New sell amount: ' + "{:.2f}".format(sell_amount))
-        
-        trade_response = polo.sell('USDT_STR', price_limit, total_bought, 'immediateOrCancel')  # CHANGE TO REGULAR LIMIT ORDER?
-        logger.debug('trade_response: ' + str(trade_response))
 
-        # HANDLE UNFILLED AMOUNT HERE
+        
+        trade_response = polo.sell('USDT_STR', price_limit, sell_amount, 'immediateOrCancel')  # CHANGE TO REGULAR LIMIT ORDER?
+        logger.debug('[SELL] trade_response: ' + str(trade_response))
         
         order_details = process_trade_response(trade_response, position)
         logger.debug('[SELL] order_details: ' + str(order_details))
 
         try:
-            # NEED TO HANDLE COLLECTION CREATION, ETC. HERE
             mongo_response = db[coll_current].insert_one({'amount': float(order_details['amount']), 'price': float(order_details['rate']), 'side': position, 'date': order_details['date']})
             logger.debug('[SELL] mongo_response: ' + str(mongo_response))
         except:
             logger.exception('[SELL] Failed to write to MongoDB log!')
             mongo_failures += 1
-    
-    if csv_logging == True:
-        csv_list = [order_details['date'],
-                    position,
-                    "{:.8f}".format(order_details['amount']),
-                    "{:.8f}".format(order_details['rate']),
-                    "{:.8f}".format(calc_base())]
-        logger.debug('csv_list: ' + str(csv_list))
-        log_trade_csv(csv_list)
+
+        if csv_logging == True:
+            csv_list = [order_details['date'],
+                        position,
+                        "{:.8f}".format(order_details['amount']),
+                        "{:.8f}".format(order_details['rate']),
+                        "{:.8f}".format(calc_base())]
+            logger.debug('csv_list: ' + str(csv_list))
+            log_trade_csv(csv_list)
+        
+        # If order not completely filled, handle unfilled amount
+        if order_details['amount_unfilled'] > Decimal(0):
+            # Log sell, create new collection, and add amount_unfilled as buy in MongoDB for base_price calculation
+            modify_collections('create')
+            
+            try:
+                mongo_response = db[coll_current].insert_one({'amount': float(order_details['amount']), 'price': float(order_details['rate']), 'side': 'buy', 'date': order_details['date']})
+                logger.debug('[UNFILLED/NEW] mongo_response: ' + str(mongo_response))
+            except:
+                logger.exception('[UNFILLED/NEW] Failed to write to MongoDB log!')
+                mongo_failures += 1
+        
+        else:
+            # Just log sell and create new collection
+            modify_collections('create')
 
 
 def process_trade_response(order_response, order_position):
@@ -351,7 +365,7 @@ def process_trade_response(order_response, order_position):
     
     logger.debug('Calc. Error Margin: ' + "{:.2f}".format((trade_amount - amount_unfilled) - amount_total))
     
-    return {'date': trade_date, 'amount': amount_total, 'rate': order_average_rate}
+    return {'date': trade_date, 'amount': amount_total, 'rate': order_average_rate, 'amount_unfilled': amount_unfilled}
 
 
 def log_trade_csv(csv_row): # Must pass list as argument
@@ -431,7 +445,7 @@ if __name__ == '__main__':
                 logger.debug('TRADE CONDITIONS MET ---> SELLING')
                 exec_trade('sell', sell_price_calc)
                 #modify_collections('drop')
-                modify_collections('create')
+                #modify_collections('create')   # Handled in exec_trade() function
                 
             elif (lowest_ask_actual < base_price_trigger):
                 logger.debug('Price good for buy. Checking account balance.')
