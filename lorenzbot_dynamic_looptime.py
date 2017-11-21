@@ -32,6 +32,7 @@ parser.add_argument('-a', '--amount', default=0.1, type=float, help='Set trade a
 parser.add_argument('-m', '--max', default=100, type=float, help='Max amount of quote currency allowed for trading.')
 parser.add_argument('-p', '--profit', default=0.05, type=float, help='Set profit threshold for sell triggering.')
 parser.add_argument('-l', '--loop', default=60, type=float, help='Main program loop time (seconds).')
+parser.add_argument('--dynamic', action='store_true', default=False, help='Add flag to dynamically set loop time based on current conditions.')
 parser.add_argument('--live', action='store_true', default=False, help='Add flag to enable live trading API keys')
 parser.add_argument('--nocsv', action='store_false', default=True, help='Add flag to disable csv logging.')
 #parser.add_argument(?? no - or -- ??, default='USDT_STR', help='Manual selection of currency pair for trading.') --> Product selection
@@ -43,6 +44,7 @@ trade_amount = Decimal(args.amount); logger.debug('trade_amount: ' + "{:.8f}".fo
 trade_max = Decimal(args.max); logger.debug('trade_max: ' + "{:.2f}".format(trade_max))   # CURRENTLY UNUSED
 profit_threshold = Decimal(args.profit); logger.debug('profit_threshold: ' + "{:.4f}".format(profit_threshold))
 loop_time = Decimal(args.loop); logger.debug('loop_time: ' + str(loop_time))
+loop_dynamic = args.dynamic; logger.debug('loop_dynamic: ' + str(loop_dynamic))
 live_trading = args.live; logger.debug('live_trading: ' + str(live_trading))
 csv_logging = args.nocsv; logger.debug('csv_logging: ' + str(csv_logging))
 
@@ -62,7 +64,7 @@ if trade_amount > Decimal(5):
 
 # Variable modifiers
 product = 'USDT_STR'
-loop_time_min = Decimal(6) # Minimum allowed loop time with dynamic adjustment
+loop_time_min = Decimal(6) # Minimum allowed loop time with dynamic adjustment (seconds)
 
 buy_threshold = Decimal(0.000105)
 sell_padding = Decimal(0.9975)  # Proportion of total amount bought to sell when triggered
@@ -148,9 +150,27 @@ except:
     logger.exception('Poloniex API key and/or secret incorrect. Exiting.')
     sys.exit(1)
 
-user_balances = polo.returnAvailableAccountBalances()['exchange']
-balance_str = Decimal(user_balances['STR'])
-balance_usdt = Decimal(user_balances['USDT'])
+
+def get_balances():
+    user_balances = polo.returnAvailableAccountBalances()['exchange']
+    bal_str = Decimal(user_balances['STR'])
+    bal_usdt = Decimal(user_balances['USDT'])
+    
+    bal_dict = {'str': bal_str, 'usdt': bal_usdt}
+
+    return bal_dict
+
+
+user_fees = polo.returnFeeInfo()
+maker_fee = Decimal(user_fees['makerFee'])
+taker_fee = Decimal(user_fees['takerFee'])
+logger.info('Current Maker Fee: ' + "{:.4f}".format(maker_fee))
+logger.info('Current Taker Fee: ' + "{:.4f}".format(taker_fee))
+
+account_balances = get_balances()
+balance_str = account_balances['str']
+balance_usdt = account_balances['usdt']
+
 logger.info('Balance STR:  ' + "{:.2f}".format(balance_str))
 logger.info('Balance USDT: ' + "{:.2f}".format(balance_usdt))
 
@@ -160,14 +180,6 @@ logger.debug('trade_max_calc: ' + "{:.2f}".format(trade_max_calc))
 if balance_usdt < trade_max_calc:
     logger.error('Insufficient USDT balance -- need at least ' + "{:.2f}".format(trade_max_calc) + ' USDT. Exiting.')
     sys.exit(1)
-
-user_fees = polo.returnFeeInfo()
-maker_fee = Decimal(user_fees['makerFee'])
-taker_fee = Decimal(user_fees['takerFee'])
-logger.info('Current Maker Fee: ' + "{:.4f}".format(maker_fee))
-logger.info('Current Taker Fee: ' + "{:.4f}".format(taker_fee))
-
-#time.sleep(3)
 
 
 def calc_base():
@@ -344,9 +356,8 @@ def loop_time_dynamic(base, amt, book):
     for x in range(0, len(book['asks'])):
         ask_tot += Decimal(book['asks'][x][1])
         if ask_tot >= amt:
-            logger.debug('ask_tot:    ' + "{:.2f}".format(ask_tot))
             ask_actual = Decimal(book['asks'][x][0])
-            logger.debug('ask_actual: ' + "{:.8f}".format(ask_actual))
+            logger.debug('ask_tot:    ' + "{:.2f}".format(ask_tot) + ' @ ' + "{:.8f}".format(ask_actual))
             break
     
     diff = (base - ask_actual) / base
@@ -365,7 +376,7 @@ def loop_time_dynamic(base, amt, book):
     elif diff > Decimal(1):
         logger.debug('1 < diff')
         lt = loop_time_min
-        logger.debug('lt: ' + "{:.2f}".format(lt))
+        logger.debug('New loop time: ' + "{:.2f}".format(lt) + ' sec')
     
     return lt
 
@@ -379,9 +390,9 @@ if __name__ == '__main__':
             base_price = calc_base()
             base_price_trigger = base_price - buy_threshold
 
-            balances = polo.returnAvailableAccountBalances()['exchange']
-            balance_str = Decimal(balances['STR'])
-            balance_usdt = Decimal(balances['USDT'])
+            account_balances = get_balances()
+            balance_str = account_balances['str']
+            balance_usdt = account_balances['usdt']
 
             ob = polo.returnOrderBook('USDT_STR')
             lowest_ask = Decimal(ob['asks'][0][0])
@@ -428,5 +439,8 @@ if __name__ == '__main__':
             sys.exit(0)
 
         #time.sleep(loop_time)
-        ltd = loop_time_dynamic(base_price_trigger, trade_amount, ob)
-        time.sleep(ltd)
+        if loop_dynamic == True:
+            time.sleep(loop_time_dynamic(base_price_trigger, trade_amount, ob))
+        else:
+            time.sleep(loop_time)
+            
