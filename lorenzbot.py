@@ -353,7 +353,7 @@ if __name__ == '__main__':
             lowest_ask = Decimal(ob['asks'][0][0])
             lowest_ask_volume = Decimal(ob['asks'][0][1])
             highest_bid = Decimal(ob['bids'][0][0])
-            #highest_bid_volume = Decimal(ob['bids'][0][1])
+            highest_bid_volume = Decimal(ob['bids'][0][1])
                         
             lowest_ask_actual = lowest_ask / (Decimal(1) - taker_fee)
             sell_price_calc = base_price * (Decimal(1) + profit_threshold)# + taker_fee)    # Fees already factored in
@@ -365,10 +365,12 @@ if __name__ == '__main__':
             logger.debug('sell_price_calc:    ' + "{:.8f}".format(sell_price_calc))
             logger.debug('lowest_ask_volume:  ' + "{:.2f}".format(lowest_ask_volume))
 
-            if (highest_bid >= sell_price_calc) and (lowest_ask_volume >= sell_amount()):
+            # NEED BETTER LOGIC HERE
+            if (highest_bid >= sell_price_calc) and (highest_bid_volume >= sell_amount()):
                 logger.debug('TRADE CONDITIONS MET ---> SELLING')
                 exec_trade('sell', sell_price_calc)
                 #modify_collections('drop')
+                # NEED LOGIC TO CONFIRM SELL COMPLETION BEFORE CREATION
                 modify_collections('create')
                 
             elif (lowest_ask_actual < base_price_trigger):
