@@ -62,8 +62,11 @@ if trade_amount > Decimal(5):
 
 # Variable modifiers
 product = 'USDT_STR'
+loop_time_min = Decimal(6) # Minimum allowed loop time with dynamic adjustment
+
 buy_threshold = Decimal(0.000105)
 sell_padding = Decimal(0.9975)  # Proportion of total amount bought to sell when triggered
+
 mongo_failures = 0
 csv_failures = 0
 
@@ -86,7 +89,7 @@ def modify_collections(action):
 
 
 if csv_logging == True:
-    log_file = 'logs/' + datetime.datetime.now().strftime('%m%d%Y-%H%M%S') + 'lorenzbot_log.csv'
+    log_file = 'logs/' + datetime.datetime.now().strftime('%m%d%Y-%H%M%S') + '_lorenzbot_log.csv'
     logger.info('CSV log file path: ' + log_file)
     if not os.path.exists('logs'):
         logger.info('Log directory not found. Creating...')
@@ -161,11 +164,10 @@ if balance_usdt < trade_max_calc:
 user_fees = polo.returnFeeInfo()
 maker_fee = Decimal(user_fees['makerFee'])
 taker_fee = Decimal(user_fees['takerFee'])
-logger.info('Current Maker Fee: ' + str(maker_fee))
-logger.info('Current Taker Fee: ' + str(taker_fee))
+logger.info('Current Maker Fee: ' + "{:.4f}".format(maker_fee))
+logger.info('Current Taker Fee: ' + "{:.4f}".format(taker_fee))
 
-# DELAY TO READ LOG MESSAGES
-time.sleep(3)
+#time.sleep(3)
 
 
 def calc_base():
@@ -229,8 +231,6 @@ def sell_amount():
     logger.debug('agg: ' + str(agg))
 
     amount_bought = Decimal(agg[0]['amount_bought'])
-    logger.debug('agg[0][\'amount_bought\']: ' + "{:.8f}".format(agg[0]['amount_bought']))
-
     amount_bought = amount_bought * sell_padding # Not necessarily needed, but gives some padding
     
     return amount_bought
@@ -272,7 +272,8 @@ def exec_trade(position, price_limit=None):
         csv_list = [order_details['date'],
                     position,
                     "{:.8f}".format(order_details['amount']),
-                    "{:.8f}".format(order_details['rate'])]
+                    "{:.8f}".format(order_details['rate']),
+                    "{:.8f}".format(calc_base())]
         logger.debug('csv_list: ' + str(csv_list))
         log_trade_csv(csv_list)
 
@@ -336,6 +337,39 @@ def log_trade_csv(csv_row): # Must pass list as argument
         csv_failures += 1
 
 
+def loop_time_dynamic(base, amt, book):
+    logger.debug('Calculating loop time.')
+
+    ask_tot = Decimal(0)
+    for x in range(0, len(book['asks'])):
+        ask_tot += Decimal(book['asks'][x][1])
+        if ask_tot >= amt:
+            logger.debug('ask_tot:    ' + "{:.2f}".format(ask_tot))
+            ask_actual = Decimal(book['asks'][x][0])
+            logger.debug('ask_actual: ' + "{:.8f}".format(ask_actual))
+            break
+    
+    diff = (base - ask_actual) / base
+    logger.debug('diff: ' + "{:.2f}".format(diff * Decimal(100)) + ' %')
+
+    if diff < Decimal(0):
+        logger.debug('diff < 0')
+        lt = loop_time
+        logger.debug('lt: ' + "{:.2f}".format(lt))
+
+    elif Decimal(0) < diff <= Decimal(1):
+        logger.debug('0 < diff < 1')
+        lt = loop_time - (Decimal(loop_time_min) + ((loop_time - loop_time_min) * diff))
+        logger.debug('lt: ' + "{:.2f}".format(lt))
+
+    elif diff > Decimal(1):
+        logger.debug('1 < diff')
+        lt = loop_time_min
+        logger.debug('lt: ' + "{:.2f}".format(lt))
+    
+    return lt
+
+
 if __name__ == '__main__':
     while (True):
         try:
@@ -353,10 +387,10 @@ if __name__ == '__main__':
             lowest_ask = Decimal(ob['asks'][0][0])
             lowest_ask_volume = Decimal(ob['asks'][0][1])
             highest_bid = Decimal(ob['bids'][0][0])
-            #highest_bid_volume = Decimal(ob['bids'][0][1])
+            highest_bid_volume = Decimal(ob['bids'][0][1])
                         
-            lowest_ask_actual = lowest_ask / (Decimal(1) - taker_fee)
-            sell_price_calc = base_price * (Decimal(1) + profit_threshold)# + taker_fee)    # Fees already factored in
+            lowest_ask_actual = lowest_ask / (Decimal(1) - taker_fee)   # EVALUATE LOGIC BEHIND THIS
+            sell_price_calc = base_price * (Decimal(1) + profit_threshold + taker_fee)
 
             logger.debug('base_price:         ' + "{:.8f}".format(base_price))
             logger.debug('base_price_trigger: ' + "{:.8f}".format(base_price_trigger))
@@ -380,10 +414,7 @@ if __name__ == '__main__':
                     logger.warning('Insufficient balance to execute buy trade. Skipping buy.')
 
             #trade_amount_adjust()
-            #loop_time_adjust()
-
-            logger.debug('----[LOOP END]----')
-                
+            logger.debug('----[LOOP END]----')                
 
         except Exception as e:
             logger.exception(e)
@@ -396,4 +427,6 @@ if __name__ == '__main__':
             
             sys.exit(0)
 
-        time.sleep(loop_time)
+        #time.sleep(loop_time)
+        ltd = loop_time_dynamic(base_price_trigger, trade_amount, ob)
+        time.sleep(ltd)
