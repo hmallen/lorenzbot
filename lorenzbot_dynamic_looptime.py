@@ -62,6 +62,11 @@ if trade_amount > Decimal(5):
         logger.error('Unrecognized user input. Exiting.')
         sys.exit(1)
 
+if loop_dynamic == True:
+    logger.info('Dynamic loop time calculation activated.')
+else:
+    logger.info('Using fixed loop time of ' + str(loop_time) + ' seconds.')
+
 # Variable modifiers
 product = 'USDT_STR'
 loop_time_min = Decimal(6) # Minimum allowed loop time with dynamic adjustment (seconds)
@@ -69,6 +74,7 @@ loop_time_min = Decimal(6) # Minimum allowed loop time with dynamic adjustment (
 buy_threshold = Decimal(0.000105)
 sell_padding = Decimal(0.9975)  # Proportion of total amount bought to sell when triggered
 
+buy_skips = 0
 mongo_failures = 0
 csv_failures = 0
 
@@ -231,7 +237,7 @@ def calc_base():
     return weighted_avg
 
 
-def sell_amount():
+def calc_sell_amount():
     # Total amount bought
     pipeline = [{
         '$group': {
@@ -253,31 +259,42 @@ def exec_trade(position, price_limit=None):
     if position == 'buy':
         trade_response = polo.buy('USDT_STR', price_limit, trade_amount, 'immediateOrCancel')
         order_details = process_trade_response(trade_response, position)
-        logger.debug('[BUY]order_details: ' + str(order_details))
+        logger.debug('[BUY] order_details: ' + str(order_details))
 
         try:
             mongo_response = db[coll_current].insert_one({'amount': float(order_details['amount']), 'price': float(order_details['rate']), 'side': position, 'date': order_details['date']})
-            logger.debug('[BUY]mongo_response: ' + str(mongo_response))
+            logger.debug('[BUY] mongo_response: ' + str(mongo_response))
         except:
-            logger.exception('[BUY]Failed to write to MongoDB log!')
+            logger.exception('[BUY] Failed to write to MongoDB log!')
             mongo_failures += 1
         # Add some try/except or if result == '????' to ensure successful write
 
     elif position == 'sell':
-        total_bought = sell_amount()
-        logger.debug('total_bought[sell_amount()]: ' + "{:.2f}".format(total_bought))
+        sell_amount = calc_sell_amount()
+        logger.debug('calc_sell_amount(): ' + "{:.2f}".format(sell_amount))
+
+        account_balances = get_balances()
+        balance_str = account_balances['str']
+
+        if balance_str < sell_amount:
+            logger.warning('Account balance now less than total bought. Adjusting sell amount to current balance.')
+            sell_amount = balance_str
+            logger.warning('New sell amount: ' + "{:.2f}".format(sell_amount))
         
-        trade_response = polo.sell('USDT_STR', price_limit, total_bought, 'immediateOrCancel')
+        trade_response = polo.sell('USDT_STR', price_limit, total_bought, 'immediateOrCancel')  # CHANGE TO REGULAR LIMIT ORDER?
         logger.debug('trade_response: ' + str(trade_response))
+
+        # HANDLE UNFILLED AMOUNT HERE
         
         order_details = process_trade_response(trade_response, position)
-        logger.debug('[SELL]order_details: ' + str(order_details))
+        logger.debug('[SELL] order_details: ' + str(order_details))
 
         try:
+            # NEED TO HANDLE COLLECTION CREATION, ETC. HERE
             mongo_response = db[coll_current].insert_one({'amount': float(order_details['amount']), 'price': float(order_details['rate']), 'side': position, 'date': order_details['date']})
-            logger.debug('[SELL]mongo_response: ' + str(mongo_response))
+            logger.debug('[SELL] mongo_response: ' + str(mongo_response))
         except:
-            logger.exception('[SELL]Failed to write to MongoDB log!')
+            logger.exception('[SELL] Failed to write to MongoDB log!')
             mongo_failures += 1
     
     if csv_logging == True:
@@ -410,7 +427,7 @@ if __name__ == '__main__':
             logger.debug('sell_price_calc:    ' + "{:.8f}".format(sell_price_calc))
             logger.debug('lowest_ask_volume:  ' + "{:.2f}".format(lowest_ask_volume))
 
-            if (highest_bid >= sell_price_calc) and (lowest_ask_volume >= sell_amount()):
+            if (highest_bid >= sell_price_calc) and (lowest_ask_volume >= calc_sell_amount()):
                 logger.debug('TRADE CONDITIONS MET ---> SELLING')
                 exec_trade('sell', sell_price_calc)
                 #modify_collections('drop')
@@ -423,6 +440,8 @@ if __name__ == '__main__':
                     exec_trade('buy', base_price_trigger)
                 else:
                     logger.warning('Insufficient balance to execute buy trade. Skipping buy.')
+                    buy_skips += 1
+                    logger.warning('Buy trades skipped: ' + str(buy_skips))
 
             #trade_amount_adjust()
             logger.debug('----[LOOP END]----')                
@@ -443,4 +462,3 @@ if __name__ == '__main__':
             time.sleep(loop_time_dynamic(base_price_trigger, trade_amount, ob))
         else:
             time.sleep(loop_time)
-            
