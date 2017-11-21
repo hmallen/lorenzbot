@@ -42,7 +42,7 @@ clear_collections = args.clean; logger.debug('clear_collections: ' + str(clear_c
 trade_amount = Decimal(args.amount); logger.debug('trade_amount: ' + "{:.8f}".format(trade_amount))
 trade_max = Decimal(args.max); logger.debug('trade_max: ' + "{:.2f}".format(trade_max))   # CURRENTLY UNUSED
 profit_threshold = Decimal(args.profit); logger.debug('profit_threshold: ' + "{:.4f}".format(profit_threshold))
-loop_time = args.loop; logger.debug('loop_time: ' + str(loop_time))
+loop_time = Decimal(args.loop); logger.debug('loop_time: ' + str(loop_time))
 live_trading = args.live; logger.debug('live_trading: ' + str(live_trading))
 csv_logging = args.nocsv; logger.debug('csv_logging: ' + str(csv_logging))
 
