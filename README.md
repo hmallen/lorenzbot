@@ -2,11 +2,10 @@
 Poloniex exchange trading bot
 
 TO DO:
-- Add check for sell completion and create new collection only after
-
-LATER:
 - Add handling for max trade limit
 - Add argument for minimum loop time (loop_time_min)
+
+LATER:
 - Add function for trade amount adjustment (?)
 
 IF TIME:
@@ -24,3 +23,4 @@ DONE:
 - Add base_price to csv log
 - Add function for loop time adjustment
 - Test dynamic loop time
+- Add check for sell completion and create new collection only after
