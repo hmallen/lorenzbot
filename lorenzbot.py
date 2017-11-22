@@ -32,6 +32,7 @@ parser.add_argument('-a', '--amount', default=0.1, type=float, help='Set trade a
 parser.add_argument('-m', '--max', default=100, type=float, help='Max amount of quote currency allowed for trading.')
 parser.add_argument('-p', '--profit', default=0.05, type=float, help='Set profit threshold for sell triggering.')
 parser.add_argument('-l', '--loop', default=60, type=float, help='Main program loop time (seconds).')
+parser.add_argument('--dynamic', action='store_true', default=False, help='Add flag to dynamically set loop time based on current conditions.')
 parser.add_argument('--live', action='store_true', default=False, help='Add flag to enable live trading API keys')
 parser.add_argument('--nocsv', action='store_false', default=True, help='Add flag to disable csv logging.')
 #parser.add_argument(?? no - or -- ??, default='USDT_STR', help='Manual selection of currency pair for trading.') --> Product selection
@@ -42,7 +43,8 @@ clear_collections = args.clean; logger.debug('clear_collections: ' + str(clear_c
 trade_amount = Decimal(args.amount); logger.debug('trade_amount: ' + "{:.8f}".format(trade_amount))
 trade_max = Decimal(args.max); logger.debug('trade_max: ' + "{:.2f}".format(trade_max))   # CURRENTLY UNUSED
 profit_threshold = Decimal(args.profit); logger.debug('profit_threshold: ' + "{:.4f}".format(profit_threshold))
-loop_time = args.loop; logger.debug('loop_time: ' + str(loop_time))
+loop_time = Decimal(args.loop); logger.debug('loop_time: ' + str(loop_time))
+loop_dynamic = args.dynamic; logger.debug('loop_dynamic: ' + str(loop_dynamic))
 live_trading = args.live; logger.debug('live_trading: ' + str(live_trading))
 csv_logging = args.nocsv; logger.debug('csv_logging: ' + str(csv_logging))
 
@@ -60,10 +62,19 @@ if trade_amount > Decimal(5):
         logger.error('Unrecognized user input. Exiting.')
         sys.exit(1)
 
+if loop_dynamic == True:
+    logger.info('Dynamic loop time calculation activated.')
+else:
+    logger.info('Using fixed loop time of ' + str(loop_time) + ' seconds.')
+
 # Variable modifiers
 product = 'USDT_STR'
+loop_time_min = Decimal(6) # Minimum allowed loop time with dynamic adjustment (seconds)
+
 buy_threshold = Decimal(0.000105)
 sell_padding = Decimal(0.9975)  # Proportion of total amount bought to sell when triggered
+
+buy_skips = 0
 mongo_failures = 0
 csv_failures = 0
 
@@ -86,7 +97,7 @@ def modify_collections(action):
 
 
 if csv_logging == True:
-    log_file = 'logs/' + datetime.datetime.now().strftime('%m%d%Y-%H%M%S') + 'lorenzbot_log.csv'
+    log_file = 'logs/' + datetime.datetime.now().strftime('%m%d%Y-%H%M%S') + '_lorenzbot_log.csv'
     logger.info('CSV log file path: ' + log_file)
     if not os.path.exists('logs'):
         logger.info('Log directory not found. Creating...')
@@ -145,9 +156,27 @@ except:
     logger.exception('Poloniex API key and/or secret incorrect. Exiting.')
     sys.exit(1)
 
-user_balances = polo.returnAvailableAccountBalances()['exchange']
-balance_str = Decimal(user_balances['STR'])
-balance_usdt = Decimal(user_balances['USDT'])
+
+def get_balances():
+    user_balances = polo.returnAvailableAccountBalances()['exchange']
+    bal_str = Decimal(user_balances['STR'])
+    bal_usdt = Decimal(user_balances['USDT'])
+    
+    bal_dict = {'str': bal_str, 'usdt': bal_usdt}
+
+    return bal_dict
+
+
+user_fees = polo.returnFeeInfo()
+maker_fee = Decimal(user_fees['makerFee'])
+taker_fee = Decimal(user_fees['takerFee'])
+logger.info('Current Maker Fee: ' + "{:.4f}".format(maker_fee))
+logger.info('Current Taker Fee: ' + "{:.4f}".format(taker_fee))
+
+account_balances = get_balances()
+balance_str = account_balances['str']
+balance_usdt = account_balances['usdt']
+
 logger.info('Balance STR:  ' + "{:.2f}".format(balance_str))
 logger.info('Balance USDT: ' + "{:.2f}".format(balance_usdt))
 
@@ -157,15 +186,6 @@ logger.debug('trade_max_calc: ' + "{:.2f}".format(trade_max_calc))
 if balance_usdt < trade_max_calc:
     logger.error('Insufficient USDT balance -- need at least ' + "{:.2f}".format(trade_max_calc) + ' USDT. Exiting.')
     sys.exit(1)
-
-user_fees = polo.returnFeeInfo()
-maker_fee = Decimal(user_fees['makerFee'])
-taker_fee = Decimal(user_fees['takerFee'])
-logger.info('Current Maker Fee: ' + str(maker_fee))
-logger.info('Current Taker Fee: ' + str(taker_fee))
-
-# DELAY TO READ LOG MESSAGES
-time.sleep(3)
 
 
 def calc_base():
@@ -217,7 +237,7 @@ def calc_base():
     return weighted_avg
 
 
-def sell_amount():
+def calc_sell_amount():
     # Total amount bought
     pipeline = [{
         '$group': {
@@ -229,8 +249,6 @@ def sell_amount():
     logger.debug('agg: ' + str(agg))
 
     amount_bought = Decimal(agg[0]['amount_bought'])
-    logger.debug('agg[0][\'amount_bought\']: ' + "{:.8f}".format(agg[0]['amount_bought']))
-
     amount_bought = amount_bought * sell_padding # Not necessarily needed, but gives some padding
     
     return amount_bought
@@ -241,40 +259,66 @@ def exec_trade(position, price_limit=None):
     if position == 'buy':
         trade_response = polo.buy('USDT_STR', price_limit, trade_amount, 'immediateOrCancel')
         order_details = process_trade_response(trade_response, position)
-        logger.debug('[BUY]order_details: ' + str(order_details))
+        logger.debug('[BUY] order_details: ' + str(order_details))
 
         try:
             mongo_response = db[coll_current].insert_one({'amount': float(order_details['amount']), 'price': float(order_details['rate']), 'side': position, 'date': order_details['date']})
-            logger.debug('[BUY]mongo_response: ' + str(mongo_response))
+            logger.debug('[BUY] mongo_response: ' + str(mongo_response))
         except:
-            logger.exception('[BUY]Failed to write to MongoDB log!')
+            logger.exception('[BUY] Failed to write to MongoDB log!')
             mongo_failures += 1
         # Add some try/except or if result == '????' to ensure successful write
 
-    elif position == 'sell':
-        total_bought = sell_amount()
-        logger.debug('total_bought[sell_amount()]: ' + "{:.2f}".format(total_bought))
+    elif position == 'sell':        
+        sell_amount = calc_sell_amount()
+        logger.debug('sell_amount: ' + "{:.2f}".format(sell_amount))
+
+        account_balances = get_balances()
+        balance_str = account_balances['str']
+
+        if balance_str < sell_amount:
+            logger.warning('Account balance now less than total bought. Adjusting sell amount to current balance.')
+            sell_amount = balance_str
+            logger.warning('New sell amount: ' + "{:.2f}".format(sell_amount))
+
         
-        trade_response = polo.sell('USDT_STR', price_limit, total_bought, 'immediateOrCancel')
-        logger.debug('trade_response: ' + str(trade_response))
+        trade_response = polo.sell('USDT_STR', price_limit, sell_amount, 'immediateOrCancel')  # CHANGE TO REGULAR LIMIT ORDER?
+        logger.debug('[SELL] trade_response: ' + str(trade_response))
         
         order_details = process_trade_response(trade_response, position)
-        logger.debug('[SELL]order_details: ' + str(order_details))
+        logger.debug('[SELL] order_details: ' + str(order_details))
 
         try:
             mongo_response = db[coll_current].insert_one({'amount': float(order_details['amount']), 'price': float(order_details['rate']), 'side': position, 'date': order_details['date']})
-            logger.debug('[SELL]mongo_response: ' + str(mongo_response))
+            logger.debug('[SELL] mongo_response: ' + str(mongo_response))
         except:
-            logger.exception('[SELL]Failed to write to MongoDB log!')
+            logger.exception('[SELL] Failed to write to MongoDB log!')
             mongo_failures += 1
-    
-    if csv_logging == True:
-        csv_list = [order_details['date'],
-                    position,
-                    "{:.8f}".format(order_details['amount']),
-                    "{:.8f}".format(order_details['rate'])]
-        logger.debug('csv_list: ' + str(csv_list))
-        log_trade_csv(csv_list)
+
+        if csv_logging == True:
+            csv_list = [order_details['date'],
+                        position,
+                        "{:.8f}".format(order_details['amount']),
+                        "{:.8f}".format(order_details['rate']),
+                        "{:.8f}".format(calc_base())]
+            logger.debug('csv_list: ' + str(csv_list))
+            log_trade_csv(csv_list)
+        
+        # If order not completely filled, handle unfilled amount
+        if order_details['amount_unfilled'] > Decimal(0):
+            # Log sell, create new collection, and add amount_unfilled as buy in MongoDB for base_price calculation
+            modify_collections('create')
+            
+            try:
+                mongo_response = db[coll_current].insert_one({'amount': float(order_details['amount']), 'price': float(order_details['rate']), 'side': 'buy', 'date': order_details['date']})
+                logger.debug('[UNFILLED/NEW] mongo_response: ' + str(mongo_response))
+            except:
+                logger.exception('[UNFILLED/NEW] Failed to write to MongoDB log!')
+                mongo_failures += 1
+        
+        else:
+            # Just log sell and create new collection
+            modify_collections('create')
 
 
 def process_trade_response(order_response, order_position):
@@ -321,7 +365,7 @@ def process_trade_response(order_response, order_position):
     
     logger.debug('Calc. Error Margin: ' + "{:.2f}".format((trade_amount - amount_unfilled) - amount_total))
     
-    return {'date': trade_date, 'amount': amount_total, 'rate': order_average_rate}
+    return {'date': trade_date, 'amount': amount_total, 'rate': order_average_rate, 'amount_unfilled': amount_unfilled}
 
 
 def log_trade_csv(csv_row): # Must pass list as argument
@@ -336,6 +380,38 @@ def log_trade_csv(csv_row): # Must pass list as argument
         csv_failures += 1
 
 
+def loop_time_dynamic(base, amt, book):
+    logger.debug('Calculating loop time.')
+
+    ask_tot = Decimal(0)
+    for x in range(0, len(book['asks'])):
+        ask_tot += Decimal(book['asks'][x][1])
+        if ask_tot >= amt:
+            ask_actual = Decimal(book['asks'][x][0])
+            logger.debug('ask_tot:    ' + "{:.2f}".format(ask_tot) + ' @ ' + "{:.8f}".format(ask_actual))
+            break
+    
+    diff = (base - ask_actual) / base
+    logger.debug('diff: ' + "{:.2f}".format(diff * Decimal(100)) + ' %')
+
+    if diff < Decimal(0):
+        logger.debug('diff < 0')
+        lt = loop_time
+        logger.debug('lt: ' + "{:.2f}".format(lt))
+
+    elif Decimal(0) < diff <= Decimal(1):
+        logger.debug('0 < diff < 1')
+        lt = loop_time - (Decimal(loop_time_min) + ((loop_time - loop_time_min) * diff))
+        logger.debug('lt: ' + "{:.2f}".format(lt))
+
+    elif diff > Decimal(1):
+        logger.debug('1 < diff')
+        lt = loop_time_min
+        logger.debug('New loop time: ' + "{:.2f}".format(lt) + ' sec')
+    
+    return lt
+
+
 if __name__ == '__main__':
     while (True):
         try:
@@ -345,9 +421,9 @@ if __name__ == '__main__':
             base_price = calc_base()
             base_price_trigger = base_price - buy_threshold
 
-            balances = polo.returnAvailableAccountBalances()['exchange']
-            balance_str = Decimal(balances['STR'])
-            balance_usdt = Decimal(balances['USDT'])
+            account_balances = get_balances()
+            balance_str = account_balances['str']
+            balance_usdt = account_balances['usdt']
 
             ob = polo.returnOrderBook('USDT_STR')
             lowest_ask = Decimal(ob['asks'][0][0])
@@ -355,8 +431,8 @@ if __name__ == '__main__':
             highest_bid = Decimal(ob['bids'][0][0])
             highest_bid_volume = Decimal(ob['bids'][0][1])
                         
-            lowest_ask_actual = lowest_ask / (Decimal(1) - taker_fee)
-            sell_price_calc = base_price * (Decimal(1) + profit_threshold)# + taker_fee)    # Fees already factored in
+            lowest_ask_actual = lowest_ask / (Decimal(1) - taker_fee)   # EVALUATE LOGIC BEHIND THIS
+            sell_price_calc = base_price * (Decimal(1) + profit_threshold + taker_fee)
 
             logger.debug('base_price:         ' + "{:.8f}".format(base_price))
             logger.debug('base_price_trigger: ' + "{:.8f}".format(base_price_trigger))
@@ -365,13 +441,11 @@ if __name__ == '__main__':
             logger.debug('sell_price_calc:    ' + "{:.8f}".format(sell_price_calc))
             logger.debug('lowest_ask_volume:  ' + "{:.2f}".format(lowest_ask_volume))
 
-            # NEED BETTER LOGIC HERE
-            if (highest_bid >= sell_price_calc) and (highest_bid_volume >= sell_amount()):
+            if (highest_bid >= sell_price_calc) and (lowest_ask_volume >= calc_sell_amount()):
                 logger.debug('TRADE CONDITIONS MET ---> SELLING')
                 exec_trade('sell', sell_price_calc)
                 #modify_collections('drop')
-                # NEED LOGIC TO CONFIRM SELL COMPLETION BEFORE CREATION
-                modify_collections('create')
+                #modify_collections('create')   # Handled in exec_trade() function
                 
             elif (lowest_ask_actual < base_price_trigger):
                 logger.debug('Price good for buy. Checking account balance.')
@@ -380,12 +454,11 @@ if __name__ == '__main__':
                     exec_trade('buy', base_price_trigger)
                 else:
                     logger.warning('Insufficient balance to execute buy trade. Skipping buy.')
+                    buy_skips += 1
+                    logger.warning('Buy trades skipped: ' + str(buy_skips))
 
             #trade_amount_adjust()
-            #loop_time_adjust()
-
-            logger.debug('----[LOOP END]----')
-                
+            logger.debug('----[LOOP END]----')                
 
         except Exception as e:
             logger.exception(e)
@@ -398,4 +471,8 @@ if __name__ == '__main__':
             
             sys.exit(0)
 
-        time.sleep(loop_time)
+        #time.sleep(loop_time)
+        if loop_dynamic == True:
+            time.sleep(loop_time_dynamic(base_price_trigger, trade_amount, ob))
+        else:
+            time.sleep(loop_time)

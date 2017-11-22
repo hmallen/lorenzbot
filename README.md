@@ -4,6 +4,7 @@ Poloniex exchange trading bot
 TO DO:
 - Add handling for max trade limit
 - Add argument for minimum loop time (loop_time_min)
+- Add handling of situation where on sell not enough asks are available in depth=20
 
 LATER:
 - Add function for trade amount adjustment (?)
