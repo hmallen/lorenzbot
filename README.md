@@ -10,6 +10,7 @@ TO DO:
 
 LATER:
 - Add argument for minimum loop time (loop_time_min)
+- Add Poloniex coach?
 
 IF TIME:
 - Add argument for product selection

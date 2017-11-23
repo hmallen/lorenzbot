@@ -167,13 +167,13 @@ def calc_base():
 
     calc_base_initialized = True
 
-    total_spent = calc_trade_totals('spent')['trade_total']
-    logger.debug('total_spent: ' + "{:.8f}".format(total_spent))
+    #total_spent = calc_trade_totals('spent')['trade_total']
+    #logger.debug('total_spent: ' + "{:.8f}".format(total_spent))
 
-    total_bought = calc_trade_totals('bought')['trade_total']
-    logger.debug('total_bought: ' + "{:.2f}".format(total_bought))
+    #total_bought = calc_trade_totals('bought')['trade_total']
+    #logger.debug('total_bought: ' + "{:.2f}".format(total_bought))
 
-    rate_avg = total_spent / total_bought
+    rate_avg = calc_trade_totals('spent') / calc_trade_totals('bought')
     logger.debug('rate_avg: ' + "{:.8f}".format(rate_avg))
 
     return rate_avg
@@ -206,8 +206,10 @@ def calc_trade_totals(position):
         for x in range(0, len(agg)):
             trade_total += Decimal(agg[x]['total_spent'])
         logger.debug('trade_total: ' + "{:.2f}".format(trade_total))
+
+    logger.debug('trade_total[' + position + ']: ' + "{:.8f}".format(trade_total))
     
-    return {'trade_total': trade_total, 'agg': agg}
+    return trade_total
 
 
 # Improve this function by returning weighted average of exec price based on trade amount
@@ -321,7 +323,8 @@ def exec_trade(position, limit, amount):
                         position,
                         "{:.8f}".format(order_details['amount']),
                         "{:.8f}".format(order_details['rate']),
-                        "{:.8f}".format(base_price_initial)]
+                        "{:.8f}".format(base_price_initial),
+                        "{:.8f}".format(calc_base())]
             logger.debug('csv_list: ' + str(csv_list))
             log_trade_csv(csv_list)
 
@@ -517,8 +520,17 @@ if __name__ == '__main__':
             sys.exit(1)
 
     global trade_usdt_remaining
-    trade_usdt_remaining = trade_usdt_max
+    if db[coll_current].count() > 0:
+        logger.debug('Collection not empty. Calculating trade amount remaining.')
+        trade_usdt_remaining = trade_usdt_max - calc_trade_totals('bought')
+    else:
+        logger.debug('Collection empty. Setting trade remaining to trade max.')
+        trade_usdt_remaining = trade_usdt_max
     logger.debug('trade_usdt_remaining: ' + "{:.2f}".format(trade_usdt_remaining))
+
+    if trade_usdt_remaining < 0:
+        logger.error('Trade amount remaining less than 0. Try cleaning collections or setting a higher max trade value. Exiting.')
+        sys.exit(1)
 
 # Functions Used/Arguments Required/Values Returned:
 #
