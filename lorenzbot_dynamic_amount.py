@@ -24,11 +24,13 @@ loop_time_min = Decimal(6) # Minimum allowed loop time with dynamic adjustment (
 buy_threshold = Decimal(0.000105)
 sell_padding = Decimal(0.9975)  # Proportion of total amount bought to sell when triggered
 
-calc_base_initialized = False
+# System variables (Do not change)
+calc_base_initialized = False   # Needed to prevent infinite loop b/w calc_base() and exec_trade() on entry buy
 buy_skips = 0
 mongo_failures = 0
 csv_failures = 0
 
+# Handle argument parsing
 parser = argparse.ArgumentParser(
     formatter_class=argparse.RawDescriptionHelpFormatter,
     description=textwrap.dedent('''\
@@ -141,18 +143,8 @@ def calc_base():
     logger.debug('Entering base_price calculation.')
     
     while (True):
-        # Total amount spent
-        pipeline = [{
-        '$project': {
-            '_id': None,
-            'amount_spent': {
-                '$multiply': [ '$amount', '$price' ]
-                }
-            }}]
-        agg = db.command('aggregate', coll_current, pipeline=pipeline)['result']
-
-        trade_log_length = len(agg)
-        logger.debug('MongoDB collection length: ' + str(len(agg)))
+        trade_log_length = db[coll_current].count()
+        logger.debug('MongoDB collection length: ' + str(trade_log_length))
         
         if trade_log_length == 0:
             if amount_dynamic == True:
@@ -175,47 +167,47 @@ def calc_base():
 
     calc_base_initialized = True
 
-    amount_spent = Decimal(0)
-    for x in range(0, len(agg)):
-        amount_spent += Decimal(agg[x]['amount_spent'])
+    total_spent = calc_trade_totals('spent')['trade_total']
+    logger.debug('total_spent: ' + "{:.8f}".format(total_spent))
 
-    # Total amount bought
-    pipeline = [{
-        '$group': {
-            '_id': None,
-            'amount_bought': {'$sum': '$amount'}
-            }
-        }]
-    agg = db.command('aggregate', coll_current, pipeline=pipeline)['result']
-    logger.debug('agg: ' + str(agg))
+    total_bought = calc_trade_totals('bought')['trade_total']
+    logger.debug('total_bought: ' + "{:.2f}".format(total_bought))
 
-    amount_bought = Decimal(agg[0]['amount_bought'])
-    logger.debug('amount_bought: ' + "{:.8f}".format(agg[0]['amount_bought']))
-
-    rate_avg = amount_spent / amount_bought
-
-    logger.debug('amount_spent:  ' + "{:.8f}".format(amount_spent))
-    logger.debug('amount_bought: ' + "{:.8f}".format(amount_bought))
-    logger.debug('weighted_avg:  ' + "{:.8f}".format(rate_avg))
+    rate_avg = total_spent / total_bought
+    logger.debug('rate_avg: ' + "{:.8f}".format(rate_avg))
 
     return rate_avg
 
 
-def calc_total_bought():
-    # Total amount bought
-    pipeline = [{
-        '$group': {
-            '_id': None,
-            'total_bought': {'$sum': '$amount'}
-            }
-        }]
-    agg = db.command('aggregate', coll_current, pipeline=pipeline)['result']
-    logger.debug('agg: ' + str(agg))
+def calc_trade_totals(position):
+    if position == 'bought':
+        pipeline = [{
+            '$group': {
+                '_id': None,
+                'total_bought': {'$sum': '$amount'}
+                }
+            }]
+        agg = db.command('aggregate', coll_current, pipeline=pipeline)['result']
+        logger.debug('agg: ' + str(agg))
 
-    total_bought = Decimal(agg[0]['total_bought'])
-    total_bought = total_bought * sell_padding # Not necessarily needed, but gives some padding
+        trade_total = Decimal(agg[0]['total_bought'])
+        #trade_total = trade_total * sell_padding # Not necessarily needed, but gives some padding
+
+    elif position == 'spent':
+        pipeline = [{
+            '$project': {
+                '_id': None,
+                'total_spent': {'$multiply': ['$amount', '$price']}
+                }
+            }]
+        agg = db.command('aggregate', coll_current, pipeline=pipeline)['result']
+        
+        trade_total = Decimal(0)
+        for x in range(0, len(agg)):
+            trade_total += Decimal(agg[x]['total_spent'])
+        logger.debug('trade_total: ' + "{:.2f}".format(trade_total))
     
-    return total_bought
+    return {'trade_total': trade_total, 'agg': agg}
 
 
 # Improve this function by returning weighted average of exec price based on trade amount
@@ -261,7 +253,7 @@ def calc_limit_price(amount, position):
 
 
 # NEED TO FIX THE BUY/SELL FUNCTIONS
-def exec_trade(position, limit, amount):
+def exec_trade(position, limit, amount):    
     if calc_base_initialized == True:
         base_price_initial = calc_base()
     else:
@@ -280,7 +272,7 @@ def exec_trade(position, limit, amount):
         except:
             logger.exception('[BUY] Failed to write to MongoDB log!')
             mongo_failures += 1
-
+        
     elif position == 'sell':
         sell_amount = calc_total_bought()
         logger.debug('sell_amount: ' + "{:.2f}".format(sell_amount))
@@ -408,33 +400,35 @@ def loop_time_dynamic(base, amount, book):
         if diff < Decimal(0):
             logger.debug('diff < 0')
             lt = loop_time
-            logger.debug('lt: ' + "{:.2f}".format(lt))
 
         elif Decimal(0) < diff <= Decimal(1):
             logger.debug('0 < diff < 1')
             lt = loop_time - (Decimal(loop_time_min) + ((loop_time - loop_time_min) * diff))
-            logger.debug('lt: ' + "{:.2f}".format(lt))
 
         elif diff > Decimal(1):
             logger.debug('1 < diff')
             lt = loop_time_min
-            logger.debug('New loop time: ' + "{:.2f}".format(lt))
 
     else:
         lt = loop_time
-        logger.debug('lt: ' + "{:.2f}".format(lt))
+        
+    logger.debug('lt: ' + "{:.2f}".format(lt))
     
     return lt
 
 
 def calc_trade_amount():
     if amount_dynamic == True:
+        logger.debug('Calculating trade amount.')
+        
         #amt = ????
         logger.debug('CALC_TRADE_AMOUNT REACHED')
         sys.exit()
 
     else:
         amt = trade_amount
+
+    logger.debug('amt: ' + "{:.2f}".format(amt))
 
     return amt
 
@@ -509,17 +503,22 @@ if __name__ == '__main__':
     logger.info('Balance USDT: ' + "{:.2f}".format(balance_usdt))
 
     if balance_usdt < trade_usdt_max:
-        logger.warning('Insufficient USDT balance -- need at least ' + "{:.2f}".format(trade_max_calc) + ' USDT.')
-        user_input = input('Continue using full balance of ' + "{:.2f}".format(balance_usdt) + '? (y/n): ')
+        logger.warning('Insufficient USDT balance -- need at least ' + "{:.2f}".format(trade_usdt_max) + ' USDT.')
+        user_input = input('Continue using full balance of ' + "{:.2f}".format(balance_usdt) + ' instead? (y/n): ')
 
         if user_confirm == 'y':
-            logger.info('Max trade amount adjustment confirmed.')
+            trade_usdt_max = balance_usdt
+            logger.info('Max trade amount adjusted.')
         elif user_confirm == 'n':
             logger.warning('Startup cancelled by user due to insufficient balance. Exiting.')
             sys.exit()
         else:
             logger.error('Unrecognized user input. Exiting.')
             sys.exit(1)
+
+    global trade_usdt_remaining
+    trade_usdt_remaining = trade_usdt_max
+    logger.debug('trade_usdt_remaining: ' + "{:.2f}".format(trade_usdt_remaining))
 
 # Functions Used/Arguments Required/Values Returned:
 #
@@ -536,9 +535,11 @@ if __name__ == '__main__':
             
             # Calculate base price
             base_price = calc_base()
+            logger.debug('base_price: ' + "{:.8f}".format(base_price))
             base_price_trigger = base_price - buy_threshold
 
             account_balances = get_balances()
+            logger.debug('account_balances: ' + str(account_balances))
             balance_str = account_balances['str']
             balance_usdt = account_balances['usdt']
 
@@ -559,6 +560,7 @@ if __name__ == '__main__':
             logger.debug('sell_price_calc:    ' + "{:.8f}".format(sell_price_calc))
             logger.debug('lowest_ask_volume:  ' + "{:.2f}".format(lowest_ask_volume))
 
+            # CHANGE THESE TO USE NEW LIMIT CALC FUNCTION!!!!
             if (highest_bid >= sell_price_calc) and (lowest_ask_volume >= calc_total_bought()):
                 logger.debug('TRADE CONDITIONS MET ---> SELLING')
                 exec_trade('sell', sell_price_calc, calc_total_bought())
@@ -574,7 +576,9 @@ if __name__ == '__main__':
                     logger.warning('Buy trades skipped: ' + str(buy_skips))
 
             #trade_amount_adjust()
-            logger.debug('----[LOOP END]----')                
+            logger.debug('----[LOOP END]----')
+
+            time.sleep(loop_time_dynamic(base_price_trigger, trade_amount, ob))
 
         except Exception as e:
             logger.exception(e)
@@ -586,5 +590,3 @@ if __name__ == '__main__':
                 logger.info('CSV write errors: ' + str(csv_failures))
             
             sys.exit(0)
-
-        time.sleep(loop_time_dynamic(base_price_trigger, trade_amount, ob))
