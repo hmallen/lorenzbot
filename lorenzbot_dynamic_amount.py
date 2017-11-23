@@ -24,6 +24,7 @@ loop_time_min = Decimal(6) # Minimum allowed loop time with dynamic adjustment (
 buy_threshold = Decimal(0.000105)
 sell_padding = Decimal(0.9975)  # Proportion of total amount bought to sell when triggered
 
+calc_base_initialized = False
 buy_skips = 0
 mongo_failures = 0
 csv_failures = 0
@@ -42,18 +43,18 @@ parser = argparse.ArgumentParser(
 parser.add_argument('-c', '--clean', action='store_true', default=False, help='Add argument to drop all collections and start fresh. [Default = False]')
 
 parser.add_argument('-a', '--amount', default=0.1, type=float, help='Set static base amount of quote product to trade. [Default = 0.1]')
-parser.add_argument('--dynamicamount', action='store_true', default=False, help='Add flag to dynamically set trade amount based on current conditions. [Default = False]')
-parser.add_argument('-i', '--initial', default=0.05, type=float, help='Set proportion of funds to use for initial buy. [Default = 0.05]')
+parser.add_argument('--dynamicamount', action='store_true', default=False, help='Add flag to dynamically set trade amount based on current conditions.')
+parser.add_argument('-i', '--initial', default=0.05, type=float, help='Set proportion of total funds to use for initial buy. [Default = 0.05]')
 
-parser.add_argument('-m', '--max', default=1.0, type=float, help='Total amount of USDT to use for trading. [Default = 100]')
+parser.add_argument('-m', '--max', default=1.0, type=float, help='Total amount of USDT to use for trading. [Default = 1.0]')
 parser.add_argument('-p', '--profit', default=0.05, type=float, help='Set profit threshold for sell triggering. [Default = 0.05]')
 
 parser.add_argument('-l', '--loop', default=60, type=float, help='Main program loop time (seconds). [Default = 60]')
-parser.add_argument('--dynamicloop', action='store_true', default=False, help='Add flag to dynamically set loop time based on current conditions. [Default = False]')
+parser.add_argument('--dynamicloop', action='store_true', default=False, help='Add flag to dynamically set loop time based on current conditions.')
 
-parser.add_argument('--live', action='store_true', default=False, help='Add flag to enable live trading API keys. [Default = False]')
-parser.add_argument('--nocsv', action='store_false', default=True, help='Add flag to disable csv logging. [Default = False]')
-parser.add_argument('--debug', action='store_true', default=False, help='Add flag to include debug level output to console. [Default = False]')
+parser.add_argument('--live', action='store_true', default=False, help='Add flag to enable live trading API keys.')
+parser.add_argument('--nocsv', action='store_false', default=True, help='Add flag to disable csv logging.')
+parser.add_argument('--debug', action='store_true', default=False, help='Add flag to include debug level output to console.')
 
 # Parse arguments passed to program
 logger.debug('Parsing arguments.')
@@ -161,13 +162,18 @@ def calc_base():
             logger.debug('trade_amount_initial: ' + "{:.2f}".format(trade_amount_initial))
             
             logger.info('No trade log found. Making entry buy.')
-            #exec_trade('buy', polo.returnTicker()['USDT_STR']['lowestAsk'], trade_amount_initial)
-            trade_response = polo.buy('USDT_STR', calc_exec_price(trade_amount_initial, 'buy'), trade_amount_initial, 'immediateOrCancel')
-            print(trade_response)
-            sys.exit()
+            try:
+                limit_price = calc_limit_price(trade_amount_initial, 'buy')
+                logger.debug('limit_price: ' + "{:.8f}".format(limit_price))
+                exec_trade('buy', limit_price, trade_amount_initial)
+            except:
+                logger.exception('Entry buy failed. Exiting.')
+                sys.exit(1)
             
         else:
             break
+
+    calc_base_initialized = True
 
     amount_spent = Decimal(0)
     for x in range(0, len(agg)):
@@ -213,7 +219,7 @@ def calc_total_bought():
 
 
 # Improve this function by returning weighted average of exec price based on trade amount
-def calc_exec_price(amount, position):
+def calc_limit_price(amount, position):
     # NEED HANDLING FOR IMPOSSIBLE SITUATIONS
     if position == 'buy':
         book_pos = 'asks'
@@ -236,7 +242,7 @@ def calc_exec_price(amount, position):
                 price_actual = 0
 
         if price_actual > 0:
-            logger.debug('calc_exec_price() successful at depth = ' + str(book_depth) + '.')
+            logger.debug('calc_limit_price() successful within limits (depth=' + str(book_depth) + ').')
             break
         
         else:
@@ -244,11 +250,11 @@ def calc_exec_price(amount, position):
 
             # NEED TO FIGURE OUT HOW TO HANDLE THIS!!!!
             if book_depth > 100:
-                #logger.exception('Failed to set price_actual in calc_exec_price().')
-                logger.exception('Failed to set price_actual in calc_exec_price(). Exiting.')
+                #logger.exception('Failed to set price_actual in calc_limit_price().')
+                logger.exception('Failed to set price_actual in calc_limit_price(). Exiting.')
                 sys.exit(1)
             
-            logger.warning('Volume not satisfied at default order book depth = ' + str(book_depth - 20) + '. Retrying with depth = ' + str(book_depth) + '.')
+            logger.warning('Volume not satisfied at default order book depth=' + str(book_depth - 20) + '. Retrying with depth = ' + str(book_depth) + '.')
             time.sleep(1)
 
     return price_actual
@@ -256,7 +262,10 @@ def calc_exec_price(amount, position):
 
 # NEED TO FIX THE BUY/SELL FUNCTIONS
 def exec_trade(position, limit, amount):
-    base_price_initial = calc_base()
+    if calc_base_initialized == True:
+        base_price_initial = calc_base()
+    else:
+        base_price_initial = 0
         
     if position == 'buy':
         trade_response = polo.buy('USDT_STR', limit, amount, 'immediateOrCancel')
@@ -412,7 +421,6 @@ def loop_time_dynamic(base, amount, book):
             logger.debug('New loop time: ' + "{:.2f}".format(lt))
 
     else:
-        logger.debug('Returning static loop time.')
         lt = loop_time
         logger.debug('lt: ' + "{:.2f}".format(lt))
     
@@ -422,7 +430,8 @@ def loop_time_dynamic(base, amount, book):
 def calc_trade_amount():
     if amount_dynamic == True:
         #amt = ????
-        pass
+        logger.debug('CALC_TRADE_AMOUNT REACHED')
+        sys.exit()
 
     else:
         amt = trade_amount
@@ -515,7 +524,7 @@ if __name__ == '__main__':
 # Functions Used/Arguments Required/Values Returned:
 #
 # calc_base() --> Decimal(base_price)
-# calc_exec_price(book, amt, position, book_depth=20) --> Decimal(price_actual)
+# calc_limit_price(book, amt, position, book_depth=20) --> Decimal(price_actual)
 # calc_total_bought() --> Decimal(total_bought)
 # exec_trade(position, price_limit=None, trade_amount=None) --> None
 # get_balances() --> {'str': Decimal(bal_str), 'usdt': Decimal(bal_usdt)}
