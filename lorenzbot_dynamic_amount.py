@@ -276,7 +276,7 @@ def exec_trade(position, limit, amount):
             mongo_failures += 1
         
     elif position == 'sell':
-        sell_amount = calc_total_bought()
+        sell_amount = calc_trade_totals('bought')
         logger.debug('sell_amount: ' + "{:.2f}".format(sell_amount))
 
         account_balances = get_balances()
@@ -389,15 +389,10 @@ def loop_time_dynamic(base, amount, book):
     if loop_dynamic == True:
         logger.debug('Calculating loop time.')
 
-        ask_tot = Decimal(0)
-        for x in range(0, len(book['asks'])):
-            ask_tot += Decimal(book['asks'][x][1])
-            if ask_tot >= amount:
-                ask_actual = Decimal(book['asks'][x][0])
-                logger.debug('ask_tot:    ' + "{:.2f}".format(ask_tot) + ' @ ' + "{:.8f}".format(ask_actual))
-                break
+        ask_limit = calc_limit_price(amount, 'buy')
+        logger.debug('[CALC EXEC]ask_actual: ' + "{:.8f}".format(ask_limit))
         
-        diff = (base - ask_actual) / base
+        diff = (base - ask_limit) / base
         logger.debug('diff: ' + "{:.2f}".format(diff * Decimal(100)) + ' %')
 
         if diff < Decimal(0):
@@ -536,7 +531,7 @@ if __name__ == '__main__':
 #
 # calc_base() --> Decimal(base_price)
 # calc_limit_price(book, amt, position, book_depth=20) --> Decimal(price_actual)
-# calc_total_bought() --> Decimal(total_bought)
+# calc_trade_totals(position = 'bought' or 'spent') --> Decimal(trade_total)
 # exec_trade(position, price_limit=None, trade_amount=None) --> None
 # get_balances() --> {'str': Decimal(bal_str), 'usdt': Decimal(bal_usdt)}
 # loop_time_dynamic(base, amt, book) --> Decimal(lt)
@@ -550,33 +545,53 @@ if __name__ == '__main__':
             logger.debug('base_price: ' + "{:.8f}".format(base_price))
             base_price_trigger = base_price - buy_threshold
 
+            # Get current account balances
             account_balances = get_balances()
             logger.debug('account_balances: ' + str(account_balances))
             balance_str = account_balances['str']
             balance_usdt = account_balances['usdt']
 
-            # REPLACE WITH CALL TO CALC FUNCTION????
+            # Verify remaining balances
+            trade_usdt_remaining = trade_usdt_max - total_bought_str
+            logger.debug('trade_usdt_remaining: ' + "{:.8f}".format(trade_usdt_remaining))
+
+            if balance_usdt < trade_usdt_remaining:
+                logger.warning('USDT balance less than remaining trade allowance. Adjusting allowance to 95% of current balance.')
+                trade_usdt_remaining = balance_usdt * Decimal(0.95)
+                logger.info('[ADJUSTED]trade_usdt_remaining: ' + "{:.2f}".format(trade_usdt_remaining))
+
+            total_bought_str = calc_trade_totals('bought')
+            logger.debug('total_bought_str: ' + "{:.8f}".format(total_bought_str))
+
+            if balance_str < total_bought_str:
+                logger.warning('STR balance less than total amount bought. Will default to selling full STR balance when triggered if still true.')
+
+            # Check current order book conditions
+            # CHANGE TO USE CALC LIMIT FUNCTION
             ob = polo.returnOrderBook('USDT_STR')
             lowest_ask = Decimal(ob['asks'][0][0])
             lowest_ask_volume = Decimal(ob['asks'][0][1])
             highest_bid = Decimal(ob['bids'][0][0])
             highest_bid_volume = Decimal(ob['bids'][0][1])
-                        
-            lowest_ask_actual = lowest_ask / (Decimal(1) - taker_fee)   # EVALUATE LOGIC BEHIND THIS
-            sell_price_calc = base_price * (Decimal(1) + profit_threshold + taker_fee)
+
+            # CHANGE TO USE CALC LIMIT FUNCTION
+            lowest_ask_actual = lowest_ask * (Decimal(1) + taker_fee)   # Actual rate if bought at this price, including fees
+            sell_price_target = base_price * (Decimal(1) + profit_threshold + taker_fee)
 
             logger.debug('base_price:         ' + "{:.8f}".format(base_price))
             logger.debug('base_price_trigger: ' + "{:.8f}".format(base_price_trigger))
             logger.debug('lowest_ask_actual:  ' + "{:.8f}".format(lowest_ask_actual))
             logger.debug('Difference:         ' + "{:.8f}".format(base_price_trigger - lowest_ask_actual))
-            logger.debug('sell_price_calc:    ' + "{:.8f}".format(sell_price_calc))
+            logger.debug('sell_price_target:    ' + "{:.8f}".format(sell_price_target))
             logger.debug('lowest_ask_volume:  ' + "{:.2f}".format(lowest_ask_volume))
 
-            # CHANGE THESE TO USE NEW LIMIT CALC FUNCTION!!!!
-            if (highest_bid >= sell_price_calc) and (lowest_ask_volume >= calc_total_bought()):
+            # CHANGE TO USE CALC LIMIT FUNCTION
+            # Check for sell conditions
+            if (highest_bid >= sell_price_target) and (lowest_ask_volume >= calc_trade_totals('bought')):
                 logger.debug('TRADE CONDITIONS MET ---> SELLING')
-                exec_trade('sell', sell_price_calc, calc_total_bought())
-                
+                exec_trade('sell', sell_price_target, calc_trade_totals('bought'))
+
+            # Check for buy conditions
             elif (lowest_ask_actual < base_price_trigger):
                 logger.debug('Price good for buy. Checking account balance.')
                 if ((balance_usdt * trade_amount) > base_price_trigger):
