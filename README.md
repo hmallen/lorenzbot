@@ -4,15 +4,18 @@ Poloniex exchange trading bot
 TO DO:
 - Add handling for max trade limit
 - Add function for trade amount adjustment
-- List out all variable used and formalize to clean up program
+- List out all variables used and formalize to clean up program
 - Make boolean arguments into human-readable format
+- Clean up arguments --> Make parent/child --> Make sure all conditions satisfied
 
 LATER:
 - Add argument for minimum loop time (loop_time_min)
-- Add handling of situation where on sell not enough asks are available in depth=20
 
 IF TIME:
 - Add argument for product selection
+
+NEEDS TESTING:
+- Add handling of situation where on sell not enough asks are available in depth=20
 
 DONE:
 - Add argument for trade amount
