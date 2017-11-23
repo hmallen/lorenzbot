@@ -390,7 +390,7 @@ def loop_time_dynamic(base, amount, book):
         logger.debug('Calculating loop time.')
 
         ask_limit = calc_limit_price(amount, 'buy')
-        logger.debug('[CALC EXEC]ask_actual: ' + "{:.8f}".format(ask_limit))
+        logger.debug('ask_actual: ' + "{:.8f}".format(ask_limit))
         
         diff = (base - ask_limit) / base
         logger.debug('diff: ' + "{:.2f}".format(diff * Decimal(100)) + ' %')
@@ -436,11 +436,24 @@ if __name__ == '__main__':
     db = MongoClient().lorenzbot
 
     if clean_collections == True:
+        logger.warning('You have selected the option to delete all existing collections.')
+        user_confirm = input('Continue? (y/n): ')
+
+        if user_confirm == 'y':
+            logger.info('Confirmed. Deleting all collections')
+        elif user_confirm == 'n':
+            logger.warning('Collection deletion cancelled by user. Exiting.')
+            sys.exit()
+        else:
+            logger.error('Unrecognized user input. Exiting.')
+            sys.exit(1)
+        
         logger.info('Dropping all collections from database.')
         modify_collections('drop')
         logger.info('Process complete. Restart program without boolean switch.')
         # COULD JUST PROCEED WITH MAIN PROGRAM...
         sys.exit()
+    
     else:
         try:
             # Try to retrieve latest collection
@@ -552,6 +565,9 @@ if __name__ == '__main__':
             balance_usdt = account_balances['usdt']
 
             # Verify remaining balances
+            total_bought_str = calc_trade_totals('bought')
+            logger.debug('total_bought_str: ' + "{:.8f}".format(total_bought_str))
+            
             trade_usdt_remaining = trade_usdt_max - total_bought_str
             logger.debug('trade_usdt_remaining: ' + "{:.8f}".format(trade_usdt_remaining))
 
@@ -559,9 +575,6 @@ if __name__ == '__main__':
                 logger.warning('USDT balance less than remaining trade allowance. Adjusting allowance to 95% of current balance.')
                 trade_usdt_remaining = balance_usdt * Decimal(0.95)
                 logger.info('[ADJUSTED]trade_usdt_remaining: ' + "{:.2f}".format(trade_usdt_remaining))
-
-            total_bought_str = calc_trade_totals('bought')
-            logger.debug('total_bought_str: ' + "{:.8f}".format(total_bought_str))
 
             if balance_str < total_bought_str:
                 logger.warning('STR balance less than total amount bought. Will default to selling full STR balance when triggered if still true.')
