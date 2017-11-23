@@ -212,8 +212,10 @@ def calc_trade_totals(position):
     return trade_total
 
 
-# Improve this function by returning weighted average of exec price based on trade amount
-def calc_limit_price(amount, position):
+####
+# Improve this function by returning weighted average of exec price based on trade amount!!!!
+####
+def calc_limit_price(amount, position, withFees=None):
     # NEED HANDLING FOR IMPOSSIBLE SITUATIONS
     if position == 'buy':
         book_pos = 'asks'
@@ -250,6 +252,16 @@ def calc_limit_price(amount, position):
             
             logger.warning('Volume not satisfied at default order book depth=' + str(book_depth - 20) + '. Retrying with depth = ' + str(book_depth) + '.')
             time.sleep(1)
+
+    logger.debug('[' + position + ']price_actual: ' + "{:.8f}".format(price_actual))
+
+    if withFees:
+        logger.debug('Adding fees to calc_limit_price() return value.')
+        if position == 'buy':
+            price_actual = price_actual * (Decimal(1) + taker_fee)
+        elif position == 'sell':
+            price_actual = price_actual * (Decimal(1) - taker_fee)
+        logger.debug('[' + position + ']price_actual[+FEES]: ' + "{:.8f}".format(price_actual))
 
     return price_actual
 
