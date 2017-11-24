@@ -109,41 +109,42 @@ loop_dynamic = args.dynamicloop; logger.debug('loop_dynamic: ' + str(loop_dynami
 live_trading = args.live; logger.debug('live_trading: ' + str(live_trading))
 csv_logging = args.nocsv; logger.debug('csv_logging: ' + str(csv_logging))
 
-# Handle all of the arguments delivered appropriately
-if trade_usdt_max >= Decimal(10):
-    logger.warning('Total USDT trade amount set to a high value. Confirm before continuing.')
-    user_confirm = input('Continue? (y/n): ')
+if clean_collections == False:
+    # Handle all of the arguments delivered appropriately
+    if trade_usdt_max >= Decimal(10):
+        logger.warning('Total USDT trade amount set to a high value. Confirm before continuing.')
+        user_confirm = input('Continue? (y/n): ')
 
-    if user_confirm == 'y':
-        logger.info('USDT trade amount confirmed.')
-    elif user_confirm == 'n':
-        logger.warning('Startup cancelled by user due to USDT trade amount. Exiting.')
-        sys.exit()
+        if user_confirm == 'y':
+            logger.info('USDT trade amount confirmed.')
+        elif user_confirm == 'n':
+            logger.warning('Startup cancelled by user due to USDT trade amount. Exiting.')
+            sys.exit()
+        else:
+            logger.error('Unrecognized user input. Exiting.')
+            sys.exit(1)
+
+    if trade_amount >= Decimal(10):
+        logger.warning('Total STR trade amount set to a high value. Confirm before continuing.')
+        user_confirm = input('Continue? (y/n): ')
+
+        if user_confirm == 'y':
+            logger.info('STR trade amount confirmed.')
+        elif user_confirm == 'n':
+            logger.warning('Startup cancelled by user due to STR trade amount. Exiting.')
+            sys.exit()
+        else:
+            logger.error('Unrecognized user input. Exiting.')
+            sys.exit(1)
+
+    if loop_dynamic == True:
+        logger.info('Dynamic loop time calculation activated. Base loop time set to ' + str(loop_time) + ' seconds.')
     else:
-        logger.error('Unrecognized user input. Exiting.')
-        sys.exit(1)
+        logger.info('Using fixed loop time of ' + str(loop_time) + ' seconds.')
 
-if trade_amount >= Decimal(10):
-    logger.warning('Total STR trade amount set to a high value. Confirm before continuing.')
-    user_confirm = input('Continue? (y/n): ')
-
-    if user_confirm == 'y':
-        logger.info('STR trade amount confirmed.')
-    elif user_confirm == 'n':
-        logger.warning('Startup cancelled by user due to STR trade amount. Exiting.')
-        sys.exit()
-    else:
-        logger.error('Unrecognized user input. Exiting.')
-        sys.exit(1)
-
-if loop_dynamic == True:
-    logger.info('Dynamic loop time calculation activated. Base loop time set to ' + str(loop_time) + ' seconds.')
-else:
-    logger.info('Using fixed loop time of ' + str(loop_time) + ' seconds.')
-
-if csv_logging == True:
-    log_file = 'logs/' + 'lorenzbot_log_' + datetime.datetime.now().strftime('%m%d%Y-%H%M%S') + '.csv'
-    logger.info('CSV log file path: ' + log_file)
+    if csv_logging == True:
+        log_file = 'logs/' + 'lorenzbot_log_' + datetime.datetime.now().strftime('%m%d%Y-%H%M%S') + '.csv'
+        logger.info('CSV log file path: ' + log_file)
 
 
 def modify_collections(action):
@@ -188,13 +189,19 @@ def calc_base():
         
         if trade_log_length == 0:
             if amount_dynamic == True:
-                trade_amount_initial = calc_limit_price((trade_usdt_max * trade_proportion_initial), 'buy', reverseLookup=True)
+                trade_prop = trade_usdt_max * trade_proportion_initial
+                logger.debug('trade_prop: ' + "{:.8f}".format(trade_prop))
+                
+                trade_amount_initial = calc_limit_price(trade_prop, 'buy', reverseLookup=True)
                 logger.debug('trade_amount_initial[CALC]: ' + "{:.2f}".format(trade_amount_initial))
+
+                trade_amount = trade_amount_initial
             else:
                 trade_amount_initial = trade_amount
                 logger.debug('trade_amount_initial[STATIC]: ' + "{:.2f}".format(trade_amount_initial))
             
             logger.info('No trade log found. Making entry buy.')
+            logger.info('Entry trade amount: ' + "{:.8f}".format(trade_amount_initial))
             try:
                 limit_price = calc_limit_price(trade_amount_initial, 'buy')
                 logger.debug('limit_price: ' + "{:.8f}".format(limit_price))
@@ -271,9 +278,17 @@ def calc_limit_price(amount, position, reverseLookup=None, withFees=None):
                     actual = amt_tot
                     break
                 elif book_tot > amount:
-                    less_amt = (book_tot - amount) * Decimal(book[book_pos][x][0])
-                    actual = book_tot - less_amt
-                    logger.debug('actual: ' + "{:.2f}".format(actual))
+                    book_tot -= Decimal(book[book_pos][x][0]) * Decimal(book[book_pos][x][1])
+                    amt_tot -= Decimal(book[book_pos][x][1])
+
+                    while (True):
+                        book_tot += Decimal(1) * Decimal(book[book_pos][x][0])
+                        if book_tot > amount:
+                            actual = amt_tot
+                            break
+                        else:
+                            amt_tot += Decimal(1)
+                    
                     break
             else:
                 actual = 0
@@ -291,9 +306,11 @@ def calc_limit_price(amount, position, reverseLookup=None, withFees=None):
             else:
                 actual = 0
 
+        logger.debug('actual: ' + "{:.8f}".format(actual))
+        logger.debug('book_tot: ' + "{:.2f}".format(book_tot))
+
         if actual > 0:
             logger.debug('calc_limit_price() successful within limits (depth=' + str(book_depth) + ').')
-            logger.debug('[' + position + ']actual: ' + "{:.8f}".format(actual))
 
             if withFees:
                 logger.debug('Adding fees to calc_limit_price() return value.')
@@ -626,8 +643,10 @@ if __name__ == '__main__':
 
     while (True):
         try:
-            logger.debug('----[LOOP START]----')
-            logger.info('----')
+            if debug == True:
+                logger.debug('----[LOOP START]----')
+            else:
+                logger.info('----')
             
             # Calculate base price
             base_price = calc_base()
@@ -698,14 +717,15 @@ if __name__ == '__main__':
             # Check for buy conditions
             elif low_ask_actual <= base_price:
                 logger.info('TRADE CONDITIONS MET --> BUYING')
-                exec_trade('buy', base_price, trade_amount_current)
-
-            logger.info('----')
+                exec_trade('buy', base_price_target, trade_amount_current)
 
             loop_time_dynamic = calc_dynamic('loop', base_price, low_ask_actual)
             logger.info('Trade loop complete. Sleeping for ' + "{:.2f}".format(loop_time_dynamic) + ' seconds.')
-            
-            logger.debug('----[LOOP END]----')
+
+            if debug == True:
+                logger.debug('----[LOOP END]----')
+            else:
+                logger.info('----')
 
             time.sleep(loop_time_dynamic)
 
