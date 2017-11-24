@@ -14,9 +14,25 @@ import time
 
 global coll_current
 
-FORMAT = '%(asctime)-15s %(message)s'
-logging.basicConfig(level=logging.INFO, format=FORMAT)
+log_out = 'logs/' + datetime.datetime.now().strftime('%m%d%Y-%H%M%S') + '.log'
+
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+
+file_handler = logging.FileHandler(log_out)
+file_handler.setLevel(logging.DEBUG)
+
+console_handler = logging.StreamHandler()
+console_handler.setLevel(logging.INFO)
+
+formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+file_handler.setFormatter(formatter)
+console_handler.setFormatter(formatter)
+
+logger.addHandler(file_handler)
+logger.addHandler(console_handler)
+
+#logging.basicConfig(level=logging.INFO, format=FORMAT)
 
 # Variable modifiers
 product = 'USDT_STR'
@@ -66,7 +82,8 @@ args = parser.parse_args()
 # Set variables from arguments passed to program
 debug = args.debug
 if debug == True:
-    logger.setLevel(logging.DEBUG)
+    console_handler.setLevel(logging.DEBUG)
+    #logger.setLevel(logging.DEBUG)
     logger.debug('Activated debug logging.')
 
 clean_collections = args.clean; logger.debug('clean_collections: ' + str(clean_collections))
@@ -106,7 +123,7 @@ else:
     logger.info('Using fixed loop time of ' + str(loop_time) + ' seconds.')
 
 if csv_logging == True:
-    log_file = 'logs/' + datetime.datetime.now().strftime('%m%d%Y-%H%M%S') + '_lorenzbot_log.csv'
+    log_file = 'logs/' + 'lorenzbot_log_' + datetime.datetime.now().strftime('%m%d%Y-%H%M%S') + '.csv'
     logger.info('CSV log file path: ' + log_file)
     if not os.path.exists('logs'):
         logger.info('Log directory not found. Creating...')
