@@ -148,10 +148,11 @@ def calc_base():
         
         if trade_log_length == 0:
             if amount_dynamic == True:
-                trade_amount_initial = trade_usdt_max * trade_proportion_initial
+                trade_amount_initial = calc_limit_price((trade_usdt_max * trade_proportion_initial), 'buy', reverseLookup=True)
+                logger.debug('trade_amount_initial[CALC]: ' + "{:.2f}".format(trade_amount_initial))
             else:
                 trade_amount_initial = trade_amount
-            logger.debug('trade_amount_initial: ' + "{:.2f}".format(trade_amount_initial))
+                logger.debug('trade_amount_initial[STATIC]: ' + "{:.2f}".format(trade_amount_initial))
             
             logger.info('No trade log found. Making entry buy.')
             try:
@@ -208,7 +209,7 @@ def calc_trade_totals(position):
 ####
 # Improve this function by returning weighted average of exec price based on trade amount!!!!
 ####
-def calc_limit_price(amount, position, withFees=None):
+def calc_limit_price(amount, position, reverseLookup=None, withFees=None):
     # NEED HANDLING FOR IMPOSSIBLE SITUATIONS
     if position == 'buy':
         book_pos = 'asks'
@@ -218,20 +219,50 @@ def calc_limit_price(amount, position, withFees=None):
     book_depth = 20  # Default
     while (True):
         book = polo.returnOrderBook('USDT_STR', depth=book_depth)
-        
-        book_tot = Decimal(0)
-        for x in range(0, len(book[book_pos])):
-            book_tot += Decimal(book[book_pos][x][1])
-            if book_tot >= amount:
-                price_actual = Decimal(book[book_pos][x][0])
-                logger.debug('price_actual: ' + "{:.8f}".format(price_actual))
-                logger.debug('book_tot: ' + "{:.2f}".format(book_tot))
-                break
-            else:
-                price_actual = 0
 
-        if price_actual > 0:
+        # Lookup amount based on price
+        if reverseLookup == True:
+            book_tot = Decimal(0)
+            amt_tot = Decimal(0)
+            for x in range(0, len(book[book_pos])):
+                book_tot += Decimal(book[book_pos][x][0]) * Decimal(book[book_pos][x][1])
+                amt_tot += Decimal(book[book_pos][x][1])
+                if book_tot == amount:
+                    actual = amt_tot
+                    break
+                elif book_tot > amount:
+                    less_amt = (book_tot - amount) * Decimal(book[book_pos][x][0])
+                    actual = book_tot - less_amt
+                    logger.debug('actual: ' + "{:.2f}".format(actual))
+                    break
+            else:
+                actual = 0
+        
+        # Lookup price based on amount
+        else:
+            book_tot = Decimal(0)
+            for x in range(0, len(book[book_pos])):
+                book_tot += Decimal(book[book_pos][x][1])
+                if book_tot >= amount:
+                    actual = Decimal(book[book_pos][x][0])
+                    logger.debug('actual: ' + "{:.8f}".format(actual))
+                    logger.debug('book_tot: ' + "{:.2f}".format(book_tot))
+                    break
+            else:
+                actual = 0
+
+        if actual > 0:
             logger.debug('calc_limit_price() successful within limits (depth=' + str(book_depth) + ').')
+            logger.debug('[' + position + ']actual: ' + "{:.8f}".format(actual))
+
+            if withFees:
+                logger.debug('Adding fees to calc_limit_price() return value.')
+                if position == 'buy':
+                    actual = actual * (Decimal(1) + taker_fee)
+                elif position == 'sell':
+                    actual = actual * (Decimal(1) - taker_fee)
+                logger.debug('[' + position + ']price_actual[+FEES]: ' + "{:.8f}".format(actual))
+            
             break
         
         else:
@@ -247,17 +278,7 @@ def calc_limit_price(amount, position, withFees=None):
             logger.warning('Volume not satisfied at default order book depth=' + str(book_depth - 20) + '. Retrying with depth = ' + str(book_depth) + '.')
             time.sleep(1)
 
-    logger.debug('[' + position + ']price_actual: ' + "{:.8f}".format(price_actual))
-
-    if withFees:
-        logger.debug('Adding fees to calc_limit_price() return value.')
-        if position == 'buy':
-            price_actual = price_actual * (Decimal(1) + taker_fee)
-        elif position == 'sell':
-            price_actual = price_actual * (Decimal(1) - taker_fee)
-        logger.debug('[' + position + ']price_actual[+FEES]: ' + "{:.8f}".format(price_actual))
-
-    return price_actual
+    return actual
 
 
 # NEED TO FIX THE BUY/SELL FUNCTIONS
@@ -431,15 +452,16 @@ def calc_dynamic(selection, base, limit):
             global trade_usdt_remaining
             logger.debug('---------------------')
             logger.debug('trade_usdt_remaining: ' + "{:.2f}".format(trade_usdt_remaining))
-            amount = trade_usdt_remaining * trade_proportion_adj
-            logger.debug('[DYNAMIC]amount: ' + "{:.8f}".format(amount))
-            sys.exit()
             
+            amount_usdt = trade_usdt_remaining * trade_proportion_adj  # USDT
+            logger.debug('[DYNAMIC]amount: ' + "{:.8f}".format(amount_usdt))
+
+            amount = calc_limit_price(amount_usdt, 'buy', reverseLookup=True)
 
             logger.info('New Trade Amount: ' + "{:.8f}".format(amount))
 
         else:
-            amount = trade_amount
+            amount = trade_amount  # STELLAR LUMENS
             logger.debug('[STATIC]amount: ' + "{:.8f}".format(amount))
 
         return amount
@@ -606,9 +628,6 @@ if __name__ == '__main__':
             # Calculate target sell price
             sell_price_target = base_price * (Decimal(1) + profit_threshold + taker_fee)  # Add fee in calc_limit_price()
             logger.debug('sell_price_target:    ' + "{:.8f}".format(sell_price_target))
-
-            # 1 - Getting values
-            # 2 - Perform trade logic checks
 
             trade_amount_base = trade_amount
             low_ask_actual = calc_limit_price(trade_amount_base, 'buy', withFees=True)
