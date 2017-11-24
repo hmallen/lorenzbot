@@ -544,8 +544,15 @@ if __name__ == '__main__':
 
     # Get initial account balances
     account_balances = get_balances()
-    balance_str = account_balances['str']
-    balance_usdt = account_balances['usdt']
+    try:
+        balance_str = account_balances['str']
+    except:
+        balance_str = Decimal(0)
+    try:
+        balance_usdt = account_balances['usdt']
+    except:
+        balance_usdt = Decimal(0)
+    
     logger.info('Balance STR:  ' + "{:.2f}".format(balance_str))
     logger.info('Balance USDT: ' + "{:.2f}".format(balance_usdt))
 
