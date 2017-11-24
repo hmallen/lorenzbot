@@ -167,12 +167,6 @@ def calc_base():
 
     calc_base_initialized = True
 
-    #total_spent = calc_trade_totals('spent')['trade_total']
-    #logger.debug('total_spent: ' + "{:.8f}".format(total_spent))
-
-    #total_bought = calc_trade_totals('bought')['trade_total']
-    #logger.debug('total_bought: ' + "{:.2f}".format(total_bought))
-
     rate_avg = calc_trade_totals('spent') / calc_trade_totals('bought')
     logger.debug('rate_avg: ' + "{:.8f}".format(rate_avg))
 
@@ -397,50 +391,55 @@ def log_trade_csv(csv_row): # Must pass list as argument
         csv_failures += 1
 
 
-#def loop_time_dynamic(base, amount):
-def loop_time_dynamic(base, limit):
-    if loop_dynamic == True:
-        logger.debug('Calculating loop time.')
+def calc_dynamic(selection, base, limit):
+    diff = (base - limit) / base
+    logger.debug('diff: ' + "{:.4f}".format(diff * Decimal(100)) + ' %')
 
-        #ask_limit = calc_limit_price(amount, 'buy', withFees=True)
-        #logger.debug('ask_actual: ' + "{:.8f}".format(ask_limit))
+    # Map magnitude of difference b/w base price and buy price to loop time
+    if selection == 'loop':
+        if loop_dynamic == True:
+            logger.debug('Calculating loop time.')
+            if diff <= Decimal(0.0001): # To exclude tiny values
+                logger.debug('diff <= 0')
+                lt = loop_time
+
+            elif Decimal(0.0001) < diff <= Decimal(1):
+                logger.debug('0 < diff < 1')
+                lt = loop_time - ((loop_time - loop_time_min) * diff)
+
+            elif diff > Decimal(1):
+                logger.debug('1 < diff')
+                lt = loop_time_min
         
-        #diff = (base - ask_limit) / base
-        diff = (base - limit) / base
-        logger.debug('diff: ' + "{:.4f}".format(diff * Decimal(100)) + ' %')
-
-        if diff <= Decimal(0.0001): # To exclude tiny values
-            logger.debug('diff <= 0')
+        else:
             lt = loop_time
 
-        elif Decimal(0.0001) < diff <= Decimal(1):
-            logger.debug('0 < diff < 1')
-            lt = loop_time - ((loop_time - loop_time_min) * diff)
+        logger.debug('lt: ' + "{:.2f}".format(lt))
 
-        elif diff > Decimal(1):
-            logger.debug('1 < diff')
-            lt = loop_time_min
+        return lt
 
-    else:
-        lt = loop_time
-        
-    logger.debug('lt: ' + "{:.2f}".format(lt))
-    
-    return lt
+    # Map magnitude of difference b/w base price and buy price to buy amount
+    elif selection == 'amount':
+        if amount_dynamic == True:
+            trade_proportion_low = trade_proportion_initial # Default = 0.05
+            logger.debug('trade_proportion_low: ' + "{:.2f}".format(trade_proportion_low))
+            trade_proportion_high = Decimal(0.50)    # If limit price 100% less than base price, trade with half of available USDT remaining
+            logger.debug('trade_proportion_high: ' + "{:.2f}".format(trade_proportion_high))
+            trade_proportion_adj = trade_proportion_low + (diff * (trade_proportion_high - trade_proportion_low))
+            logger.debug('trade_proportion_adj: ' + "{:.2f}".format(trade_proportion_adj))
 
+            global trade_usdt_remaining
+            amount = trade_usdt_remaining * trade_proportion_adj
+            logger.debug('[DYNAMIC]amount: ' + "{:.8f}".format(amount))
+            
 
-def calc_trade_amount(base=None, limit=None):
-    if amount_dynamic == True:
-        logger.debug('Calculating trade amount.')
-        logger.debug('SKIPPING TRADE AMOUNT CALCULATION.')
-        amt = trade_amount
+            logger.info('New Trade Amount: ' + "{:.8f}".format(amount)
 
-    else:
-        amt = trade_amount
+        else:
+            amount = trade_amount
+            logger.debug('[STATIC]amount: ' + "{:.8f}".format(amount))
 
-    logger.debug('amt: ' + "{:.2f}".format(amt))
-
-    return amt
+        return amount
 
 
 if __name__ == '__main__':
@@ -592,8 +591,6 @@ if __name__ == '__main__':
                 trade_usdt_remaining = balance_usdt * Decimal(0.95)
                 logger.info('[ADJUSTED]trade_usdt_remaining: ' + "{:.2f}".format(trade_usdt_remaining))
 
-            trade_amount_current = calc_trade_amount()  # Make sure to check against available balance
-
             if balance_str < total_bought_str:
                 logger.warning('STR balance less than total amount bought. Defaulting to full available STR balance.')
                 sell_volume = balance_str
@@ -610,10 +607,13 @@ if __name__ == '__main__':
             # 1 - Getting values
             # 2 - Perform trade logic checks
 
-            low_ask_actual = calc_limit_price(trade_amount_current, 'buy', withFees=True)
+            trade_amount_base = trade_amount
+            low_ask_actual = calc_limit_price(trade_amount_base, 'buy', withFees=True)
             logger.debug('low_ask_actual: ' + "{:.8f}".format(low_ask_actual))
             high_bid_actual = calc_limit_price(sell_volume, 'sell', withFees=True)
             logger.debug('high_bid_actual: ' + "{:.8f}".format(high_bid_actual))
+
+            trade_amount_current = calc_dynamic('amount', base_price, low_ask_actual)
 
             # Check for sell conditions
             if high_bid_actual >= sell_price_target:
@@ -621,14 +621,13 @@ if __name__ == '__main__':
                 exec_trade('sell', sell_price_target, sell_volume)
 
             # Check for buy conditions
-            elif low_ask_actual <= base_price_trigger:
+            elif low_ask_actual <= base_price:
                 logger.debug('TRADE CONDITIONS MET --> BUYING')
-                exec_trade('buy', base_price_trigger, trade_amount_current)
+                exec_trade('buy', base_price, trade_amount_current)
 
             logger.debug('----[LOOP END]----')
 
-            #time.sleep(loop_time_dynamic(base_price_trigger, trade_amount_current, ob))
-            time.sleep(loop_time_dynamic(base_price_trigger, low_ask_actual))
+            time.sleep(calc_dynamic('loop', base_price, low_ask_actual))
 
         except Exception as e:
             logger.exception(e)
