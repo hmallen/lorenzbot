@@ -475,15 +475,12 @@ def calc_dynamic(selection, base, limit):
             logger.debug('trade_proportion_adj: ' + "{:.2f}".format(trade_proportion_adj))
 
             global trade_usdt_remaining
-            logger.debug('---------------------')
             logger.debug('trade_usdt_remaining: ' + "{:.2f}".format(trade_usdt_remaining))
             
             amount_usdt = trade_usdt_remaining * trade_proportion_adj  # USDT
             logger.debug('[DYNAMIC]amount: ' + "{:.8f}".format(amount_usdt))
 
             amount = calc_limit_price(amount_usdt, 'buy', reverseLookup=True)
-
-            logger.info('New Trade Amount: ' + "{:.8f}".format(amount))
 
         else:
             amount = trade_amount  # STELLAR LUMENS
@@ -580,7 +577,7 @@ if __name__ == '__main__':
 
         if user_confirm == 'y':
             trade_usdt_max = balance_usdt
-            logger.info('Max trade amount adjusted.')
+            logger.info('Max trade amount adjusted to ' + "{:.2f}".format(trade_max_usdt) + '.')
         elif user_confirm == 'n':
             logger.warning('Startup cancelled by user due to insufficient balance. Exiting.')
             sys.exit()
