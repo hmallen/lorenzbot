@@ -429,8 +429,11 @@ def calc_dynamic(selection, base, limit):
             logger.debug('trade_proportion_adj: ' + "{:.2f}".format(trade_proportion_adj))
 
             global trade_usdt_remaining
+            logger.debug('---------------------')
+            logger.debug('trade_usdt_remaining: ' + "{:.2f}".format(trade_usdt_remaining))
             amount = trade_usdt_remaining * trade_proportion_adj
             logger.debug('[DYNAMIC]amount: ' + "{:.8f}".format(amount))
+            sys.exit()
             
 
             logger.info('New Trade Amount: ' + "{:.8f}".format(amount))
