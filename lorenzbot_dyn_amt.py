@@ -596,6 +596,7 @@ if __name__ == '__main__':
     while (True):
         try:
             logger.debug('----[LOOP START]----')
+            logger.info('----')
             
             # Calculate base price
             base_price = calc_base()
@@ -672,6 +673,7 @@ if __name__ == '__main__':
             logger.info('Trade loop complete. Sleeping for ' + "{:.2f}".format(loop_time_dynamic) + ' seconds.')
             
             logger.debug('----[LOOP END]----')
+            logger.info('----')
 
             time.sleep(loop_time_dynamic)
 
