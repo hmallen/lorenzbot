@@ -433,7 +433,7 @@ def calc_dynamic(selection, base, limit):
             logger.debug('[DYNAMIC]amount: ' + "{:.8f}".format(amount))
             
 
-            logger.info('New Trade Amount: ' + "{:.8f}".format(amount)
+            logger.info('New Trade Amount: ' + "{:.8f}".format(amount))
 
         else:
             amount = trade_amount
