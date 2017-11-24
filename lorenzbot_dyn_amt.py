@@ -16,23 +16,31 @@ global coll_current
 
 log_out = 'logs/' + datetime.datetime.now().strftime('%m%d%Y-%H%M%S') + '.log'
 
+#logging.basicConfig(level=logging.INFO, format=FORMAT)
+
 logger = logging.getLogger(__name__)
+formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
 logger.setLevel(logging.DEBUG)
 
-file_handler = logging.FileHandler(log_out)
-file_handler.setLevel(logging.DEBUG)
-
+# Add handler to output log messages to console
 console_handler = logging.StreamHandler()
 console_handler.setLevel(logging.INFO)
-
-formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
-file_handler.setFormatter(formatter)
 console_handler.setFormatter(formatter)
-
-logger.addHandler(file_handler)
 logger.addHandler(console_handler)
 
-#logging.basicConfig(level=logging.INFO, format=FORMAT)
+if not os.path.exists('logs'):
+    logger.info('Log directory not found. Creating...')
+    try:
+        os.makedirs('logs')
+    except:
+        logger.exception('Failed to create log directory. Exiting.')
+        sys.exit()
+
+# Add handler to write log messages to file
+file_handler = logging.FileHandler(log_out)
+file_handler.setLevel(logging.DEBUG)
+file_handler.setFormatter(formatter)
+logger.addHandler(file_handler)
 
 # Variable modifiers
 product = 'USDT_STR'
@@ -102,9 +110,9 @@ live_trading = args.live; logger.debug('live_trading: ' + str(live_trading))
 csv_logging = args.nocsv; logger.debug('csv_logging: ' + str(csv_logging))
 
 # Handle all of the arguments delivered appropriately
-if trade_usdt_max > Decimal(10):
+if trade_usdt_max >= Decimal(10):
     logger.warning('Total USDT trade amount set to a high value. Confirm before continuing.')
-if trade_amount > Decimal(10):
+if trade_amount >= Decimal(10):
     logger.warning('Total STR trade amount set to a high value. Confirm before continuing.')
     user_confirm = input('Continue? (y/n): ')
 
@@ -125,9 +133,6 @@ else:
 if csv_logging == True:
     log_file = 'logs/' + 'lorenzbot_log_' + datetime.datetime.now().strftime('%m%d%Y-%H%M%S') + '.csv'
     logger.info('CSV log file path: ' + log_file)
-    if not os.path.exists('logs'):
-        logger.info('Log directory not found. Creating...')
-        os.makedirs('logs')
 
 
 def modify_collections(action):
