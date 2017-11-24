@@ -115,7 +115,7 @@ if trade_usdt_max >= Decimal(10):
     user_confirm = input('Continue? (y/n): ')
 
     if user_confirm == 'y':
-        logger.info('Confirmed. Starting program.')
+        logger.info('USDT trade amount confirmed.')
     elif user_confirm == 'n':
         logger.warning('Startup cancelled by user due to USDT trade amount. Exiting.')
         sys.exit()
@@ -128,7 +128,7 @@ if trade_amount >= Decimal(10):
     user_confirm = input('Continue? (y/n): ')
 
     if user_confirm == 'y':
-        logger.info('Confirmed. Starting program.')
+        logger.info('STR trade amount confirmed.')
     elif user_confirm == 'n':
         logger.warning('Startup cancelled by user due to STR trade amount. Exiting.')
         sys.exit()
