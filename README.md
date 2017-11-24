@@ -2,6 +2,7 @@
 Poloniex exchange trading bot
 
 TO DO:
+- Add Telegram alerts
 - List out all variables used and formalize to clean up program
 - Make boolean arguments into human-readable format
 - Clean up arguments --> Make parent/child --> Make sure all conditions satisfied
@@ -12,7 +13,6 @@ LATER:
 
 IF TIME:
 - Add argument for product selection
-- Create output/notification/alert system
 
 NEEDS TESTING:
 - Add handling for max trade limit
