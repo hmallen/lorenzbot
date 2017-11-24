@@ -422,6 +422,7 @@ def log_trade_csv(csv_row): # Must pass list as argument
 def calc_dynamic(selection, base, limit):
     diff = (base - limit) / base
     logger.debug('diff: ' + "{:.4f}".format(diff * Decimal(100)) + ' %')
+    logger.info('Price Difference from Base: ' + "{:.2f}".format(diff) + '%')
 
     # Map magnitude of difference b/w base price and buy price to loop time
     if selection == 'loop':
@@ -669,11 +670,12 @@ if __name__ == '__main__':
                 logger.info('TRADE CONDITIONS MET --> BUYING')
                 exec_trade('buy', base_price, trade_amount_current)
 
+            logger.info('----')
+
             loop_time_dynamic = calc_dynamic('loop', base_price, low_ask_actual)
             logger.info('Trade loop complete. Sleeping for ' + "{:.2f}".format(loop_time_dynamic) + ' seconds.')
             
             logger.debug('----[LOOP END]----')
-            logger.info('----')
 
             time.sleep(loop_time_dynamic)
 
