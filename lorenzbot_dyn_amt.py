@@ -131,8 +131,14 @@ def modify_collections(action):
 
 def get_balances():
     user_balances = polo.returnAvailableAccountBalances()['exchange']
-    bal_str = Decimal(user_balances['STR'])
-    bal_usdt = Decimal(user_balances['USDT'])
+    try:
+        bal_str = Decimal(user_balances['STR'])
+    except:
+        bal_str = Decimal(0)
+    try:
+        bal_usdt = Decimal(user_balances['USDT'])
+    except:
+        bal_usdt = Decimal(0)
     
     bal_dict = {'str': bal_str, 'usdt': bal_usdt}
 
@@ -544,15 +550,8 @@ if __name__ == '__main__':
 
     # Get initial account balances
     account_balances = get_balances()
-    try:
-        balance_str = account_balances['str']
-    except:
-        balance_str = Decimal(0)
-    try:
-        balance_usdt = account_balances['usdt']
-    except:
-        balance_usdt = Decimal(0)
-    
+    balance_str = account_balances['str']
+    balance_usdt = account_balances['usdt']
     logger.info('Balance STR:  ' + "{:.2f}".format(balance_str))
     logger.info('Balance USDT: ' + "{:.2f}".format(balance_usdt))
 
@@ -605,24 +604,20 @@ if __name__ == '__main__':
 
             # Get current account balances
             account_balances = get_balances()
-            logger.debug('account_balances: ' + str(account_balances))
-            try:
-                balance_str = account_balances['str']
-            except:
-                balance_str = Decimal(0)
-            try:
-                balance_usdt = account_balances['usdt']
-            except:
-                balance_usdt = Decimal(0)
+            balance_str = account_balances['str']
+            balance_usdt = account_balances['usdt']
+            logger.info('Balance STR:  ' + "{:.8f}".format(balance_str))
+            logger.info('Balance USDT: ' + "{:.2f}".format(balance_usdt))
 
             # Verify remaining STR balance with expected trade amount
             total_bought_str = calc_trade_totals('bought')
             logger.debug('total_bought_str: ' + "{:.8f}".format(total_bought_str))
             total_spent_usdt = calc_trade_totals('spent')
+            logger.debug('total_spent_usdt: ' + "{:.8f}".format(total_spent_usdt))
 
             # Verify remaining USDT balance with expected trade amount
             trade_usdt_remaining = trade_usdt_max - total_spent_usdt
-            logger.debug('trade_usdt_remaining: ' + "{:.8f}".format(trade_usdt_remaining))
+            logger.debug('trade_usdt_remaining: ' + "{:.2f}".format(trade_usdt_remaining))
 
             if balance_usdt < trade_usdt_remaining:
                 logger.warning('USDT balance less than remaining trade allowance. Adjusting allowance to 95% of current balance.')
