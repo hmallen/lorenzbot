@@ -439,10 +439,10 @@ def log_trade_csv(csv_row): # Must pass list as argument
 def calc_dynamic(selection, base, limit):
     diff = (base - limit) / base
     logger.debug('diff: ' + "{:.4f}".format(diff * Decimal(100)) + ' %')
+    logger.info('Price Difference from Base: ' + "{:.4f}".format(diff) + '%')
 
     # Map magnitude of difference b/w base price and buy price to loop time
     if selection == 'loop':
-        logger.info('Price Difference from Base: ' + "{:.4f}".format(diff) + '%')
         if loop_dynamic == True:
             logger.debug('Calculating loop time.')
             if diff <= Decimal(0.0001): # To exclude tiny values
@@ -466,7 +466,6 @@ def calc_dynamic(selection, base, limit):
 
     # Map magnitude of difference b/w base price and buy price to buy amount
     elif selection == 'amount':
-        logger.info('Price Difference from Base: ' + "{:.4f}".format(diff) + '%')
         if amount_dynamic == True:
             trade_proportion_low = trade_proportion_initial # Default = 0.05
             logger.debug('trade_proportion_low: ' + "{:.2f}".format(trade_proportion_low))
