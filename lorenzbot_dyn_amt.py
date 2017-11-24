@@ -14,7 +14,8 @@ import time
 
 global coll_current
 
-logging.basicConfig(level=logging.INFO)
+FORMAT = '%(asctime)-15s %(message)s'
+logging.basicConfig(level=logging.INFO, format=FORMAT)
 logger = logging.getLogger(__name__)
 
 # Variable modifiers
@@ -571,12 +572,13 @@ if __name__ == '__main__':
 
     global trade_usdt_remaining
     if db[coll_current].count() > 0:
-        logger.debug('Collection not empty. Calculating trade amount remaining.')
+        logger.info('Collection not empty. Calculating trade amount remaining.')
         trade_usdt_remaining = trade_usdt_max - calc_trade_totals('bought')
     else:
-        logger.debug('Collection empty. Setting trade remaining to trade max.')
+        logger.info('Collection empty. Setting tradable balance remaining to allowed maximum.')
         trade_usdt_remaining = trade_usdt_max
     logger.debug('trade_usdt_remaining: ' + "{:.2f}".format(trade_usdt_remaining))
+    logger.info('Tradable USDT Remaining: ' + "{:.2f}".format(trade_usdt_remaining))
 
     if trade_usdt_remaining < 0:
         logger.error('Trade amount remaining less than 0. Try cleaning collections or setting a higher max trade value. Exiting.')
@@ -598,9 +600,11 @@ if __name__ == '__main__':
             # Calculate base price
             base_price = calc_base()
             logger.debug('base_price: ' + "{:.8f}".format(base_price))
-            #base_price_trigger = base_price - buy_threshold    # IS BUY_THRESHOLD NEEDED IF CALCULATING FEES TOO?
-            base_price_trigger = base_price * (Decimal(1) - taker_fee)
-            logger.debug('base_price_trigger: ' + "{:.8f}".format(base_price_trigger))
+            logger.info('Base Price: ' + "{:.8f}".format(base_price))
+            #base_price_target = base_price - buy_threshold    # IS BUY_THRESHOLD NEEDED IF CALCULATING FEES TOO?
+            base_price_target = base_price * (Decimal(1) - taker_fee)
+            logger.debug('base_price_target: ' + "{:.8f}".format(base_price_target))
+            logger.info('Base Price Target: ' + "{:.8f}".format(base_price_target))
 
             # Get current account balances
             account_balances = get_balances()
@@ -612,22 +616,27 @@ if __name__ == '__main__':
             # Verify remaining STR balance with expected trade amount
             total_bought_str = calc_trade_totals('bought')
             logger.debug('total_bought_str: ' + "{:.8f}".format(total_bought_str))
+            logger.info('Total STR Bought: ' + "{:.8f}".format(total_bought_str))
             total_spent_usdt = calc_trade_totals('spent')
             logger.debug('total_spent_usdt: ' + "{:.8f}".format(total_spent_usdt))
+            logger.info('Total USDT Spent: ' + "{:.2f}".format(total_spent_usdt))
 
             # Verify remaining USDT balance with expected trade amount
             trade_usdt_remaining = trade_usdt_max - total_spent_usdt
             logger.debug('trade_usdt_remaining: ' + "{:.2f}".format(trade_usdt_remaining))
+            logger.info('Tradable USDT Remaining: ' + "{:.2f}".format(trade_usdt_remaining))
 
             if balance_usdt < trade_usdt_remaining:
                 logger.warning('USDT balance less than remaining trade allowance. Adjusting allowance to 95% of current balance.')
                 trade_usdt_remaining = balance_usdt * Decimal(0.95)
-                logger.info('[ADJUSTED]trade_usdt_remaining: ' + "{:.2f}".format(trade_usdt_remaining))
+                logger.debug('[ADJUSTED]trade_usdt_remaining: ' + "{:.2f}".format(trade_usdt_remaining))
+                logger.info('Remaining Tradable USDT Balance Adjusted: ' + "{:.2f}".format(trade_usdt_remaining))
 
             if balance_str < total_bought_str:
                 logger.warning('STR balance less than total amount bought. Defaulting to full available STR balance.')
                 sell_volume = balance_str
                 logger.debug('sell_volume[ADJUSTED]: ' + "{:.8f}".format(sell_volume))
+                logger.info('Sell Volume Adjusted: ' + "{:.8f}".format(sell_volume))
             else:
                 sell_volume = total_bought_str
                 logger.debug('sell_volume: ' + "{:.8f}".format(sell_volume))
@@ -636,28 +645,35 @@ if __name__ == '__main__':
             # Calculate target sell price
             sell_price_target = base_price * (Decimal(1) + profit_threshold + taker_fee)  # Add fee in calc_limit_price()
             logger.debug('sell_price_target:    ' + "{:.8f}".format(sell_price_target))
+            logger.info('Sell Target: ' + "{:.8f}".format(sell_price_target))
 
             trade_amount_base = trade_amount
             low_ask_actual = calc_limit_price(trade_amount_base, 'buy', withFees=True)
             logger.debug('low_ask_actual: ' + "{:.8f}".format(low_ask_actual))
+            logger.info('Low Ask (Actual): ' + "{:.8f}".format(low_ask_actual))
             high_bid_actual = calc_limit_price(sell_volume, 'sell', withFees=True)
             logger.debug('high_bid_actual: ' + "{:.8f}".format(high_bid_actual))
+            logger.info('High Bid (Actual): ' + "{:.8f}".format(high_bid_actual))
 
             trade_amount_current = calc_dynamic('amount', base_price, low_ask_actual)
-
+            logger.info('Current Trade Amount: ' + "{:.2f}".format(trade_amount_current))
+            
             # Check for sell conditions
             if high_bid_actual >= sell_price_target:
-                logger.debug('TRADE CONDITIONS MET --> SELLING')
+                logger.info('TRADE CONDITIONS MET --> SELLING')
                 exec_trade('sell', sell_price_target, sell_volume)
 
             # Check for buy conditions
             elif low_ask_actual <= base_price:
-                logger.debug('TRADE CONDITIONS MET --> BUYING')
+                logger.info('TRADE CONDITIONS MET --> BUYING')
                 exec_trade('buy', base_price, trade_amount_current)
 
+            loop_time_dynamic = calc_dynamic('loop', base_price, low_ask_actual)
+            logger.info('Trade loop complete. Sleeping for ' + "{:.2f}".format(loop_time_dynamic) + ' seconds.')
+            
             logger.debug('----[LOOP END]----')
 
-            time.sleep(calc_dynamic('loop', base_price, low_ask_actual))
+            time.sleep(loop_time_dynamic)
 
         except Exception as e:
             logger.exception(e)
