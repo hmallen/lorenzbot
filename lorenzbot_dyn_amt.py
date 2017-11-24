@@ -606,8 +606,14 @@ if __name__ == '__main__':
             # Get current account balances
             account_balances = get_balances()
             logger.debug('account_balances: ' + str(account_balances))
-            balance_str = account_balances['str']
-            balance_usdt = account_balances['usdt']
+            try:
+                balance_str = account_balances['str']
+            except:
+                balance_str = Decimal(0)
+            try:
+                balance_usdt = account_balances['usdt']
+            except:
+                balance_usdt = Decimal(0)
 
             # Verify remaining STR balance with expected trade amount
             total_bought_str = calc_trade_totals('bought')
