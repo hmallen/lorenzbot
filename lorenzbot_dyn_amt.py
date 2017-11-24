@@ -112,6 +112,17 @@ csv_logging = args.nocsv; logger.debug('csv_logging: ' + str(csv_logging))
 # Handle all of the arguments delivered appropriately
 if trade_usdt_max >= Decimal(10):
     logger.warning('Total USDT trade amount set to a high value. Confirm before continuing.')
+    user_confirm = input('Continue? (y/n): ')
+
+    if user_confirm == 'y':
+        logger.info('Confirmed. Starting program.')
+    elif user_confirm == 'n':
+        logger.warning('Startup cancelled by user due to USDT trade amount. Exiting.')
+        sys.exit()
+    else:
+        logger.error('Unrecognized user input. Exiting.')
+        sys.exit(1)
+
 if trade_amount >= Decimal(10):
     logger.warning('Total STR trade amount set to a high value. Confirm before continuing.')
     user_confirm = input('Continue? (y/n): ')
@@ -119,7 +130,7 @@ if trade_amount >= Decimal(10):
     if user_confirm == 'y':
         logger.info('Confirmed. Starting program.')
     elif user_confirm == 'n':
-        logger.warning('Startup cancelled by user. Exiting.')
+        logger.warning('Startup cancelled by user due to STR trade amount. Exiting.')
         sys.exit()
     else:
         logger.error('Unrecognized user input. Exiting.')
