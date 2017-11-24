@@ -429,13 +429,11 @@ def loop_time_dynamic(base, limit):
     return lt
 
 
-def calc_trade_amount():
+def calc_trade_amount(base, limit):
     if amount_dynamic == True:
         logger.debug('Calculating trade amount.')
-        
-        #amt = ????
-        logger.debug('CALC_TRADE_AMOUNT REACHED')
-        sys.exit()
+        logger.debug('SKIPPING TRADE AMOUNT CALCULATION.')
+        amt = trade_amount
 
     else:
         amt = trade_amount
