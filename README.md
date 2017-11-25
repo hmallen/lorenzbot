@@ -6,6 +6,10 @@ TO DO:
 - Make boolean arguments into human-readable format
 - Clean up arguments --> Make parent/child --> Make sure all conditions satisfied
 - Add MongoDB collection to store Telegram users
+- Add "shutdown" function that can be called anywhere instead of updater.stop() each time
+- Add check for minimum buy/sell amount
+-- Buy = 0.0001USDT
+-- Sell = 0.0001USDT
 
 LATER:
 - Add argument for minimum loop time (loop_time_min)

@@ -1,0 +1,15 @@
+2017-11-24 15:46:10,611 - DEBUG - Parsing arguments.
+2017-11-24 15:46:10,612 - DEBUG - Activated debug logging.
+2017-11-24 15:46:10,615 - DEBUG - clean_collections: True
+2017-11-24 15:46:10,615 - DEBUG - trade_amount: 0.10
+2017-11-24 15:46:10,615 - DEBUG - amount_dynamic: True
+2017-11-24 15:46:10,616 - DEBUG - trade_proportion_initial: 0.05
+2017-11-24 15:46:10,616 - DEBUG - trade_usdt_max: 1.00
+2017-11-24 15:46:10,616 - DEBUG - profit_threshold: 0.05
+2017-11-24 15:46:10,616 - DEBUG - loop_time: 20
+2017-11-24 15:46:10,616 - DEBUG - loop_dynamic: True
+2017-11-24 15:46:10,617 - DEBUG - live_trading: True
+2017-11-24 15:46:10,617 - DEBUG - csv_logging: True
+2017-11-24 15:46:10,617 - INFO - Dynamic loop time calculation activated. Base loop time set to 20 seconds.
+2017-11-24 15:46:10,617 - INFO - CSV log file path: logs/lorenzbot_log_11242017-154610.csv
+2017-11-24 15:46:10,619 - WARNING - Option to delete all existing collections selected.

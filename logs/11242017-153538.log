@@ -1,0 +1,55 @@
+2017-11-24 15:35:38,858 - DEBUG - Parsing arguments.
+2017-11-24 15:35:38,859 - DEBUG - Activated debug logging.
+2017-11-24 15:35:38,859 - DEBUG - clean_collections: False
+2017-11-24 15:35:38,859 - DEBUG - trade_amount: 0.10
+2017-11-24 15:35:38,859 - DEBUG - amount_dynamic: True
+2017-11-24 15:35:38,859 - DEBUG - trade_proportion_initial: 0.05
+2017-11-24 15:35:38,860 - DEBUG - trade_usdt_max: 1.00
+2017-11-24 15:35:38,860 - DEBUG - profit_threshold: 0.05
+2017-11-24 15:35:38,860 - DEBUG - loop_time: 20
+2017-11-24 15:35:38,860 - DEBUG - loop_dynamic: True
+2017-11-24 15:35:38,860 - DEBUG - live_trading: True
+2017-11-24 15:35:38,860 - DEBUG - csv_logging: True
+2017-11-24 15:35:38,860 - INFO - Dynamic loop time calculation activated. Base loop time set to 20 seconds.
+2017-11-24 15:35:38,861 - INFO - CSV log file path: logs/lorenzbot_log_11242017-153538.csv
+2017-11-24 15:35:38,871 - INFO - No collections found in database. Creating new...
+2017-11-24 15:35:39,340 - INFO - Created new collection: 11242017_153538
+2017-11-24 15:35:39,340 - INFO - Found config file: ".config.ini"
+2017-11-24 15:35:39,381 - WARNING - Live trading ENABLED.
+2017-11-24 15:35:39,724 - INFO - Current Maker Fee: 0.0015
+2017-11-24 15:35:39,725 - INFO - Current Taker Fee: 0.0025
+2017-11-24 15:35:39,969 - INFO - Balance STR:  10.07
+2017-11-24 15:35:39,970 - INFO - Balance USDT: 39.96
+2017-11-24 15:35:39,972 - INFO - Collection empty. Setting tradable balance remaining to allowed maximum.
+2017-11-24 15:35:39,972 - DEBUG - trade_usdt_remaining: 1.00
+2017-11-24 15:35:39,972 - INFO - Tradable USDT Remaining: 1.00
+2017-11-24 15:35:39,972 - DEBUG - ----[LOOP START]----
+2017-11-24 15:35:39,972 - INFO - ----
+2017-11-24 15:35:39,972 - DEBUG - Entering base_price calculation.
+2017-11-24 15:35:39,974 - DEBUG - MongoDB collection length: 0
+2017-11-24 15:35:40,260 - DEBUG - actual: 1678.18
+2017-11-24 15:35:40,260 - DEBUG - calc_limit_price() successful within limits (depth=20).
+2017-11-24 15:35:40,260 - DEBUG - [buy]actual: 1678.18304137
+2017-11-24 15:35:40,261 - DEBUG - trade_amount_initial[CALC]: 1678.18
+2017-11-24 15:35:40,261 - INFO - No trade log found. Making entry buy.
+2017-11-24 15:35:40,261 - INFO - Entry trade amount: 1678.18304137
+2017-11-24 15:35:40,499 - DEBUG - actual: 0.04111308
+2017-11-24 15:35:40,500 - DEBUG - book_tot: 42568.80
+2017-11-24 15:35:40,500 - DEBUG - calc_limit_price() successful within limits (depth=20).
+2017-11-24 15:35:40,500 - DEBUG - [buy]actual: 0.04111308
+2017-11-24 15:35:40,500 - DEBUG - limit_price: 0.04111308
+2017-11-24 15:35:41,754 - ERROR - Entry buy failed. Exiting.
+Traceback (most recent call last):
+  File "lorenzbot_dyn_amt.py", line 202, in calc_base
+    exec_trade('buy', limit_price, trade_amount_initial)
+  File "lorenzbot_dyn_amt.py", line 333, in exec_trade
+    trade_response = polo.buy('USDT_STR', limit, amount, 'immediateOrCancel')
+  File "/Users/hunterallen/Documents/crypto/lorenzbot/env/lib/python3.6/site-packages/poloniex/__init__.py", line 430, in buy
+    return self.__call__('buy', args)
+  File "/Users/hunterallen/Documents/crypto/lorenzbot/env/lib/python3.6/site-packages/poloniex/__init__.py", line 143, in retrying
+    return func(*args, **kwargs)
+  File "/Users/hunterallen/Documents/crypto/lorenzbot/env/lib/python3.6/site-packages/poloniex/__init__.py", line 203, in __call__
+    return self.handleReturned(ret.text)
+  File "/Users/hunterallen/Documents/crypto/lorenzbot/env/lib/python3.6/site-packages/poloniex/__init__.py", line 270, in handleReturned
+    raise PoloniexError(out['error'])
+poloniex.PoloniexError: Not enough USDT.

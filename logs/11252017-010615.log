@@ -1,0 +1,74 @@
+2017-11-25 01:06:15,999 - DEBUG - Parsing arguments.
+2017-11-25 01:06:16,000 - DEBUG - Activated debug logging.
+2017-11-25 01:06:16,000 - DEBUG - clean_collections: False
+2017-11-25 01:06:16,002 - DEBUG - trade_amount: 0.10
+2017-11-25 01:06:16,002 - DEBUG - amount_dynamic: True
+2017-11-25 01:06:16,003 - DEBUG - trade_proportion_initial: 0.05
+2017-11-25 01:06:16,003 - DEBUG - trade_usdt_max: 1.00
+2017-11-25 01:06:16,003 - DEBUG - profit_threshold: 0.05
+2017-11-25 01:06:16,003 - DEBUG - loop_time: 30
+2017-11-25 01:06:16,004 - DEBUG - loop_dynamic: True
+2017-11-25 01:06:16,004 - DEBUG - live_trading: True
+2017-11-25 01:06:16,004 - DEBUG - csv_logging: True
+2017-11-25 01:06:16,004 - DEBUG - telegram_active: True
+2017-11-25 01:06:16,005 - INFO - Dynamic loop time calculation activated. Base loop time set to 30 seconds.
+2017-11-25 01:06:16,005 - INFO - CSV log file path: logs/lorenzbot_log_11252017-010616.csv
+2017-11-25 01:06:16,011 - INFO - No collections found in database. Creating new...
+2017-11-25 01:06:16,491 - INFO - Created new collection: 11252017_010616
+2017-11-25 01:06:16,492 - INFO - Found Telegram config file.
+2017-11-25 01:06:16,517 - DEBUG - telegram_token: 411687950:AAFOIzovAmjDoy_0qJeBfdtzTFkM74BI0Fs
+2017-11-25 01:06:16,521 - INFO - Found Poloniex config file.
+2017-11-25 01:06:16,551 - WARNING - Live trading ENABLED.
+2017-11-25 01:06:17,148 - INFO - Current Maker Fee: 0.0015
+2017-11-25 01:06:17,148 - INFO - Current Taker Fee: 0.0025
+2017-11-25 01:06:17,574 - INFO - Balance STR:  238.40
+2017-11-25 01:06:17,575 - INFO - Balance USDT: 30.59
+2017-11-25 01:06:17,577 - INFO - Collection empty. Setting tradable balance remaining to allowed maximum.
+2017-11-25 01:06:17,577 - DEBUG - trade_usdt_remaining: 1.00
+2017-11-25 01:06:17,577 - INFO - Tradable USDT Remaining: 1.00
+2017-11-25 01:06:17,577 - DEBUG - ----[LOOP START]----
+2017-11-25 01:06:17,578 - DEBUG - Entering base_price calculation.
+2017-11-25 01:06:17,579 - DEBUG - MongoDB collection length: 0
+2017-11-25 01:06:17,579 - DEBUG - trade_prop: 0.05000000
+2017-11-25 01:06:17,875 - DEBUG - actual: 1.00000000
+2017-11-25 01:06:17,875 - DEBUG - book_tot: 0.08
+2017-11-25 01:06:17,875 - DEBUG - calc_limit_price() successful within limits (depth=20).
+2017-11-25 01:06:17,875 - DEBUG - trade_amount_initial[CALC]: 1.00
+2017-11-25 01:06:17,876 - INFO - No trade log found. Making entry buy.
+2017-11-25 01:06:17,876 - INFO - Entry trade amount: 1.00000000
+2017-11-25 01:06:18,178 - DEBUG - actual: 0.04159000
+2017-11-25 01:06:18,178 - DEBUG - book_tot: 582.15
+2017-11-25 01:06:18,178 - DEBUG - actual: 0.04159000
+2017-11-25 01:06:18,179 - DEBUG - book_tot: 582.15
+2017-11-25 01:06:18,179 - DEBUG - calc_limit_price() successful within limits (depth=20).
+2017-11-25 01:06:18,179 - DEBUG - limit_price: 0.04159000
+2017-11-25 01:06:18,690 - DEBUG - [BUY] trade_response: {'orderNumber': '39713981390', 'resultingTrades': [{'amount': '1.00000000', 'date': '2017-11-25 07:06:17', 'rate': '0.04159000', 'total': '0.04159000', 'tradeID': '1750696', 'type': 'buy'}], 'amountUnfilled': '0.00000000'}
+2017-11-25 01:06:19,181 - DEBUG - returnOrderTrades: [{'globalTradeID': 268908462, 'tradeID': 1750696, 'currencyPair': 'USDT_STR', 'type': 'buy', 'rate': '0.04159000', 'amount': '1.00000000', 'total': '0.04159000', 'fee': '0.00250000', 'date': '2017-11-25 07:06:17'}]
+2017-11-25 01:06:19,181 - DEBUG - trade_date: 2017-11-25 07:06:17
+2017-11-25 01:06:19,181 - DEBUG - len(order_trades): 1
+2017-11-25 01:06:19,181 - DEBUG - len(order_list): 1
+2017-11-25 01:06:19,182 - DEBUG - order_list: [[Decimal('0.9975000000000000'), Decimal('0.04159000')]]
+2017-11-25 01:06:19,182 - DEBUG - rate_calc_total:    0.04148602
+2017-11-25 01:06:19,182 - DEBUG - amount_total:       0.99750000
+2017-11-25 01:06:19,182 - DEBUG - order_average_rate: 0.04159000
+2017-11-25 01:06:19,183 - DEBUG - Calc. Error Margin: -0.90
+2017-11-25 01:06:19,183 - DEBUG - [BUY] order_details: {'date': '2017-11-25 07:06:17', 'amount': Decimal('0.9975000000000000'), 'rate': Decimal('0.04159000')}
+2017-11-25 01:06:19,184 - DEBUG - [BUY] mongo_response: <pymongo.results.InsertOneResult object at 0x103efed48>
+2017-11-25 01:06:19,193 - DEBUG - Entering base_price calculation.
+2017-11-25 01:06:19,195 - DEBUG - MongoDB collection length: 1
+2017-11-25 01:06:19,196 - DEBUG - trade_total[spent]: 0.04148603
+2017-11-25 01:06:19,197 - DEBUG - agg: [{'_id': None, 'total_bought': 0.9975}]
+2017-11-25 01:06:19,197 - DEBUG - trade_total[bought]: 0.99750000
+2017-11-25 01:06:19,197 - DEBUG - rate_avg: 0.04159000
+2017-11-25 01:06:19,198 - DEBUG - csv_list: ['2017-11-25 07:06:17', 'buy', '0.99750000', '0.04159000', '0.00000000', '0.04159000']
+2017-11-25 01:06:19,198 - INFO - Logging trade details to csv file.
+2017-11-25 01:06:19,199 - DEBUG - trade_message: Bought 0.9975 @ 0.0416
+2017-11-25 01:06:19,199 - ERROR - Entry buy failed. Exiting.
+Traceback (most recent call last):
+  File "lorenzbot_telegram.py", line 211, in calc_base
+    exec_trade('buy', limit_price, trade_amount_initial)
+  File "lorenzbot_telegram.py", line 425, in exec_trade
+    telegram_send_message(updater.bot, telegram_message)
+  File "lorenzbot_telegram.py", line 519, in telegram_send_message
+    if len(connected_users) > 0:
+NameError: name 'connected_users' is not defined

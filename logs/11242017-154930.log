@@ -1,0 +1,36 @@
+2017-11-24 15:49:30,449 - DEBUG - Parsing arguments.
+2017-11-24 15:49:30,450 - DEBUG - Activated debug logging.
+2017-11-24 15:49:30,450 - DEBUG - clean_collections: False
+2017-11-24 15:49:30,450 - DEBUG - trade_amount: 10.00
+2017-11-24 15:49:30,450 - DEBUG - amount_dynamic: True
+2017-11-24 15:49:30,451 - DEBUG - trade_proportion_initial: 0.05
+2017-11-24 15:49:30,451 - DEBUG - trade_usdt_max: 1.00
+2017-11-24 15:49:30,451 - DEBUG - profit_threshold: 0.05
+2017-11-24 15:49:30,451 - DEBUG - loop_time: 20
+2017-11-24 15:49:30,451 - DEBUG - loop_dynamic: True
+2017-11-24 15:49:30,452 - DEBUG - live_trading: True
+2017-11-24 15:49:30,452 - DEBUG - csv_logging: True
+2017-11-24 15:49:30,452 - WARNING - Total STR trade amount set to a high value. Confirm before continuing.
+2017-11-24 15:49:31,498 - INFO - STR trade amount confirmed.
+2017-11-24 15:49:31,498 - INFO - Dynamic loop time calculation activated. Base loop time set to 20 seconds.
+2017-11-24 15:49:31,498 - INFO - CSV log file path: logs/lorenzbot_log_11242017-154931.csv
+2017-11-24 15:49:31,581 - INFO - No collections found in database. Creating new...
+2017-11-24 15:49:32,153 - INFO - Created new collection: 11242017_154931
+2017-11-24 15:49:32,154 - INFO - Found config file: ".config.ini"
+2017-11-24 15:49:32,194 - WARNING - Live trading ENABLED.
+2017-11-24 15:49:32,759 - INFO - Current Maker Fee: 0.0015
+2017-11-24 15:49:32,760 - INFO - Current Taker Fee: 0.0025
+2017-11-24 15:49:33,103 - INFO - Balance STR:  0.00
+2017-11-24 15:49:33,104 - INFO - Balance USDT: 40.37
+2017-11-24 15:49:33,105 - INFO - Collection empty. Setting tradable balance remaining to allowed maximum.
+2017-11-24 15:49:33,105 - DEBUG - trade_usdt_remaining: 1.00
+2017-11-24 15:49:33,105 - INFO - Tradable USDT Remaining: 1.00
+2017-11-24 15:49:33,105 - DEBUG - ----[LOOP START]----
+2017-11-24 15:49:33,105 - INFO - ----
+2017-11-24 15:49:33,106 - DEBUG - Entering base_price calculation.
+2017-11-24 15:49:33,106 - DEBUG - MongoDB collection length: 0
+2017-11-24 15:49:33,107 - DEBUG - trade_prop: 0.05000000
+2017-11-24 15:49:33,380 - DEBUG - actual: 117309.27
+2017-11-24 15:49:33,380 - DEBUG - calc_limit_price() successful within limits (depth=20).
+2017-11-24 15:49:33,380 - DEBUG - [buy]actual: 117309.27479199
+2017-11-24 15:49:33,380 - DEBUG - trade_amount_initial[CALC]: 117309.27

@@ -1,0 +1,23 @@
+2017-11-24 16:18:25,307 - DEBUG - Parsing arguments.
+2017-11-24 16:18:25,308 - DEBUG - Activated debug logging.
+2017-11-24 16:18:25,308 - DEBUG - clean_collections: True
+2017-11-24 16:18:25,308 - DEBUG - trade_amount: 10.00
+2017-11-24 16:18:25,308 - DEBUG - amount_dynamic: True
+2017-11-24 16:18:25,309 - DEBUG - trade_proportion_initial: 0.05
+2017-11-24 16:18:25,309 - DEBUG - trade_usdt_max: 10.00
+2017-11-24 16:18:25,309 - DEBUG - profit_threshold: 0.05
+2017-11-24 16:18:25,309 - DEBUG - loop_time: 20
+2017-11-24 16:18:25,309 - DEBUG - loop_dynamic: True
+2017-11-24 16:18:25,309 - DEBUG - live_trading: True
+2017-11-24 16:18:25,309 - DEBUG - csv_logging: True
+2017-11-24 16:18:25,310 - WARNING - Total USDT trade amount set to a high value. Confirm before continuing.
+2017-11-24 16:18:28,865 - INFO - USDT trade amount confirmed.
+2017-11-24 16:18:28,866 - WARNING - Total STR trade amount set to a high value. Confirm before continuing.
+2017-11-24 16:18:29,946 - INFO - STR trade amount confirmed.
+2017-11-24 16:18:29,947 - INFO - Dynamic loop time calculation activated. Base loop time set to 20 seconds.
+2017-11-24 16:18:29,947 - INFO - CSV log file path: logs/lorenzbot_log_11242017-161829.csv
+2017-11-24 16:18:29,951 - WARNING - Option to delete all existing collections selected.
+2017-11-24 16:18:30,993 - INFO - Confirmed. Deleting all collections
+2017-11-24 16:18:30,993 - INFO - Dropping all collections from database.
+2017-11-24 16:18:31,101 - DEBUG - Dropped collection: 11242017_161441
+2017-11-24 16:18:31,101 - INFO - Process complete. Restart program without boolean switch.
