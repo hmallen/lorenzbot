@@ -722,7 +722,7 @@ if __name__ == '__main__':
     global trade_usdt_remaining
     if db[coll_current].count() > 0:
         logger.info('Collection not empty. Calculating trade amount remaining.')
-        trade_usdt_remaining = trade_usdt_max - calc_trade_totals('bought')
+        trade_usdt_remaining = trade_usdt_max - calc_trade_totals('spent')
     else:
         logger.info('Collection empty. Setting tradable balance remaining to allowed maximum.')
         trade_usdt_remaining = trade_usdt_max
