@@ -83,6 +83,7 @@ parser.add_argument('--dynamicloop', action='store_true', default=False, help='A
 parser.add_argument('--live', action='store_true', default=False, help='Add flag to enable live trading API keys.')
 parser.add_argument('--nocsv', action='store_false', default=True, help='Add flag to disable csv logging.')
 parser.add_argument('--telegram', action='store_true', default=False, help='Add flag to enable Telegram alerts.')
+parser.add_argument('--mongoalt', action='store_true', default=False, help='Add flag to use alternative database for use of multiple instances concurrently.')
 parser.add_argument('--debug', action='store_true', default=False, help='Add flag to include debug level output to console.')
 
 # Parse arguments passed to program
@@ -111,6 +112,7 @@ loop_dynamic = args.dynamicloop; logger.debug('loop_dynamic: ' + str(loop_dynami
 live_trading = args.live; logger.debug('live_trading: ' + str(live_trading))
 csv_logging = args.nocsv; logger.debug('csv_logging: ' + str(csv_logging))
 telegram_active = args.telegram; logger.debug('telegram_active: ' + str(telegram_active))
+mongo_alt = args.mongoalt; logger.debug('mongo_alt: ' + str(mongo_alt))
 
 if clean_collections == False:
     # Handle all of the arguments delivered appropriately
@@ -486,10 +488,8 @@ def telegram_connect(bot, update):
     connected_users.append(telegram_user)
     
     logger.debug('[CONNECT] chat_id: ' + str(telegram_user))
-    logger.info('Telegram User Connected: ' + str(telegram_user))
+    logger.info('Telegram user connected: ' + str(telegram_user))
     #logger.info('Connected Users: ' + str(connected_users))
-
-    telegram_active = True
     
     bot.send_message(chat_id=telegram_user, text="Subscribed to Lorenzbot alerts.")
 
@@ -499,12 +499,33 @@ def telegram_disconnect(bot, update):
     connected_users.remove(telegram_user)
     
     logger.debug('[DISCONNECT] chat_id: ' + str(telegram_user))
-    logger.info('Telegram User Disconnected: ' + str(telegram_user))
+    logger.info('Telegram user disconnected: ' + str(telegram_user))
     #logger.info('Connected Users: ' + str(connected_users))
-
-    telegram_active = False
     
     bot.send_message(chat_id=telegram_user, text="Unsubscribed from Lorenzbot alerts.")
+
+
+def telegram_status(bot, update):    
+    telegram_user = update.message.chat_id
+
+    # ADD USER LIST CHECK
+    
+    logger.debug('[STATUS] chat_id: ' + str(telegram_user))
+    logger.info('Telegram user requesting status: ' + str(telegram_user))
+
+    base = str(calc_base())
+    remain_usdt = "{:.2f}".format(trade_usdt_remaining)
+    spent = calc_trade_totals('spent')
+    bought = calc_trade_totals('bought')
+    rate = spent / bought
+    spent_msg = "{:.2f}".format(spent)
+    bought_msg = "{:.2f}".format(bought)
+    rate_msg = "{:.6f}".format(rate)
+
+    status_message = 'Bought ' + bought_msg + 'STR for $' + spent_msg + ' at average rate of $' + rate_msg + '.'
+    logger.debug(status_message)
+    
+    bot.send_message(chat_id=telegram_user, text=status_message)
 
 
 def telegram_send_message(bot, trade_message):
@@ -573,7 +594,12 @@ def calc_dynamic(selection, base, limit):
 
 if __name__ == '__main__':
     # Connect to MongoDB
-    db = MongoClient().lorenzbot
+    if mongo_alt == False:
+        db = MongoClient().lorenzbot
+        logger.info('Using default MongoDB database \'lorenzbot\'.')
+    else:
+        db = MongoClient().lorenzbotalt
+        logger.info('Using alternate MongoDB database \'lorenzbotalt\'.')
 
     if clean_collections == True:
         logger.warning('Option to delete all existing collections selected.')
@@ -631,6 +657,9 @@ if __name__ == '__main__':
 
         disconnect_handler = CommandHandler('disconnect', telegram_disconnect)
         dispatcher.add_handler(disconnect_handler)
+
+        status_handler = CommandHandler('status', telegram_status)
+        dispatcher.add_handler(status_handler)
 
         updater.start_polling()
 
