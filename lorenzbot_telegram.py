@@ -520,7 +520,7 @@ def telegram_status(bot, update):
     rate = spent / bought
     spent_msg = "{:.2f}".format(spent)
     bought_msg = "{:.2f}".format(bought)
-    rate_msg = "{:.6f}".format(rate)
+    rate_msg = "{:.4f}".format(rate)
 
     status_message = 'Bought ' + bought_msg + 'STR for $' + spent_msg + ' at average rate of $' + rate_msg + '.'
     logger.debug(status_message)
