@@ -1,0 +1,23 @@
+2017-11-25 08:06:06,085 - DEBUG - Parsing arguments.
+2017-11-25 08:06:06,086 - DEBUG - Activated debug logging.
+2017-11-25 08:06:06,086 - DEBUG - clean_collections: False
+2017-11-25 08:06:06,086 - DEBUG - trade_amount: 0.10
+2017-11-25 08:06:06,086 - DEBUG - amount_dynamic: True
+2017-11-25 08:06:06,086 - DEBUG - trade_proportion_initial: 0.05
+2017-11-25 08:06:06,086 - DEBUG - trade_usdt_max: 20.00
+2017-11-25 08:06:06,087 - DEBUG - profit_threshold: 0.05
+2017-11-25 08:06:06,087 - DEBUG - loop_time: 30
+2017-11-25 08:06:06,087 - DEBUG - loop_dynamic: True
+2017-11-25 08:06:06,087 - DEBUG - live_trading: True
+2017-11-25 08:06:06,087 - DEBUG - csv_logging: True
+2017-11-25 08:06:06,087 - DEBUG - telegram_active: True
+2017-11-25 08:06:06,087 - DEBUG - mongo_alt: False
+2017-11-25 08:06:06,087 - WARNING - Total USDT trade amount set to a high value. Confirm before continuing.
+2017-11-25 08:06:09,062 - INFO - USDT trade amount confirmed.
+2017-11-25 08:06:09,062 - INFO - Dynamic loop time calculation activated. Base loop time set to 30 seconds.
+2017-11-25 08:06:09,062 - INFO - CSV log file path: logs/lorenzbot_log_11252017-080609.csv
+2017-11-25 08:06:09,064 - INFO - Using default MongoDB database 'lorenzbot'.
+2017-11-25 08:06:09,065 - INFO - Found existing collection: 11252017_030929
+2017-11-25 08:06:09,065 - INFO - Found Telegram config file.
+2017-11-25 08:06:09,065 - DEBUG - telegram_token: 411687950:AAFOIzovAmjDoy_0qJeBfdtzTFkM74BI0Fs
+2017-11-25 08:06:09,067 - ERROR - No Poloniex config file found! Must create '.poloniex.ini'. Exiting.
