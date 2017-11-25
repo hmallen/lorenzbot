@@ -9,6 +9,7 @@ import os
 import poloniex
 from pymongo import MongoClient
 import sys
+from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
 import textwrap
 import time
 
@@ -81,6 +82,8 @@ parser.add_argument('--dynamicloop', action='store_true', default=False, help='A
 
 parser.add_argument('--live', action='store_true', default=False, help='Add flag to enable live trading API keys.')
 parser.add_argument('--nocsv', action='store_false', default=True, help='Add flag to disable csv logging.')
+parser.add_argument('--telegram', action='store_true', default=False, help='Add flag to enable Telegram alerts.')
+parser.add_argument('--mongoalt', action='store_true', default=False, help='Add flag to use alternative database for use of multiple instances concurrently.')
 parser.add_argument('--debug', action='store_true', default=False, help='Add flag to include debug level output to console.')
 
 # Parse arguments passed to program
@@ -108,6 +111,8 @@ loop_dynamic = args.dynamicloop; logger.debug('loop_dynamic: ' + str(loop_dynami
 
 live_trading = args.live; logger.debug('live_trading: ' + str(live_trading))
 csv_logging = args.nocsv; logger.debug('csv_logging: ' + str(csv_logging))
+telegram_active = args.telegram; logger.debug('telegram_active: ' + str(telegram_active))
+mongo_alt = args.mongoalt; logger.debug('mongo_alt: ' + str(mongo_alt))
 
 if clean_collections == False:
     # Handle all of the arguments delivered appropriately
@@ -412,6 +417,15 @@ def exec_trade(position, limit, amount):
         logger.debug('csv_list: ' + str(csv_list))
         log_trade_csv(csv_list)
 
+    if telegram_active == True:
+        if position == 'buy':
+            pos_msg = 'Bought '
+        elif position == 'sell':
+            pos_msg = 'Sold '
+        
+        telegram_message = pos_msg + "{:.4f}".format(order_details['amount']) + ' @ ' + "{:.4f}".format(order_details['rate'])
+        telegram_send_message(updater.bot, telegram_message)
+
 
 def process_trade_response(response, position):
     order_trades = polo.returnOrderTrades(response['orderNumber'])
@@ -469,10 +483,66 @@ def log_trade_csv(csv_row): # Must pass list as argument
         csv_failures += 1
 
 
+def telegram_connect(bot, update):    
+    telegram_user = update.message.chat_id
+    connected_users.append(telegram_user)
+    
+    logger.debug('[CONNECT] chat_id: ' + str(telegram_user))
+    logger.info('Telegram user connected: ' + str(telegram_user))
+    #logger.info('Connected Users: ' + str(connected_users))
+    
+    bot.send_message(chat_id=telegram_user, text="Subscribed to Lorenzbot alerts.")
+
+
+def telegram_disconnect(bot, update):    
+    telegram_user = update.message.chat_id
+    connected_users.remove(telegram_user)
+    
+    logger.debug('[DISCONNECT] chat_id: ' + str(telegram_user))
+    logger.info('Telegram user disconnected: ' + str(telegram_user))
+    #logger.info('Connected Users: ' + str(connected_users))
+    
+    bot.send_message(chat_id=telegram_user, text="Unsubscribed from Lorenzbot alerts.")
+
+
+def telegram_status(bot, update):    
+    telegram_user = update.message.chat_id
+
+    # ADD USER LIST CHECK
+    
+    logger.debug('[STATUS] chat_id: ' + str(telegram_user))
+    logger.info('Telegram user requesting status: ' + str(telegram_user))
+
+    base = str(calc_base())
+    remain_usdt = "{:.2f}".format(trade_usdt_remaining)
+    spent = calc_trade_totals('spent')
+    bought = calc_trade_totals('bought')
+    rate = spent / bought
+    spent_msg = "{:.2f}".format(spent)
+    bought_msg = "{:.2f}".format(bought)
+    rate_msg = "{:.4f}".format(rate)
+
+    status_message = 'Bought ' + bought_msg + 'STR for $' + spent_msg + ' at average rate of $' + rate_msg + '.'
+    logger.debug(status_message)
+    
+    bot.send_message(chat_id=telegram_user, text=status_message)
+
+
+def telegram_send_message(bot, trade_message):
+    logger.debug('trade_message: ' + trade_message)
+
+    if len(connected_users) > 0:
+        for user in connected_users:
+            bot.send_message(chat_id=user, text=trade_message)
+            logger.debug('Sent alert to user ' + str(user) + '.')
+    else:
+        logger.debug('No Telegram users connected. Skipping alert.')
+
+
 def calc_dynamic(selection, base, limit):
     diff = (base - limit) / base
-    logger.debug('diff: ' + "{:.4f}".format(diff * Decimal(100)) + ' %')
-    logger.info('Price Difference from Base: ' + "{:.4f}".format(diff) + '%')
+    logger.debug('diff: ' + "{:.6f}".format(diff))
+    logger.info('Price Difference from Base: ' + "{:.4f}".format(diff * Decimal(100)) + '%')
 
     # Map magnitude of difference b/w base price and buy price to loop time
     if selection == 'loop':
@@ -524,7 +594,12 @@ def calc_dynamic(selection, base, limit):
 
 if __name__ == '__main__':
     # Connect to MongoDB
-    db = MongoClient().lorenzbot
+    if mongo_alt == False:
+        db = MongoClient().lorenzbot
+        logger.info('Using default MongoDB database \'lorenzbot\'.')
+    else:
+        db = MongoClient().lorenzbotalt
+        logger.info('Using alternate MongoDB database \'lorenzbotalt\'.')
 
     if clean_collections == True:
         logger.warning('Option to delete all existing collections selected.')
@@ -556,22 +631,48 @@ if __name__ == '__main__':
             logger.info('No collections found in database. Creating new...')
             modify_collections('create')
 
-    # Get config file and set program values from it
-    working_dir = os.listdir()
-
-    for file in working_dir:
-        if file.endswith('.ini'):
-            config_file = str(file)
-            logger.info('Found config file: \"' + config_file + '\"')
-            break
-    else:
-        logger.error('No ini configuration file found. Exiting.')
-        sys.exit(1)
+    # Get config file(s) and set program values from it/them
+    poloniex_config_path = './.poloniex.ini'
+    telegram_config_path = './.telegram.ini'
 
     config = configparser.ConfigParser()
-    config.read(config_file)
+
+    if telegram_active == True:
+        if not os.path.isfile(telegram_config_path):
+            logger.error('No Telegram config file found! Must create \'.telegram.ini\'. Exiting.')
+            sys.exit(1)
+        else:
+            logger.info('Found Telegram config file.')
+        
+        # Set Telegram token
+        config.read(telegram_config_path)
+        telegram_token = config['lorenzbot']['token']
+        logger.debug('telegram_token: ' + str(telegram_token))
+
+        updater = Updater(token=telegram_token)
+        dispatcher = updater.dispatcher
+
+        connect_handler = CommandHandler('connect', telegram_connect)
+        dispatcher.add_handler(connect_handler)
+
+        disconnect_handler = CommandHandler('disconnect', telegram_disconnect)
+        dispatcher.add_handler(disconnect_handler)
+
+        status_handler = CommandHandler('status', telegram_status)
+        dispatcher.add_handler(status_handler)
+
+        updater.start_polling()
+
+        connected_users = []
+
+    if not os.path.isfile(poloniex_config_path):
+        logger.error('No Poloniex config file found! Must create \'.poloniex.ini\'. Exiting.')
+        sys.exit(1)
+    else:
+        logger.info('Found Poloniex config file.')
 
     # Set Poloniex API keys
+    config.read(poloniex_config_path)
     if live_trading == True:
         logger.warning('Live trading ENABLED.')
         # Trade-enabled API key
@@ -735,7 +836,11 @@ if __name__ == '__main__':
         except KeyboardInterrupt:
             logger.info('Exit signal received.')
             logger.info('Mongo write errors: ' + str(mongo_failures))
+            
             if csv_logging == True:
                 logger.info('CSV write errors: ' + str(csv_failures))
+
+            if telegram_active == True:
+                updater.stop()
             
             sys.exit(0)
