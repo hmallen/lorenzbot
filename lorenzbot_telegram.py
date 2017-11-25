@@ -9,6 +9,7 @@ import os
 import poloniex
 from pymongo import MongoClient
 import sys
+from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
 import textwrap
 import time
 
@@ -81,6 +82,7 @@ parser.add_argument('--dynamicloop', action='store_true', default=False, help='A
 
 parser.add_argument('--live', action='store_true', default=False, help='Add flag to enable live trading API keys.')
 parser.add_argument('--nocsv', action='store_false', default=True, help='Add flag to disable csv logging.')
+parser.add_argument('--telegram', action='store_true', default=False, help='Add flag to enable Telegram alerts.')
 parser.add_argument('--debug', action='store_true', default=False, help='Add flag to include debug level output to console.')
 
 # Parse arguments passed to program
@@ -108,6 +110,7 @@ loop_dynamic = args.dynamicloop; logger.debug('loop_dynamic: ' + str(loop_dynami
 
 live_trading = args.live; logger.debug('live_trading: ' + str(live_trading))
 csv_logging = args.nocsv; logger.debug('csv_logging: ' + str(csv_logging))
+telegram_active = args.telegram; logger.debug('telegram_active: ' str(telegram_active))
 
 if clean_collections == False:
     # Handle all of the arguments delivered appropriately
@@ -403,14 +406,23 @@ def exec_trade(position, limit, amount):
             logger.debug('Sell completely filled. New collection starting empty.')
 
     if csv_logging == True:
-            csv_list = [order_details['date'],
-                        position,
-                        "{:.8f}".format(order_details['amount']),
-                        "{:.8f}".format(order_details['rate']),
-                        "{:.8f}".format(base_price_initial),
-                        "{:.8f}".format(calc_base())]
-            logger.debug('csv_list: ' + str(csv_list))
-            log_trade_csv(csv_list)
+        csv_list = [order_details['date'],
+                    position,
+                    "{:.8f}".format(order_details['amount']),
+                    "{:.8f}".format(order_details['rate']),
+                    "{:.8f}".format(base_price_initial),
+                    "{:.8f}".format(calc_base())]
+        logger.debug('csv_list: ' + str(csv_list))
+        log_trade_csv(csv_list)
+
+    if telegram_active == True:
+        if position == 'buy':
+            pos_msg = 'Bought '
+        elif position == 'sell':
+            pos_msg = 'Sold '
+        
+        telegram_message = pos_msg + "{:.4f}".format(order_details['amount']) + ' @ ' + "{:.4f}".format(order_details['rate'])
+        send_telegram_message()
 
 
 def process_trade_response(response, position):
@@ -467,6 +479,49 @@ def log_trade_csv(csv_row): # Must pass list as argument
     except:
         logger.error('Failed to write to csv file.')
         csv_failures += 1
+
+
+def telegram_connect(bot, update):
+    global connected_users
+    
+    telegram_user = update.message.chat_id
+    connected_users.append(telegram_user)
+    
+    logger.debug('[CONNECT] chat_id: ' + str(telegram_user))
+    logger.info('Telegram User Connected: ' + str(telegram_user))
+    #logger.info('Connected Users: ' + str(connected_users))
+
+    telegram_active = True
+    
+    bot.send_message(chat_id=telegram_user, text="Subscribed to Lorenzbot alerts.")
+
+
+def telegram_disconnect(bot, update):
+    global connected_users
+    
+    telegram_user = update.message.chat_id
+    connected_users.remove(telegram_user)
+    
+    logger.debug('[DISCONNECT] chat_id: ' + str(telegram_user))
+    logger.info('Telegram User Disconnected: ' + str(telegram_user))
+    #logger.info('Connected Users: ' + str(connected_users))
+
+    telegram_active = False
+    
+    bot.send_message(chat_id=telegram_user, text="Unsubscribed from Lorenzbot alerts.")
+
+
+def telegram_send_message(bot, trade_message):
+    global connected_users
+
+    logger.debug('trade_message: ' + trade_message)
+
+    if len(connected_users) > 0:
+        for user in connected_users:
+            bot.send_message(chat_id=user, text=trade_message)
+            logger.debug('Sent alert to user ' + str(user) + '.')
+    else:
+        logger.debug('No Telegram users connected. Skipping send of alert.')
 
 
 def calc_dynamic(selection, base, limit):
@@ -556,22 +611,46 @@ if __name__ == '__main__':
             logger.info('No collections found in database. Creating new...')
             modify_collections('create')
 
-    # Get config file and set program values from it
-    working_dir = os.listdir()
-
-    for file in working_dir:
-        if file.endswith('.ini'):
-            config_file = str(file)
-            logger.info('Found config file: \"' + config_file + '\"')
-            break
-    else:
-        logger.error('No ini configuration file found. Exiting.')
-        sys.exit(1)
+    # Get config file(s) and set program values from it/them
+    poloniex_config_path = './.poloniex.ini'
+    telegram_config_path = './.telegram.ini'
 
     config = configparser.ConfigParser()
-    config.read(config_file)
+
+    if telegram_active == True:
+        if not os.isfile(telegram_config_path):
+            logger.error('No Telegram config file found! Must create \'.telegram.ini\'. Exiting.')
+            sys.exit(1)
+        else:
+            logger.info('Found Telegram config file.')
+        
+        # Set Telegram token
+        config.read(telegram_config_path)
+        telegram_token = config['lorenzbot']['token']
+        logger.debug('telegram_token: ' + str(telegram_token))
+
+        updater = Updater(token=telegram_token)
+        dispatcher = updater.dispatcher
+
+        connect_handler = CommandHandler('connect', telegram_connect)
+        dispatcher.add_handler(connect_handler)
+
+        disconnect_handler = CommandHandler('disconnect', telegram_disconnect)
+        dispatcher.add_handler(disconnect_handler)
+
+        echo_handler = MessageHandler(Filters.text, telegram_echo)
+        dispatcher.add_handler(echo_handler)
+
+        updater.start_polling()
+
+    if not os.isfile(poloniex_config_path):
+        logger.error('No Poloniex config file found! Must create \'.poloniex.ini\'. Exiting.')
+        sys.exit(1)
+    else:
+        logger.info('Found Poloniex config file.')
 
     # Set Poloniex API keys
+    config.read(poloniex_config_path)
     if live_trading == True:
         logger.warning('Live trading ENABLED.')
         # Trade-enabled API key
@@ -735,7 +814,11 @@ if __name__ == '__main__':
         except KeyboardInterrupt:
             logger.info('Exit signal received.')
             logger.info('Mongo write errors: ' + str(mongo_failures))
+            
             if csv_logging == True:
                 logger.info('CSV write errors: ' + str(csv_failures))
+
+            if telegram_active == True:
+                updater.stop()
             
             sys.exit(0)

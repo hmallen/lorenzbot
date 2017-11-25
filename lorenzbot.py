@@ -403,14 +403,14 @@ def exec_trade(position, limit, amount):
             logger.debug('Sell completely filled. New collection starting empty.')
 
     if csv_logging == True:
-            csv_list = [order_details['date'],
-                        position,
-                        "{:.8f}".format(order_details['amount']),
-                        "{:.8f}".format(order_details['rate']),
-                        "{:.8f}".format(base_price_initial),
-                        "{:.8f}".format(calc_base())]
-            logger.debug('csv_list: ' + str(csv_list))
-            log_trade_csv(csv_list)
+        csv_list = [order_details['date'],
+                    position,
+                    "{:.8f}".format(order_details['amount']),
+                    "{:.8f}".format(order_details['rate']),
+                    "{:.8f}".format(base_price_initial),
+                    "{:.8f}".format(calc_base())]
+        logger.debug('csv_list: ' + str(csv_list))
+        log_trade_csv(csv_list)
 
 
 def process_trade_response(response, position):
