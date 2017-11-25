@@ -2,7 +2,7 @@
 
 sudo yum install lua-devel openssl-devel libconfig-devel readline-devel libevent-devel jansson-devel &&
 cd ~ &&
-git clone https://github.com/vysheng/tg &&
+git clone https://github.com/vysheng/tg --recursive &&
 cd tg &&
 ./configure &&
 make
