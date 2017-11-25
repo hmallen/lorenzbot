@@ -70,7 +70,7 @@ parser = argparse.ArgumentParser(
 # Define arguments that can be passed to program
 parser.add_argument('-c', '--clean', action='store_true', default=False, help='Add argument to drop all collections and start fresh. [Default = False]')
 
-parser.add_argument('-a', '--amount', default=0.1, type=float, help='Set static base amount of quote product to trade. [Default = 0.1]')
+parser.add_argument('-a', '--amount', default=1.0, type=float, help='Set static base amount of quote product to trade. [Default = 1.0]')
 parser.add_argument('--dynamicamount', action='store_true', default=False, help='Add flag to dynamically set trade amount based on current conditions.')
 parser.add_argument('-i', '--initial', default=0.05, type=float, help='Set proportion of total funds to use for initial buy. [Default = 0.05]')
 
@@ -825,8 +825,8 @@ if __name__ == '__main__':
 
 
             # Calculate buy amount based on current conditions
-            buy_amount_current = calc_dynamic('amount', base_price, low_ask_actual)
-            logger.debug('buy_amount_current: ' + "{:.8f}".format(buy_amount_current))
+            buy_amount_current = calc_dynamic('amount', base_price, calc_limit_price(trade_amount, 'buy'))
+            logger.debug('buy_amount_current: ' + "{:.4f}".format(buy_amount_current))
             logger.info('Current Buy Amount: ' + "{:.2f}".format(buy_amount_current))
 
             # Calculate true low ask (sufficient volume for buy)
@@ -836,7 +836,7 @@ if __name__ == '__main__':
 
             # Set sell amount based on total amount bought
             sell_amount_current = calc_trade_totals('bought')
-            logger.debug('sell_amount_current: ' + "{:.8f}".format(sell_amount_current))
+            logger.debug('sell_amount_current: ' + "{:.4f}".format(sell_amount_current))
             logger.info('Current Sell Amount: ' + "{:.2f}".format(sell_amount_current))
 
             # Calculate true high bid (sufficient volume for sell)
@@ -846,7 +846,7 @@ if __name__ == '__main__':
 
             # Calculate target sell price
             sell_price_target = base_price * (Decimal(1) + profit_threshold + taker_fee)  # Add fee in calc_limit_price()
-            logger.debug('sell_price_target:    ' + "{:.8f}".format(sell_price_target))
+            logger.debug('sell_price_target: ' + "{:.8f}".format(sell_price_target))
             logger.info('Sell Target: ' + "{:.8f}".format(sell_price_target))
 
             # Check for sell conditions
