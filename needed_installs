@@ -1,0 +1,4 @@
+python-poloniex-0.4.6.zip
+https://github.com/vysheng/tg
+sudo yum install lua-devel openssl-devel libconfig-devel readline-devel libevent-devel jansson-devel
+tg (Telegram CLI)
