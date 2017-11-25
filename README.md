@@ -2,10 +2,10 @@
 Poloniex exchange trading bot
 
 TO DO:
-- Add Telegram alerts
 - List out all variables used and formalize to clean up program
 - Make boolean arguments into human-readable format
 - Clean up arguments --> Make parent/child --> Make sure all conditions satisfied
+- Add MongoDB collection to store Telegram users
 
 LATER:
 - Add argument for minimum loop time (loop_time_min)
@@ -16,6 +16,7 @@ IF TIME:
 
 NEEDS TESTING:
 - Add handling for max trade limit
+- Add Telegram alerts
 
 DONE:
 - Add argument for trade amount

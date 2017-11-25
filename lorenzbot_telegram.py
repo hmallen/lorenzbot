@@ -110,7 +110,7 @@ loop_dynamic = args.dynamicloop; logger.debug('loop_dynamic: ' + str(loop_dynami
 
 live_trading = args.live; logger.debug('live_trading: ' + str(live_trading))
 csv_logging = args.nocsv; logger.debug('csv_logging: ' + str(csv_logging))
-telegram_active = args.telegram; logger.debug('telegram_active: ' str(telegram_active))
+telegram_active = args.telegram; logger.debug('telegram_active: ' + str(telegram_active))
 
 if clean_collections == False:
     # Handle all of the arguments delivered appropriately
@@ -422,7 +422,7 @@ def exec_trade(position, limit, amount):
             pos_msg = 'Sold '
         
         telegram_message = pos_msg + "{:.4f}".format(order_details['amount']) + ' @ ' + "{:.4f}".format(order_details['rate'])
-        send_telegram_message()
+        telegram_send_message(updater.bot, telegram_message)
 
 
 def process_trade_response(response, position):
@@ -481,9 +481,7 @@ def log_trade_csv(csv_row): # Must pass list as argument
         csv_failures += 1
 
 
-def telegram_connect(bot, update):
-    global connected_users
-    
+def telegram_connect(bot, update):    
     telegram_user = update.message.chat_id
     connected_users.append(telegram_user)
     
@@ -496,9 +494,7 @@ def telegram_connect(bot, update):
     bot.send_message(chat_id=telegram_user, text="Subscribed to Lorenzbot alerts.")
 
 
-def telegram_disconnect(bot, update):
-    global connected_users
-    
+def telegram_disconnect(bot, update):    
     telegram_user = update.message.chat_id
     connected_users.remove(telegram_user)
     
@@ -512,8 +508,6 @@ def telegram_disconnect(bot, update):
 
 
 def telegram_send_message(bot, trade_message):
-    global connected_users
-
     logger.debug('trade_message: ' + trade_message)
 
     if len(connected_users) > 0:
@@ -521,13 +515,13 @@ def telegram_send_message(bot, trade_message):
             bot.send_message(chat_id=user, text=trade_message)
             logger.debug('Sent alert to user ' + str(user) + '.')
     else:
-        logger.debug('No Telegram users connected. Skipping send of alert.')
+        logger.debug('No Telegram users connected. Skipping alert.')
 
 
 def calc_dynamic(selection, base, limit):
     diff = (base - limit) / base
-    logger.debug('diff: ' + "{:.4f}".format(diff * Decimal(100)) + ' %')
-    logger.info('Price Difference from Base: ' + "{:.4f}".format(diff) + '%')
+    logger.debug('diff: ' + "{:.6f}".format(diff))
+    logger.info('Price Difference from Base: ' + "{:.4f}".format(diff * Decimal(100)) + '%')
 
     # Map magnitude of difference b/w base price and buy price to loop time
     if selection == 'loop':
@@ -618,7 +612,7 @@ if __name__ == '__main__':
     config = configparser.ConfigParser()
 
     if telegram_active == True:
-        if not os.isfile(telegram_config_path):
+        if not os.path.isfile(telegram_config_path):
             logger.error('No Telegram config file found! Must create \'.telegram.ini\'. Exiting.')
             sys.exit(1)
         else:
@@ -638,12 +632,11 @@ if __name__ == '__main__':
         disconnect_handler = CommandHandler('disconnect', telegram_disconnect)
         dispatcher.add_handler(disconnect_handler)
 
-        echo_handler = MessageHandler(Filters.text, telegram_echo)
-        dispatcher.add_handler(echo_handler)
-
         updater.start_polling()
 
-    if not os.isfile(poloniex_config_path):
+        connected_users = []
+
+    if not os.path.isfile(poloniex_config_path):
         logger.error('No Poloniex config file found! Must create \'.poloniex.ini\'. Exiting.')
         sys.exit(1)
     else:
