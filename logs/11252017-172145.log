@@ -1,0 +1,20 @@
+2017-11-25 17:21:45,127 - DEBUG - Parsing arguments.
+2017-11-25 17:21:45,128 - DEBUG - Activated debug logging.
+2017-11-25 17:21:45,128 - DEBUG - clean_collections: True
+2017-11-25 17:21:45,129 - DEBUG - trade_amount: 1.00
+2017-11-25 17:21:45,129 - DEBUG - amount_dynamic: True
+2017-11-25 17:21:45,129 - DEBUG - trade_proportion_initial: 0.05
+2017-11-25 17:21:45,130 - DEBUG - trade_usdt_max: 10.00
+2017-11-25 17:21:45,130 - DEBUG - profit_threshold: 0.05
+2017-11-25 17:21:45,130 - DEBUG - loop_time: 30
+2017-11-25 17:21:45,130 - DEBUG - loop_dynamic: True
+2017-11-25 17:21:45,130 - DEBUG - live_trading: True
+2017-11-25 17:21:45,131 - DEBUG - csv_logging: True
+2017-11-25 17:21:45,131 - DEBUG - telegram_active: True
+2017-11-25 17:21:45,131 - DEBUG - mongo_alt: False
+2017-11-25 17:21:45,134 - INFO - Using default MongoDB database 'lorenzbot'.
+2017-11-25 17:21:45,135 - WARNING - Option to delete all existing collections selected.
+2017-11-25 17:21:45,963 - INFO - Confirmed. Deleting all collections
+2017-11-25 17:21:45,964 - INFO - Dropping all collections from database.
+2017-11-25 17:21:45,973 - DEBUG - Dropped collection: 11252017_171811
+2017-11-25 17:21:45,974 - INFO - Process complete. Restart program without boolean switch.

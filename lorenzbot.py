@@ -53,6 +53,7 @@ sell_padding = Decimal(0.9975)  # Proportion of total amount bought to sell when
 # System variables (Do not change)
 calc_base_initialized = False   # Needed to prevent infinite loop b/w calc_base() and exec_trade() on entry buy
 buy_skips = 0
+sell_skips = 0
 mongo_failures = 0
 csv_failures = 0
 
@@ -94,7 +95,6 @@ args = parser.parse_args()
 debug = args.debug
 if debug == True:
     console_handler.setLevel(logging.DEBUG)
-    #logger.setLevel(logging.DEBUG)
     logger.debug('Activated debug logging.')
 
 clean_collections = args.clean; logger.debug('clean_collections: ' + str(clean_collections))
@@ -117,8 +117,8 @@ mongo_alt = args.mongoalt; logger.debug('mongo_alt: ' + str(mongo_alt))
 if clean_collections == False:
     # Handle all of the arguments delivered appropriately
     if trade_usdt_max >= Decimal(10):
-        logger.warning('Total USDT trade amount set to a high value. Confirm before continuing.')
-        user_confirm = input('Continue? (y/n): ')
+        logger.warning('Total USDT trade amount is set to $' + "{:.2f}".format(trade_usdt_max) + '.')
+        user_confirm = input('Is this correct? (y/n): ')
 
         if user_confirm == 'y':
             logger.info('USDT trade amount confirmed.')
@@ -129,9 +129,14 @@ if clean_collections == False:
             logger.error('Unrecognized user input. Exiting.')
             sys.exit(1)
 
-    if trade_amount >= Decimal(10):
-        logger.warning('Total STR trade amount set to a high value. Confirm before continuing.')
-        user_confirm = input('Continue? (y/n): ')
+    if amount_dynamic == True:
+        logger.info('Dynamic trade amount calculation activated.')
+        if float(trade_amount) != 1.0:
+            logger.warning('Ignoring trade amount argument passed. Will set initial trade amount on program start.')
+    
+    elif amount_dynamic == False and trade_amount >= Decimal(10):
+        logger.warning('Total STR trade amount is set to ' + "{:.2f}".format(trade_amount) + '.')
+        user_confirm = input('Is this correct? (y/n): ')
 
         if user_confirm == 'y':
             logger.info('STR trade amount confirmed.')
@@ -150,6 +155,9 @@ if clean_collections == False:
     if csv_logging == True:
         log_file = 'logs/' + 'lorenzbot_log_' + datetime.datetime.now().strftime('%m%d%Y-%H%M%S') + '.csv'
         logger.info('CSV log file path: ' + log_file)
+
+    if telegram_active == True:
+        logger.info('Telegram logging active. Send @lorenzbot_bot \'/connect\' to receive alerts.')
 
 
 def modify_collections(action):
@@ -187,36 +195,31 @@ def get_balances():
 
 def calc_base():
     logger.debug('Entering base_price calculation.')
+    logger.debug('db[coll_current].count(): ' + str(db[coll_current].count()))
     
-    while (True):
-        trade_log_length = db[coll_current].count()
-        logger.debug('MongoDB collection length: ' + str(trade_log_length))
-        
-        if trade_log_length == 0:
+    if db[coll_current].count() == 0:
+        logger.info('No trade log found. Making entry buy.')
+        while (True):
             if amount_dynamic == True:
-                trade_prop = trade_usdt_max * trade_proportion_initial
-                logger.debug('trade_prop: ' + "{:.8f}".format(trade_prop))
+                logger.debug('trade_amount[CALC]: ' + "{:.2f}".format(trade_amount))
                 
-                trade_amount_initial = calc_limit_price(trade_prop, 'buy', reverseLookup=True)
-                logger.debug('trade_amount_initial[CALC]: ' + "{:.2f}".format(trade_amount_initial))
-
-                trade_amount = trade_amount_initial
-            else:
-                trade_amount_initial = trade_amount
-                logger.debug('trade_amount_initial[STATIC]: ' + "{:.2f}".format(trade_amount_initial))
+                trade_price_initial = calc_limit_price(trade_amount, 'buy')
+                logger.debug('trade_price_initial[CALC]: ' + "{:.2f}".format(trade_price_initial))
             
-            logger.info('No trade log found. Making entry buy.')
-            logger.info('Entry trade amount: ' + "{:.8f}".format(trade_amount_initial))
+            else:
+                logger.debug('trade_amount[STATIC]: ' + "{:.2f}".format(trade_amount))
+                
+                trade_price_initial = calc_limit_price(trade_amount, 'buy')
+                logger.debug('trade_price_initial[STATIC]: ' + "{:.2f}".format(trade_price_initial))
+            
+            logger.info('Entry trade amount: ' + "{:.4f}".format(trade_amount))
             try:
-                limit_price = calc_limit_price(trade_amount_initial, 'buy')
-                logger.debug('limit_price: ' + "{:.8f}".format(limit_price))
-                exec_trade('buy', limit_price, trade_amount_initial)
+                logger.debug('trade_price_initial: ' + "{:.8f}".format(trade_price_initial))
+                exec_trade('buy', trade_price_initial, trade_amount)
+                break
             except:
                 logger.exception('Entry buy failed. Exiting.')
                 sys.exit(1)
-            
-        else:
-            break
 
     calc_base_initialized = True
 
@@ -365,6 +368,7 @@ def exec_trade(position, limit, amount):
         try:
             mongo_response = db[coll_current].insert_one({'amount': float(order_details['amount']), 'price': float(order_details['rate']), 'side': position, 'date': order_details['date']})
             logger.debug('[BUY] mongo_response: ' + str(mongo_response))
+            logger.info('Buy logged to MongoDB database collection ' + coll_current)
         except:
             logger.exception('[BUY] Failed to write to MongoDB log!')
             mongo_failures += 1
@@ -387,7 +391,7 @@ def exec_trade(position, limit, amount):
         logger.debug('[SELL] trade_response: ' + str(trade_response))
 
         amount_unfilled = Decimal(response['amountUnfilled'])
-        logger.debug('amount_unfilled: ' + "{:.2f}".format(amount_unfilled))
+        logger.debug('amount_unfilled: ' + "{:.4f}".format(amount_unfilled))
         
         order_details = process_trade_response(trade_response, position)
         logger.debug('[SELL] order_details: ' + str(order_details))
@@ -395,6 +399,7 @@ def exec_trade(position, limit, amount):
         try:
             mongo_response = db[coll_current].insert_one({'amount': float(order_details['amount']), 'price': float(order_details['rate']), 'side': position, 'date': order_details['date']})
             logger.debug('[SELL] mongo_response: ' + str(mongo_response))
+            logger.info('Sell logged to MongoDB database collection ' + coll_current)
         except:
             logger.exception('[SELL] Failed to write to MongoDB log!')
             mongo_failures += 1
@@ -411,6 +416,7 @@ def exec_trade(position, limit, amount):
             try:
                 mongo_response = db[coll_current].insert_one({'amount': float(amount_unfilled), 'price': float(base_price_initial), 'side': 'buy', 'date': order_details['date']})
                 logger.debug('[UNFILLED/NEW] mongo_response: ' + str(mongo_response))
+                logger.info('Added unfilled trade amount to new MongoDB collection ' + coll_current)
             except:
                 logger.exception('[UNFILLED/NEW] Failed to write to MongoDB log!')
                 mongo_failures += 1
@@ -435,6 +441,7 @@ def exec_trade(position, limit, amount):
             pos_msg = 'Sold '
         
         telegram_message = pos_msg + "{:.4f}".format(order_details['amount']) + ' @ ' + "{:.4f}".format(order_details['rate'])
+        logger.info('Sending Telegram alert.')
         telegram_send_message(updater.bot, telegram_message)
 
 
@@ -473,9 +480,10 @@ def process_trade_response(response, position):
         amount_total += order_list[x][0]
     order_average_rate = rate_calc_total / amount_total
 
-    logger.debug('rate_calc_total:    ' + "{:.8f}".format(rate_calc_total))
-    logger.debug('amount_total:       ' + "{:.8f}".format(amount_total))
+    logger.debug('rate_calc_total: ' + "{:.8f}".format(rate_calc_total))
+    logger.debug('amount_total: ' + "{:.8f}".format(amount_total))
     logger.debug('order_average_rate: ' + "{:.8f}".format(order_average_rate))
+    logger.debug('trade_amount: ' + "{:.8f}".format(trade_amount))
     
     logger.debug('Calc. Error Margin: ' + "{:.2f}".format((trade_amount - Decimal(response['amountUnfilled'])) - amount_total))
     
@@ -523,15 +531,15 @@ def telegram_status(bot, update):
     logger.info('Telegram user requesting status: ' + str(telegram_user))
 
     if connected_users.count(telegram_user) > 0:
-        logger.info('User confirmed as connected.')
+        logger.debug('Access confirmed for requesting user.')
         
         base = str(calc_base())
         remain_usdt = "{:.2f}".format(trade_usdt_remaining)
         spent = calc_trade_totals('spent')
         bought = calc_trade_totals('bought')
         rate = spent / bought
-        spent_msg = "{:.2f}".format(spent)
-        bought_msg = "{:.2f}".format(bought)
+        spent_msg = "{:.4f}".format(spent)
+        bought_msg = "{:.4f}".format(bought)
         rate_msg = "{:.4f}".format(rate)
 
         status_message = 'Bought ' + bought_msg + 'STR for $' + spent_msg + ' at average rate of $' + rate_msg + '.'
@@ -540,7 +548,7 @@ def telegram_status(bot, update):
         bot.send_message(chat_id=telegram_user, text=status_message)
 
     else:
-        logger.warning('Requesting user not connected.')
+        logger.warning('Access denied for requesting user.')
 
         telegram_message = 'Not currently in list of connected users. Type \'/connect\' to subscribe to alerts.'
         telegram_send_message(updater.bot, telegram_message)
@@ -590,7 +598,7 @@ def calc_dynamic(selection, base, limit):
         if amount_dynamic == True:
             trade_proportion_low = trade_proportion_initial # Default = 0.05
             logger.debug('trade_proportion_low: ' + "{:.2f}".format(trade_proportion_low))
-            trade_proportion_high = Decimal(0.50)    # If limit price 100% less than base price, trade with half of available USDT remaining
+            trade_proportion_high = Decimal(0.50)    # If limit price 100% less than base price, trade with this proportion of available USDT remaining
             logger.debug('trade_proportion_high: ' + "{:.2f}".format(trade_proportion_high))
             trade_proportion_adj = trade_proportion_low + (diff * (trade_proportion_high - trade_proportion_low))
             logger.debug('trade_proportion_adj: ' + "{:.2f}".format(trade_proportion_adj))
@@ -599,9 +607,10 @@ def calc_dynamic(selection, base, limit):
             logger.debug('trade_usdt_remaining: ' + "{:.2f}".format(trade_usdt_remaining))
             
             amount_usdt = trade_usdt_remaining * trade_proportion_adj  # USDT
-            logger.debug('[DYNAMIC]amount: ' + "{:.8f}".format(amount_usdt))
+            logger.debug('[DYNAMIC]amount_usdt: ' + "{:.8f}".format(amount_usdt))
 
             amount = calc_limit_price(amount_usdt, 'buy', reverseLookup=True)
+            logger.debug('[DYNAMIC]amount: ' + "{:.8f}".format(amount))
 
         else:
             amount = trade_amount  # STELLAR LUMENS
@@ -646,7 +655,7 @@ if __name__ == '__main__':
             logger.info('Found existing collection: ' + str(coll_current))
         except:
             # If none found, create new
-            logger.info('No collections found in database. Creating new...')
+            logger.info('No collections found in database. Creating new.')
             modify_collections('create')
 
     # Get config file(s) and set program values from it/them
@@ -709,6 +718,10 @@ if __name__ == '__main__':
         logger.exception('Poloniex API key and/or secret incorrect. Exiting.')
         sys.exit(1)
 
+    # If dynamic amount calculation active, set the base trade amount using current conditions
+    if amount_dynamic == True:
+        trade_amount = (trade_usdt_max * trade_proportion_initial) / Decimal(polo.returnTicker()['USDT_STR']['lowestAsk'])
+
     # Get and set user maker/taker fees
     user_fees = polo.returnFeeInfo()
     maker_fee = Decimal(user_fees['makerFee'])
@@ -723,7 +736,7 @@ if __name__ == '__main__':
     logger.info('Balance STR:  ' + "{:.2f}".format(balance_str))
     logger.info('Balance USDT: ' + "{:.2f}".format(balance_usdt))
 
-    if balance_usdt < trade_usdt_max:
+    if float(balance_usdt) < float(trade_usdt_max):
         logger.warning('Insufficient USDT balance -- need at least ' + "{:.2f}".format(trade_usdt_max) + ' USDT.')
         user_input = input('Continue using full balance of ' + "{:.2f}".format(balance_usdt) + ' instead? (y/n): ')
 
@@ -747,7 +760,7 @@ if __name__ == '__main__':
     logger.debug('trade_usdt_remaining: ' + "{:.2f}".format(trade_usdt_remaining))
     logger.info('Tradable USDT Remaining: ' + "{:.2f}".format(trade_usdt_remaining))
 
-    if trade_usdt_remaining < 0:
+    if trade_usdt_remaining < Decimal(0):
         logger.error('Trade amount remaining less than 0. Try cleaning collections or setting a higher max trade value. Exiting.')
         sys.exit(1)
 
@@ -770,21 +783,21 @@ if __name__ == '__main__':
             # Calculate base price
             base_price = calc_base()
             logger.debug('base_price: ' + "{:.8f}".format(base_price))
-            logger.info('Base Price: ' + "{:.8f}".format(base_price))
+            logger.info('Base Price: ' + "{:.4f}".format(base_price))
             #base_price_target = base_price - buy_threshold    # IS BUY_THRESHOLD NEEDED IF CALCULATING FEES TOO?
             base_price_target = base_price * (Decimal(1) - taker_fee)
             logger.debug('base_price_target: ' + "{:.8f}".format(base_price_target))
-            logger.info('Base Price Target: ' + "{:.8f}".format(base_price_target))
+            logger.info('Base Price Target: ' + "{:.4f}".format(base_price_target))
 
             # Get current account balances
             account_balances = get_balances()
             balance_str = account_balances['str']
             balance_usdt = account_balances['usdt']
             logger.info('Balance STR:  ' + "{:.8f}".format(balance_str))
-            logger.info('Balance USDT: ' + "{:.2f}".format(balance_usdt))
+            logger.info('Balance USDT: ' + "{:.4f}".format(balance_usdt))
 
             # If USDT and STR balances both ~0, then exit
-            if balance_usdt <= Decimal(0.0001) and balance_str == Decimal(0):
+            if balance_usdt < Decimal(0.0001) and float(balance_str) == 0:
                 logger.error('USDT and STR balances both 0. Exiting.')
                 updater.stop()
                 sys.exit(1)
@@ -792,77 +805,80 @@ if __name__ == '__main__':
             # Get total amount of STR bought and USDT spent
             total_bought_str = calc_trade_totals('bought')
             logger.debug('total_bought_str: ' + "{:.8f}".format(total_bought_str))
-            logger.info('Total STR Bought: ' + "{:.8f}".format(total_bought_str))
+            logger.info('Total STR Bought: ' + "{:.4f}".format(total_bought_str))
             total_spent_usdt = calc_trade_totals('spent')
             logger.debug('total_spent_usdt: ' + "{:.8f}".format(total_spent_usdt))
-            logger.info('Total USDT Spent: ' + "{:.2f}".format(total_spent_usdt))
+            logger.info('Total USDT Spent: ' + "{:.4f}".format(total_spent_usdt))
 
             # Verify remaining USDT balance with expected trade amount
             trade_usdt_remaining = trade_usdt_max - total_spent_usdt
-            logger.debug('trade_usdt_remaining: ' + "{:.2f}".format(trade_usdt_remaining))
-            if balance_usdt < trade_usdt_remaining:
+            logger.debug('trade_usdt_remaining: ' + "{:.4f}".format(trade_usdt_remaining))
+            if float(balance_usdt) < float(trade_usdt_remaining):
                 logger.warning('USDT balance less than remaining USDT amount allotted for trading. Adjusting allotment to available balance.')
                 trade_usdt_max = balance_usdt + total_spent_usdt
                 trade_usdt_remaining = trade_usdt_max - total_spent_usdt
-                logger.debug('[ADJUSTED]trade_usdt_remaining: ' + "{:.2f}".format(trade_usdt_remaining))
-                logger.info('Remaining Tradable USDT Balance Adjusted: ' + "{:.2f}".format(trade_usdt_remaining))
+                logger.debug('[ADJUSTED]trade_usdt_remaining: ' + "{:.4f}".format(trade_usdt_remaining))
+                logger.info('Remaining Tradable USDT Balance Adjusted: ' + "{:.4f}".format(trade_usdt_remaining))
 
             # Verify STR balance with recorded amount bought
-            if balance_str < total_bought_str:
+            if float(balance_str) < float(total_bought_str):
                 logger.warning('STR balance less than recorded bought amount.')
                 logger.debug('total_bought_str: ' + "{:.8f}".format(total_bought_str))
                 
-                logger.warning('Adjusting total bought to available balance and repairing database to reflect changes.')
+                logger.warning('Creating new MongoDB database with available STR balance as total bought.')
                 
                 # Create new database and add available STR balance as buy trade
                 modify_collections('create')
                 try:
                     mongo_response = db[coll_current].insert_one({'amount': float(balance_str), 'price': float(base_price), 'side': 'buy', 'date': datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')})
                     logger.debug('[BALANCE ADJUSTMENT] mongo_response: ' + str(mongo_response))
+                    logger.info('Adjustment logged to new MongoDB database collection ' + coll_current)
                 except:
                     logger.exception('[BALANCE ADJUSTMENT] Failed to write to MongoDB log!')
                     mongo_failures += 1
 
 
             # Calculate buy amount based on current conditions
-            buy_amount_current = calc_dynamic('amount', base_price, calc_limit_price(trade_amount, 'buy'))
-            logger.debug('buy_amount_current: ' + "{:.4f}".format(buy_amount_current))
-            logger.info('Current Buy Amount: ' + "{:.2f}".format(buy_amount_current))
+            buy_amount_current = calc_dynamic('amount', base_price_target, calc_limit_price(trade_amount, 'buy', withFees=True))
+            logger.debug('buy_amount_current: ' + "{:.8f}".format(buy_amount_current))
+            logger.info('Current Buy Amount: ' + "{:.4f}".format(buy_amount_current))
 
             # Calculate true low ask (sufficient volume for buy)
             low_ask_actual = calc_limit_price(buy_amount_current, 'buy', withFees=True)
             logger.debug('low_ask_actual: ' + "{:.8f}".format(low_ask_actual))
-            logger.info('Low Ask (Actual): ' + "{:.8f}".format(low_ask_actual))
+            logger.info('Low Ask (Actual): ' + "{:.4f}".format(low_ask_actual))
 
             # Set sell amount based on total amount bought
             sell_amount_current = calc_trade_totals('bought')
-            logger.debug('sell_amount_current: ' + "{:.4f}".format(sell_amount_current))
-            logger.info('Current Sell Amount: ' + "{:.2f}".format(sell_amount_current))
+            logger.debug('sell_amount_current: ' + "{:.8f}".format(sell_amount_current))
+            logger.info('Current Sell Amount: ' + "{:.4f}".format(sell_amount_current))
 
             # Calculate true high bid (sufficient volume for sell)
             high_bid_actual = calc_limit_price(sell_amount_current, 'sell', withFees=True)
             logger.debug('high_bid_actual: ' + "{:.8f}".format(high_bid_actual))
-            logger.info('High Bid (Actual): ' + "{:.8f}".format(high_bid_actual))
+            logger.info('High Bid (Actual): ' + "{:.4f}".format(high_bid_actual))
 
             # Calculate target sell price
             sell_price_target = base_price * (Decimal(1) + profit_threshold + taker_fee)  # Add fee in calc_limit_price()
             logger.debug('sell_price_target: ' + "{:.8f}".format(sell_price_target))
-            logger.info('Sell Target: ' + "{:.8f}".format(sell_price_target))
+            logger.info('Sell Target: ' + "{:.4f}".format(sell_price_target))
 
             # Check for sell conditions
-            if high_bid_actual >= sell_price_target:
+            if float(high_bid_actual) >= float(sell_price_target):
                 # Check if sell total greater than minimum allowed
                 if (sell_amount_current * sell_price_target) < Decimal(0.0001):
                     logger.warning('Trade total must be >= $0.0001. Skipping Trade.')
+                    sell_skips += 1
                 else:
                     logger.info('TRADE CONDITIONS MET --> SELLING')
                     exec_trade('sell', sell_price_target, sell_amount_current)
 
             # Check for buy conditions
-            elif low_ask_actual <= base_price:
+            elif float(low_ask_actual) <= float(base_price):
                 # Check if buy total greater than minimum allowed
                 if (buy_amount_current * low_ask_actual) < Decimal(0.0001):
                     logger.warning('Trade total must be >= $0.0001. Skipping Trade.')
+                    buy_skips += 1
                 else:
                     logger.info('TRADE CONDITIONS MET --> BUYING')
                     exec_trade('buy', base_price_target, buy_amount_current)
@@ -884,6 +900,8 @@ if __name__ == '__main__':
         except KeyboardInterrupt:
             logger.info('Exit signal received.')
             logger.info('Mongo write errors: ' + str(mongo_failures))
+            logger.info('Buy trades skipped: ' + str(buy_skips))
+            logger.info('Sell trades skipped: ' + str(sell_skips))
             
             if csv_logging == True:
                 logger.info('CSV write errors: ' + str(csv_failures))

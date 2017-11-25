@@ -1,0 +1,66 @@
+2017-11-25 17:51:33,390 - DEBUG - Parsing arguments.
+2017-11-25 17:51:33,391 - DEBUG - Activated debug logging.
+2017-11-25 17:51:33,393 - DEBUG - clean_collections: False
+2017-11-25 17:51:33,393 - DEBUG - trade_amount: 1.00
+2017-11-25 17:51:33,393 - DEBUG - amount_dynamic: True
+2017-11-25 17:51:33,393 - DEBUG - trade_proportion_initial: 0.05
+2017-11-25 17:51:33,394 - DEBUG - trade_usdt_max: 10.00
+2017-11-25 17:51:33,394 - DEBUG - profit_threshold: 0.05
+2017-11-25 17:51:33,394 - DEBUG - loop_time: 30
+2017-11-25 17:51:33,394 - DEBUG - loop_dynamic: True
+2017-11-25 17:51:33,395 - DEBUG - live_trading: True
+2017-11-25 17:51:33,395 - DEBUG - csv_logging: True
+2017-11-25 17:51:33,395 - DEBUG - telegram_active: True
+2017-11-25 17:51:33,395 - DEBUG - mongo_alt: False
+2017-11-25 17:51:33,395 - WARNING - Total USDT trade amount is set to $10.00.
+2017-11-25 17:51:36,350 - INFO - USDT trade amount confirmed.
+2017-11-25 17:51:36,357 - INFO - Dynamic trade amount calculation activated.
+2017-11-25 17:51:36,357 - INFO - Dynamic loop time calculation activated. Base loop time set to 30 seconds.
+2017-11-25 17:51:36,357 - INFO - CSV log file path: logs/lorenzbot_log_11252017-175136.csv
+2017-11-25 17:51:36,357 - INFO - Telegram logging active. Send @lorenzbot_bot '/connect' to receive alerts.
+2017-11-25 17:51:36,364 - INFO - Using default MongoDB database 'lorenzbot'.
+2017-11-25 17:51:36,373 - INFO - No collections found in database. Creating new.
+2017-11-25 17:51:36,759 - INFO - Created new collection: 11252017_175136
+2017-11-25 17:51:36,760 - INFO - Found Telegram config file.
+2017-11-25 17:51:37,018 - DEBUG - telegram_token: 411687950:AAFOIzovAmjDoy_0qJeBfdtzTFkM74BI0Fs
+2017-11-25 17:51:37,131 - INFO - Found Poloniex config file.
+2017-11-25 17:51:37,187 - WARNING - Live trading ENABLED.
+2017-11-25 17:51:37,829 - INFO - Current Maker Fee: 0.0015
+2017-11-25 17:51:37,829 - INFO - Current Taker Fee: 0.0025
+2017-11-25 17:51:37,966 - INFO - Balance STR:  11.50
+2017-11-25 17:51:37,967 - INFO - Balance USDT: 40.31
+2017-11-25 17:51:37,968 - INFO - Collection empty. Setting tradable balance remaining to allowed maximum.
+2017-11-25 17:51:37,969 - DEBUG - trade_usdt_remaining: 10.00
+2017-11-25 17:51:37,969 - INFO - Tradable USDT Remaining: 10.00
+2017-11-25 17:51:37,970 - DEBUG - ----[LOOP START]----
+2017-11-25 17:51:37,971 - DEBUG - Entering base_price calculation.
+2017-11-25 17:51:37,972 - DEBUG - db[coll_current].count(): 0
+2017-11-25 17:51:37,974 - INFO - No trade log found. Making entry buy.
+2017-11-25 17:51:37,974 - DEBUG - trade_amount[CALC]: 11.50
+2017-11-25 17:51:38,205 - DEBUG - actual: 0.04359499
+2017-11-25 17:51:38,206 - DEBUG - book_tot: 52519.04
+2017-11-25 17:51:38,207 - DEBUG - actual: 0.04359499
+2017-11-25 17:51:38,207 - DEBUG - book_tot: 52519.04
+2017-11-25 17:51:38,208 - DEBUG - calc_limit_price() successful within limits (depth=20).
+2017-11-25 17:51:38,208 - DEBUG - trade_price_initial[CALC]: 0.04
+2017-11-25 17:51:38,209 - INFO - Entry trade amount: 11.4956
+2017-11-25 17:51:38,209 - DEBUG - trade_price_initial: 0.04359499
+2017-11-25 17:51:38,571 - DEBUG - [BUY] trade_response: {'orderNumber': '39827404853', 'resultingTrades': [{'amount': '0.01000000', 'date': '2017-11-25 23:51:37', 'rate': '0.04349500', 'total': '0.00043495', 'tradeID': '1790614', 'type': 'buy'}, {'amount': '0.01000000', 'date': '2017-11-25 23:51:37', 'rate': '0.04350500', 'total': '0.00043505', 'tradeID': '1790615', 'type': 'buy'}, {'amount': '0.01000000', 'date': '2017-11-25 23:51:37', 'rate': '0.04351500', 'total': '0.00043515', 'tradeID': '1790616', 'type': 'buy'}, {'amount': '0.01000000', 'date': '2017-11-25 23:51:37', 'rate': '0.04352500', 'total': '0.00043525', 'tradeID': '1790617', 'type': 'buy'}, {'amount': '0.01000000', 'date': '2017-11-25 23:51:37', 'rate': '0.04353500', 'total': '0.00043535', 'tradeID': '1790618', 'type': 'buy'}, {'amount': '0.01000000', 'date': '2017-11-25 23:51:37', 'rate': '0.04354500', 'total': '0.00043545', 'tradeID': '1790619', 'type': 'buy'}, {'amount': '0.01000000', 'date': '2017-11-25 23:51:37', 'rate': '0.04355500', 'total': '0.00043555', 'tradeID': '1790620', 'type': 'buy'}, {'amount': '0.01000000', 'date': '2017-11-25 23:51:37', 'rate': '0.04356500', 'total': '0.00043565', 'tradeID': '1790621', 'type': 'buy'}, {'amount': '0.01000000', 'date': '2017-11-25 23:51:37', 'rate': '0.04357500', 'total': '0.00043575', 'tradeID': '1790622', 'type': 'buy'}, {'amount': '0.01000000', 'date': '2017-11-25 23:51:37', 'rate': '0.04358500', 'total': '0.00043585', 'tradeID': '1790623', 'type': 'buy'}, {'amount': '11.39557420', 'date': '2017-11-25 23:51:37', 'rate': '0.04359499', 'total': '0.49678994', 'tradeID': '1790624', 'type': 'buy'}], 'amountUnfilled': '0.00000000'}
+2017-11-25 17:51:38,800 - DEBUG - returnOrderTrades: [{'globalTradeID': 269540438, 'tradeID': 1790624, 'currencyPair': 'USDT_STR', 'type': 'buy', 'rate': '0.04359499', 'amount': '11.39557420', 'total': '0.49678994', 'fee': '0.00250000', 'date': '2017-11-25 23:51:37'}, {'globalTradeID': 269540437, 'tradeID': 1790623, 'currencyPair': 'USDT_STR', 'type': 'buy', 'rate': '0.04358500', 'amount': '0.01000000', 'total': '0.00043585', 'fee': '0.00250000', 'date': '2017-11-25 23:51:37'}, {'globalTradeID': 269540436, 'tradeID': 1790622, 'currencyPair': 'USDT_STR', 'type': 'buy', 'rate': '0.04357500', 'amount': '0.01000000', 'total': '0.00043575', 'fee': '0.00250000', 'date': '2017-11-25 23:51:37'}, {'globalTradeID': 269540435, 'tradeID': 1790621, 'currencyPair': 'USDT_STR', 'type': 'buy', 'rate': '0.04356500', 'amount': '0.01000000', 'total': '0.00043565', 'fee': '0.00250000', 'date': '2017-11-25 23:51:37'}, {'globalTradeID': 269540434, 'tradeID': 1790620, 'currencyPair': 'USDT_STR', 'type': 'buy', 'rate': '0.04355500', 'amount': '0.01000000', 'total': '0.00043555', 'fee': '0.00250000', 'date': '2017-11-25 23:51:37'}, {'globalTradeID': 269540433, 'tradeID': 1790619, 'currencyPair': 'USDT_STR', 'type': 'buy', 'rate': '0.04354500', 'amount': '0.01000000', 'total': '0.00043545', 'fee': '0.00250000', 'date': '2017-11-25 23:51:37'}, {'globalTradeID': 269540432, 'tradeID': 1790618, 'currencyPair': 'USDT_STR', 'type': 'buy', 'rate': '0.04353500', 'amount': '0.01000000', 'total': '0.00043535', 'fee': '0.00250000', 'date': '2017-11-25 23:51:37'}, {'globalTradeID': 269540431, 'tradeID': 1790617, 'currencyPair': 'USDT_STR', 'type': 'buy', 'rate': '0.04352500', 'amount': '0.01000000', 'total': '0.00043525', 'fee': '0.00250000', 'date': '2017-11-25 23:51:37'}, {'globalTradeID': 269540430, 'tradeID': 1790616, 'currencyPair': 'USDT_STR', 'type': 'buy', 'rate': '0.04351500', 'amount': '0.01000000', 'total': '0.00043515', 'fee': '0.00250000', 'date': '2017-11-25 23:51:37'}, {'globalTradeID': 269540429, 'tradeID': 1790615, 'currencyPair': 'USDT_STR', 'type': 'buy', 'rate': '0.04350500', 'amount': '0.01000000', 'total': '0.00043505', 'fee': '0.00250000', 'date': '2017-11-25 23:51:37'}, {'globalTradeID': 269540428, 'tradeID': 1790614, 'currencyPair': 'USDT_STR', 'type': 'buy', 'rate': '0.04349500', 'amount': '0.01000000', 'total': '0.00043495', 'fee': '0.00250000', 'date': '2017-11-25 23:51:37'}]
+2017-11-25 17:51:38,804 - DEBUG - trade_date: 2017-11-25 23:51:37
+2017-11-25 17:51:38,804 - DEBUG - len(order_trades): 11
+2017-11-25 17:51:38,804 - DEBUG - len(order_list): 11
+2017-11-25 17:51:38,804 - DEBUG - order_list: [[Decimal('11.3670852645000000'), Decimal('0.04359499')], [Decimal('0.0099750000000000'), Decimal('0.04358500')], [Decimal('0.0099750000000000'), Decimal('0.04357500')], [Decimal('0.0099750000000000'), Decimal('0.04356500')], [Decimal('0.0099750000000000'), Decimal('0.04355500')], [Decimal('0.0099750000000000'), Decimal('0.04354500')], [Decimal('0.0099750000000000'), Decimal('0.04353500')], [Decimal('0.0099750000000000'), Decimal('0.04352500')], [Decimal('0.0099750000000000'), Decimal('0.04351500')], [Decimal('0.0099750000000000'), Decimal('0.04350500')], [Decimal('0.0099750000000000'), Decimal('0.04349500')]]
+2017-11-25 17:51:38,805 - DEBUG - rate_calc_total:    0.49989108
+2017-11-25 17:51:38,805 - DEBUG - amount_total:       11.46683526
+2017-11-25 17:51:38,805 - DEBUG - order_average_rate: 0.04359451
+2017-11-25 17:51:38,806 - DEBUG - TRADE_AMOUNT = 11.49557420393148701587712647
+2017-11-25 17:51:38,806 - ERROR - Entry buy failed. Exiting.
+Traceback (most recent call last):
+  File "lorenzbot.py", line 218, in calc_base
+    exec_trade('buy', trade_price_initial, trade_amount)
+  File "lorenzbot.py", line 365, in exec_trade
+    order_details = process_trade_response(trade_response, position)
+  File "lorenzbot.py", line 487, in process_trade_response
+    logger.debug('TRADE_AMOUNT(RESPONSE) = ' + str(response['amount']))
+KeyError: 'amount'
