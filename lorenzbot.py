@@ -294,10 +294,10 @@ def calc_limit_price(amount, position, reverseLookup=None, withFees=None):
             for x in range(0, len(book[book_pos])):
                 book_tot += Decimal(book[book_pos][x][0]) * Decimal(book[book_pos][x][1])
                 amt_tot += Decimal(book[book_pos][x][1])
-                if book_tot == amount:
+                if float(book_tot) == float(amount):
                     actual = amt_tot
                     break
-                elif book_tot > amount:
+                elif float(book_tot) > float(amount):
                     book_tot -= Decimal(book[book_pos][x][0]) * Decimal(book[book_pos][x][1])
                     amt_tot -= Decimal(book[book_pos][x][1])
 
@@ -397,7 +397,7 @@ def exec_trade(position, limit, amount):
         #trade_response = polo.sell('USDT_STR', limit, sell_amount, 'immediateOrCancel')  # CHANGE TO REGULAR LIMIT ORDER?
         logger.debug('[SELL] trade_response: ' + str(trade_response))
 
-        amount_unfilled = Decimal(response['amountUnfilled'])
+        amount_unfilled = Decimal(trade_response['amountUnfilled'])
         logger.debug('amount_unfilled: ' + "{:.4f}".format(amount_unfilled))
         
         order_details = process_trade_response(trade_response, position)
@@ -766,6 +766,7 @@ if __name__ == '__main__':
     if db[coll_current].count() > 0:
         logger.info('Collection not empty. Calculating USDT amount remaining for trading.')
         if float(balance_str) > 0:
+            logger.debug('Initial STR balance > 0.')
             trade_usdt_remaining = trade_usdt_max - calc_trade_totals('spent')
         else:
             logger.warning('Collection not empty, but STR balance is 0. Creating new empty collection and starting over with entry buy.')
@@ -863,13 +864,18 @@ if __name__ == '__main__':
                 
                 # Create new database and add available STR balance as buy trade
                 modify_collections('create')
-                try:
-                    mongo_response = db[coll_current].insert_one({'amount': float(balance_str), 'price': float(base_price), 'side': 'buy', 'date': datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')})
-                    logger.debug('[BALANCE ADJUSTMENT] mongo_response: ' + str(mongo_response))
-                    logger.info('Adjustment logged to new MongoDB database collection ' + coll_current)
-                except:
-                    logger.exception('[BALANCE ADJUSTMENT] Failed to write to MongoDB log!')
-                    mongo_failures += 1
+
+                if float(balance_str) > 0:
+                    try:
+                        mongo_response = db[coll_current].insert_one({'amount': float(balance_str), 'price': float(base_price), 'side': 'buy', 'date': datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')})
+                        logger.debug('[BALANCE ADJUSTMENT] mongo_response: ' + str(mongo_response))
+                        logger.info('Adjustment logged to new MongoDB database collection ' + coll_current)
+                    except:
+                        logger.exception('[BALANCE ADJUSTMENT] Failed to write to MongoDB log!')
+                        mongo_failures += 1
+
+                else:
+                    logger.warning('STR balance is 0. Leaving new collection empty.')
 
 
             # Calculate buy amount based on current conditions
