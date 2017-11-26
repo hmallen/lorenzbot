@@ -736,6 +736,20 @@ if __name__ == '__main__':
     logger.info('Balance STR:  ' + "{:.2f}".format(balance_str))
     logger.info('Balance USDT: ' + "{:.2f}".format(balance_usdt))
 
+    global trade_usdt_remaining  # NEEDED GLOBAL?
+    if db[coll_current].count() > 0:
+        logger.info('Collection not empty. Calculating USDT amount remaining for trading.')
+        trade_usdt_remaining = trade_usdt_max - calc_trade_totals('spent')
+    else:
+        logger.info('Collection empty. Setting tradable balance remaining to allowed maximum.')
+        trade_usdt_remaining = trade_usdt_max
+    logger.debug('trade_usdt_remaining: ' + "{:.2f}".format(trade_usdt_remaining))
+    logger.info('Tradable USDT Remaining: ' + "{:.2f}".format(trade_usdt_remaining))
+
+    if trade_usdt_remaining < Decimal(0):
+        logger.error('Trade amount remaining less than 0. Try cleaning collections or setting a higher max trade value. Exiting.')
+        sys.exit(1)
+
     if float(balance_usdt) < float(trade_usdt_max):
         logger.warning('Insufficient USDT balance -- need at least ' + "{:.2f}".format(trade_usdt_max) + ' USDT.')
         user_input = input('Continue using full balance of ' + "{:.2f}".format(balance_usdt) + ' instead? (y/n): ')
@@ -749,20 +763,6 @@ if __name__ == '__main__':
         else:
             logger.error('Unrecognized user input. Exiting.')
             sys.exit(1)
-
-    global trade_usdt_remaining  # NEEDED GLOBAL?
-    if db[coll_current].count() > 0:
-        logger.info('Collection not empty. Calculating trade amount remaining.')
-        trade_usdt_remaining = trade_usdt_max - calc_trade_totals('spent')
-    else:
-        logger.info('Collection empty. Setting tradable balance remaining to allowed maximum.')
-        trade_usdt_remaining = trade_usdt_max
-    logger.debug('trade_usdt_remaining: ' + "{:.2f}".format(trade_usdt_remaining))
-    logger.info('Tradable USDT Remaining: ' + "{:.2f}".format(trade_usdt_remaining))
-
-    if trade_usdt_remaining < Decimal(0):
-        logger.error('Trade amount remaining less than 0. Try cleaning collections or setting a higher max trade value. Exiting.')
-        sys.exit(1)
 
 # Functions Used/Arguments Required/Values Returned:
 #
