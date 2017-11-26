@@ -495,7 +495,7 @@ def process_trade_response(response, position):
     logger.debug('order_average_rate: ' + "{:.8f}".format(order_average_rate))
     logger.debug('trade_amount: ' + "{:.8f}".format(trade_amount))
     
-    logger.debug('Calc. Error Margin: ' + "{:.2f}".format((trade_amount - Decimal(response['amountUnfilled'])) - amount_total))
+    logger.debug('Calc. Error Margin: ' + "{:.2f}".format(((trade_amount * taker_fee) - Decimal(response['amountUnfilled'])) - amount_total))
     
     return {'date': trade_date, 'amount': amount_total, 'rate': order_average_rate}
 
