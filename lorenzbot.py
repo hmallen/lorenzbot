@@ -802,6 +802,8 @@ if __name__ == '__main__':
                 updater.stop()
                 sys.exit(1)
 
+            logger.info('Total Buy Count: ' + str(db[coll_current].count()))
+
             # Get total amount of STR bought and USDT spent
             total_bought_str = calc_trade_totals('bought')
             logger.debug('total_bought_str: ' + "{:.8f}".format(total_bought_str))

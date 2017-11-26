@@ -6,7 +6,7 @@ TO DO:
 - Make boolean arguments into human-readable format
 - Clean up arguments --> Make parent/child --> Make sure all conditions satisfied
 - Add "shutdown" function that can be called anywhere instead of updater.stop() each time
-- Add counting for buy and sell skips
+- Add Telegram alerts when adjustments are made due to balance/trade amount issues
 
 LATER:
 - Add argument for minimum loop time (loop_time_min)
@@ -17,7 +17,6 @@ IF TIME:
 
 NEEDS TESTING:
 - Add handling for max trade limit
-- Add Telegram alerts
 - Add check for minimum buy/sell amount
 -- Buy = 0.0001USDT
 -- Sell = 0.0001USDT
@@ -39,3 +38,5 @@ DONE:
 - Add handling of situation where on sell not enough asks are available in depth=20
 - Merge calc_trade_amount() and loop_time_dynamic()
 - Add function for trade amount adjustment
+- Add counting for buy and sell skips
+- Add Telegram alerts
