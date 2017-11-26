@@ -750,7 +750,7 @@ if __name__ == '__main__':
         logger.error('Trade amount remaining less than 0. Try cleaning collections or setting a higher max trade value. Exiting.')
         sys.exit(1)
 
-    if float(balance_usdt) < float(trade_usdt_max):
+    if float(balance_usdt) < float(trade_usdt_remaining):
         logger.warning('Insufficient USDT balance -- need at least ' + "{:.2f}".format(trade_usdt_max) + ' USDT.')
         user_input = input('Continue using full balance of ' + "{:.2f}".format(balance_usdt) + ' instead? (y/n): ')
 
