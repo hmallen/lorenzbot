@@ -837,6 +837,7 @@ if __name__ == '__main__':
         else:
             logger.warning('Collection not empty, but STR balance is 0. Creating new empty collection and starting over with entry buy.')
             modify_collections('create')
+            trade_usdt_remaining = trade_usdt_max
     
     else:
         logger.info('Collection empty. Setting tradable balance remaining to allowed maximum.')
