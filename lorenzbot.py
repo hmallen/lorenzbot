@@ -223,8 +223,14 @@ def calc_base():
 
     calc_base_initialized = True
 
-    rate_avg = calc_trade_totals('spent') / calc_trade_totals('bought')
-    logger.debug('rate_avg: ' + "{:.8f}".format(rate_avg))
+    total_spent = calc_trade_totals('spent')
+    total_bought = calc_trade_totals('bought')
+
+    if float(total_bought) > 0:
+        rate_avg = calc_trade_totals('spent') / calc_trade_totals('bought')
+        logger.debug('rate_avg: ' + "{:.8f}".format(rate_avg))
+    else:
+        rate_avg = Decimal(0)
 
     return rate_avg
 
