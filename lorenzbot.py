@@ -504,24 +504,41 @@ def log_trade_csv(csv_row): # Must pass list as argument
 
 def telegram_connect(bot, update):    
     telegram_user = update.message.chat_id
-    connected_users.append(telegram_user)
-    
-    logger.debug('[CONNECT] chat_id: ' + str(telegram_user))
-    logger.info('Telegram user connected: ' + str(telegram_user))
-    #logger.info('Connected Users: ' + str(connected_users))
-    
-    bot.send_message(chat_id=telegram_user, text="Subscribed to Lorenzbot alerts.")
+
+    if connected_users.count(telegram_user) == 0:
+        connected_users.append(telegram_user)
+        
+        logger.debug('[CONNECT] chat_id: ' + str(telegram_user))
+        logger.info('Telegram user connected: ' + str(telegram_user))
+        #logger.info('Connected Users: ' + str(connected_users))
+
+        telegram_message = 'Subscribed to Lorenzbot alerts.'
+
+    else:
+        telegram_message = 'Already subscribed to Lorenzbot alerts.'
+        
+    logger.debug('[CONNECT] telegram_message: ' + telegram_message)
+    bot.send_message(chat_id=telegram_user, text=telegram_message)
 
 
 def telegram_disconnect(bot, update):    
     telegram_user = update.message.chat_id
-    connected_users.remove(telegram_user)
-    
-    logger.debug('[DISCONNECT] chat_id: ' + str(telegram_user))
-    logger.info('Telegram user disconnected: ' + str(telegram_user))
-    #logger.info('Connected Users: ' + str(connected_users))
-    
-    bot.send_message(chat_id=telegram_user, text="Unsubscribed from Lorenzbot alerts.")
+
+    if connected_users.count(telegram_user) > 0:
+        connected_users.remove(telegram_user)
+        
+        logger.debug('[DISCONNECT] chat_id: ' + str(telegram_user))
+        logger.info('Telegram user disconnected: ' + str(telegram_user))
+        #logger.info('Connected Users: ' + str(connected_users))
+        
+        telegram_message = 'Unsubscribed from Lorenzbot alerts.
+
+    else:
+        telegram_message = 'Not currently subscribed to Lorenzbot alerts.'
+
+    logger.debug('[DISCONNECT] telegram_message: ' + telegram_message)
+
+    bot.send_message(chat_id=telegram_user, text=telegram_message)
 
 
 def telegram_status(bot, update):    
@@ -542,16 +559,15 @@ def telegram_status(bot, update):
         bought_msg = "{:.4f}".format(bought)
         rate_msg = "{:.4f}".format(rate)
 
-        status_message = 'Bought ' + bought_msg + 'STR for $' + spent_msg + ' at an average rate of $' + rate_msg + '.'
-        logger.debug(status_message)
-        
-        bot.send_message(chat_id=telegram_user, text=status_message)
+        telegram_message = 'Bought ' + bought_msg + 'STR for $' + spent_msg + ' at an average rate of $' + rate_msg + '.'
 
     else:
         logger.warning('Access denied for requesting user.')
-
+        
         telegram_message = 'Not currently in list of connected users. Type \'/connect\' to subscribe to alerts.'
-        telegram_send_message(updater.bot, telegram_message)
+
+    logger.debug('[STATUS] telegram_message: ' + telegram_message)
+    bot.send_message(chat_id=telegram_user, text=telegram_message)
 
 
 def telegram_send_message(bot, trade_message):
