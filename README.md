@@ -2,6 +2,8 @@
 Poloniex exchange trading bot
 
 TO DO:
+- Finish Telegram-triggered csv profit calculator
+- Make csv log files persistent somehow to preserve profit calculations
 - List out all variables used and formalize to clean up program
 - Make boolean arguments into human-readable format
 - Clean up arguments --> Make parent/child --> Make sure all conditions satisfied
