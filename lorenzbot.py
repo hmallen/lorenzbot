@@ -793,7 +793,7 @@ if __name__ == '__main__':
             account_balances = get_balances()
             balance_str = account_balances['str']
             balance_usdt = account_balances['usdt']
-            logger.info('Balance STR:  ' + "{:.8f}".format(balance_str))
+            logger.info('Balance STR:  ' + "{:.4f}".format(balance_str))
             logger.info('Balance USDT: ' + "{:.4f}".format(balance_usdt))
 
             # If USDT and STR balances both ~0, then exit
