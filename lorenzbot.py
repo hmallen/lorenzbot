@@ -726,15 +726,15 @@ if __name__ == '__main__':
     user_fees = polo.returnFeeInfo()
     maker_fee = Decimal(user_fees['makerFee'])
     taker_fee = Decimal(user_fees['takerFee'])
-    logger.info('Current Maker Fee: ' + "{:.4f}".format(maker_fee))
-    logger.info('Current Taker Fee: ' + "{:.4f}".format(taker_fee))
+    logger.info('Current Maker Fee: ' + "{:.4f}".format(maker_fee * Decimal(100)) + '%')
+    logger.info('Current Taker Fee: ' + "{:.4f}".format(taker_fee * Decimal(100)) + '%')
 
     # Get initial account balances
     account_balances = get_balances()
     balance_str = account_balances['str']
     balance_usdt = account_balances['usdt']
-    logger.info('Balance STR:  ' + "{:.2f}".format(balance_str))
-    logger.info('Balance USDT: ' + "{:.2f}".format(balance_usdt))
+    logger.info('Balance STR:  ' + "{:.4f}".format(balance_str))
+    logger.info('Balance USDT: ' + "{:.4f}".format(balance_usdt))
 
     global trade_usdt_remaining  # NEEDED GLOBAL?
     if db[coll_current].count() > 0:
