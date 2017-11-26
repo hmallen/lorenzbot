@@ -157,7 +157,7 @@ if clean_collections == False:
         logger.info('CSV log file path: ' + log_file)
 
     if telegram_active == True:
-        logger.info('Telegram logging active. Send @lorenzbot_bot \'/connect\' to receive alerts.')
+        logger.info('Telegram logging active. Send \'/connect\' to @lorenzbot_bot to receive alerts.')
 
 
 def modify_collections(action):
@@ -336,16 +336,16 @@ def calc_limit_price(amount, position, reverseLookup=None, withFees=None):
             break
         
         else:
-            book_depth += 20
-
             # NEED TO FIGURE OUT HOW TO HANDLE THIS!!!!
-            if book_depth > 100:
+            if book_depth >= 200:
                 logger.exception('Failed to set price_actual in calc_limit_price().')
                 break
                 #logger.exception('Failed to set price_actual in calc_limit_price(). Exiting.')
                 #sys.exit(1)
             
-            logger.warning('Volume not satisfied at default order book depth=' + str(book_depth - 20) + '. Retrying with depth = ' + str(book_depth) + '.')
+            logger.warning('Volume not satisfied at default order book depth=' + str(book_depth) + '. Retrying with depth = ' + str(book_depth + 40) + '.')
+            book_depth += 40
+            
             time.sleep(1)
 
     return actual
@@ -542,7 +542,7 @@ def telegram_status(bot, update):
         bought_msg = "{:.4f}".format(bought)
         rate_msg = "{:.4f}".format(rate)
 
-        status_message = 'Bought ' + bought_msg + 'STR for $' + spent_msg + ' at average rate of $' + rate_msg + '.'
+        status_message = 'Bought ' + bought_msg + 'STR for $' + spent_msg + ' at an average rate of $' + rate_msg + '.'
         logger.debug(status_message)
         
         bot.send_message(chat_id=telegram_user, text=status_message)
