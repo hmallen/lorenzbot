@@ -276,7 +276,7 @@ def calc_limit_price(amount, position, reverseLookup=None, withFees=None):
     elif position == 'sell':
         book_pos = 'bids'
 
-    book_depth = 20  # Default
+    book_depth = 40  # Double the default value
     while (True):
         book = polo.returnOrderBook('USDT_STR', depth=book_depth)
 
