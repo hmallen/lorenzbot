@@ -531,7 +531,7 @@ def telegram_disconnect(bot, update):
         logger.info('Telegram user disconnected: ' + str(telegram_user))
         #logger.info('Connected Users: ' + str(connected_users))
         
-        telegram_message = 'Unsubscribed from Lorenzbot alerts.
+        telegram_message = 'Unsubscribed from Lorenzbot alerts.'
 
     else:
         telegram_message = 'Not currently subscribed to Lorenzbot alerts.'
