@@ -1,5 +1,4 @@
 env/
-#logs/
 *.DS_Store
 *.ini
 *aws*
