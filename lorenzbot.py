@@ -588,7 +588,10 @@ def telegram_send_message(bot, trade_message):
 
 
 def calc_dynamic(selection, base, limit):
-    diff = (base - limit) / base
+    if float(base) > 0:
+        diff = (base - limit) / base
+    else:
+        diff = Decimal(0)
     logger.debug('diff: ' + "{:.6f}".format(diff))
     logger.info('Price Difference from Base: ' + "{:.4f}".format(diff * Decimal(100)) + '%')
 
