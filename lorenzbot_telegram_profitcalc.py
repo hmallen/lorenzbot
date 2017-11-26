@@ -231,6 +231,7 @@ def calc_base():
         logger.debug('rate_avg: ' + "{:.8f}".format(rate_avg))
     else:
         rate_avg = Decimal(0)
+        logger.error('Trying to calculate rate with 0 STR bought. Preventing divide by zero error by returning 0.')
 
     #rate_avg = calc_trade_totals('spent') / calc_trade_totals('bought')
     #logger.debug('rate_avg: ' + "{:.8f}".format(rate_avg))
@@ -831,7 +832,12 @@ if __name__ == '__main__':
     global trade_usdt_remaining  # NEEDED GLOBAL?
     if db[coll_current].count() > 0:
         logger.info('Collection not empty. Calculating USDT amount remaining for trading.')
-        trade_usdt_remaining = trade_usdt_max - calc_trade_totals('spent')
+        if float(balance_str) > 0:
+            trade_usdt_remaining = trade_usdt_max - calc_trade_totals('spent')
+        else:
+            logger.warning('Collection not empty, but STR balance is 0. Creating new empty collection and starting over with entry buy.')
+            modify_collections('create')
+    
     else:
         logger.info('Collection empty. Setting tradable balance remaining to allowed maximum.')
         trade_usdt_remaining = trade_usdt_max
