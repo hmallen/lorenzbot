@@ -233,9 +233,6 @@ def calc_base():
         rate_avg = Decimal(0)
         logger.error('Trying to calculate rate with 0 STR bought. Preventing divide by zero error by returning 0.')
 
-    #rate_avg = calc_trade_totals('spent') / calc_trade_totals('bought')
-    #logger.debug('rate_avg: ' + "{:.8f}".format(rate_avg))
-
     return rate_avg
 
 
@@ -292,6 +289,7 @@ def calc_limit_price(amount, position, reverseLookup=None, withFees=None):
 
         # Lookup amount based on price
         if reverseLookup == True:
+            logger.debug('Reverse lookup (amount) in calc_limit_price().')
             book_tot = Decimal(0)
             amt_tot = Decimal(0)
             for x in range(0, len(book[book_pos])):
@@ -318,6 +316,7 @@ def calc_limit_price(amount, position, reverseLookup=None, withFees=None):
         
         # Lookup price based on amount
         else:
+            logger.debug('Regular lookup (price) in calc_limit_price().')
             book_tot = Decimal(0)
             for x in range(0, len(book[book_pos])):
                 book_tot += Decimal(book[book_pos][x][1])
@@ -494,8 +493,9 @@ def process_trade_response(response, position):
     logger.debug('amount_total: ' + "{:.8f}".format(amount_total))
     logger.debug('order_average_rate: ' + "{:.8f}".format(order_average_rate))
     logger.debug('trade_amount: ' + "{:.8f}".format(trade_amount))
+    logger.debug('Fees (STR): ' + "{:.8f}".format(trade_amount - amount_total))
     
-    logger.debug('Calc. Error Margin: ' + "{:.2f}".format(((trade_amount * taker_fee) - Decimal(response['amountUnfilled'])) - amount_total))
+    #logger.debug('Calc. Error Margin: ' + "{:.2f}".format((trade_amount - Decimal(response['amountUnfilled'])) - amount_total))
     
     return {'date': trade_date, 'amount': amount_total, 'rate': order_average_rate}
 
@@ -510,51 +510,6 @@ def log_trade_csv(csv_row): # Must pass list as argument
     except:
         logger.error('Failed to write to csv file.')
         csv_failures += 1
-
-
-def calc_profit_csv():
-    trade_list = []
-    
-    with open(log_file, newline='') as csv_file:
-        csv_reader = csv.reader(csv_file, delimiter=',', quotechar='|')
-
-        try:
-            for row in csv_reader:
-                trade_list.append(row)
-        
-        except csv.Error as e:
-            logger.exception('Exception occurred while reading csv file.')
-
-    bought_amount = 0
-    spent_amount = 0
-    sold_amount = 0
-    gain_amount = 0
-    for x in range(0, len(t)):
-        trade_position = t[x][1]
-        amount = float(t[x][2])
-        rate = float(t[x][3])
-
-        if trade_position == 'buy':
-            bought_amount += amount
-            spent_amount += amount * rate
-        elif trade_position == 'sell':
-            sold_amount += amount
-            gain_amount += amount * rate
-        
-        logger.debug(t[x])
-
-    rate_avg = spent_amount / bought_amount
-
-    #logger.debug(bought_amount)
-    #logger.debug(spent_amount)
-    #logger.debug(rate_avg)
-
-    if gain_amount > 0:
-        profit = gain_amount - spent_amount
-        #logger.debug(profit)
-    else:
-        #logger.debug('No sells.')
-        pass
 
 
 def telegram_connect(bot, update):    
@@ -625,25 +580,6 @@ def telegram_status(bot, update):
     bot.send_message(chat_id=telegram_user, text=telegram_message)
 
 
-def telegram_profit(bot, update):
-    telegram_user = update.message.chat_id
-    
-    logger.debug('[PROFIT] chat_id: ' + str(telegram_user))
-    logger.info('Telegram user requesting status: ' + str(telegram_user))
-
-    if connected_users.count(telegram_user) > 0:
-        logger.debug('Access confirmed for requesting user.')
-
-        trade_profit = calc_profit_csv()
-
-        telegram_message = ''   # CSV PROFIT CALCULATION
-
-    else:
-        logger.warning('Access denied for requesting user.')
-        
-        telegram_message = 'Not currently in list of connected users. Type \'/connect\' to connect to Lorenzbot.'
-
-
 def telegram_send_message(bot, trade_message):
     logger.debug('trade_message: ' + trade_message)
 
@@ -656,7 +592,10 @@ def telegram_send_message(bot, trade_message):
 
 
 def calc_dynamic(selection, base, limit):
-    diff = (base - limit) / base
+    if float(base) > 0:
+        diff = (base - limit) / base
+    else:
+        diff = Decimal(0)
     logger.debug('diff: ' + "{:.6f}".format(diff))
     logger.info('Price Difference from Base: ' + "{:.4f}".format(diff * Decimal(100)) + '%')
 
@@ -777,9 +716,6 @@ if __name__ == '__main__':
 
         status_handler = CommandHandler('status', telegram_status)
         dispatcher.add_handler(status_handler)
-
-        profit_handler = CommandHandler('profit', telegram_profit)
-        dispatcher.add_handler(profit_handler)
 
         updater.start_polling()
 
@@ -943,6 +879,7 @@ if __name__ == '__main__':
 
                 else:
                     logger.warning('STR balance is 0. Leaving new collection empty.')
+
 
             # Calculate buy amount based on current conditions
             buy_amount_current = calc_dynamic('amount', base_price_target, calc_limit_price(trade_amount, 'buy', withFees=True))
