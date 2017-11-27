@@ -957,6 +957,11 @@ if __name__ == '__main__':
                 else:
                     logger.warning('STR balance is 0. Leaving new collection empty.')
 
+                # Recalculate available USDT remaining for trading
+                trade_usdt_remaining = trade_usdt_max - total_spent_usdt
+                logger.debug('trade_usdt_remaining: ' + "{:.4f}".format(trade_usdt_remaining))
+            
+
             # Calculate buy amount based on current conditions
             buy_amount_current = calc_dynamic('amount', base_price_target, calc_limit_price(trade_amount, 'buy', withFees=True))
             logger.debug('buy_amount_current: ' + "{:.8f}".format(buy_amount_current))
