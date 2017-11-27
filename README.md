@@ -8,11 +8,12 @@ TO DO:
 - Make boolean arguments into human-readable format
 - Clean up arguments --> Make parent/child --> Make sure all conditions satisfied
 - Add "shutdown" function that can be called anywhere instead of updater.stop() each time
-- Add Telegram alerts when adjustments are made due to balance/trade amount issues
+- Move balance/trade log verification to isolated function
 
 LATER:
 - Add argument for minimum loop time (loop_time_min)
 - Add Poloniex coach?
+- Add Telegram alerts when adjustments are made due to balance/trade amount issues
 
 IF TIME:
 - Add argument for product selection
