@@ -853,40 +853,50 @@ if __name__ == '__main__':
     logger.info('Balance STR:  ' + "{:.4f}".format(balance_str))
     logger.info('Balance USDT: ' + "{:.4f}".format(balance_usdt))
 
-    global trade_usdt_remaining  # NEEDED GLOBAL?
-    if db[coll_current].count() > 0:
-        logger.info('Collection not empty. Calculating USDT amount remaining for trading.')
-        if float(balance_str) > 0:
-            logger.debug('Initial STR balance > 0.')
-            trade_usdt_remaining = trade_usdt_max - calc_trade_totals('spent')
-        else:
-            logger.warning('Collection not empty, but STR balance is 0. Creating new empty collection and starting over with entry buy.')
-            modify_collections('create')
-            trade_usdt_remaining = trade_usdt_max
-    
-    else:
-        logger.info('Collection empty. Setting tradable balance remaining to allowed maximum.')
-        trade_usdt_remaining = trade_usdt_max
-    logger.debug('trade_usdt_remaining: ' + "{:.2f}".format(trade_usdt_remaining))
-    logger.info('Tradable USDT Remaining: ' + "{:.2f}".format(trade_usdt_remaining))
-
-    if trade_usdt_remaining < Decimal(0):
-        logger.error('Trade amount remaining less than 0. Try cleaning collections or setting a higher max trade value. Exiting.')
+    # If USDT and STR balances both ~0, then exit
+    if balance_usdt < Decimal(0.0001) and float(balance_str) == 0:
+        logger.error('USDT and STR balances both 0. Exiting.')
+        updater.stop()
         sys.exit(1)
 
-    if float(balance_usdt) < float(trade_usdt_remaining):
-        logger.warning('Insufficient USDT balance -- need at least ' + "{:.2f}".format(trade_usdt_max) + ' USDT.')
-        user_input = input('Continue using full balance of ' + "{:.2f}".format(balance_usdt) + ' instead? (y/n): ')
+    logger.info('Total Buy Count: ' + str(db[coll_current].count()))
 
-        if user_confirm == 'y':
-            trade_usdt_max = balance_usdt
-            logger.info('Max trade amount adjusted to ' + "{:.2f}".format(trade_usdt_max) + '.')
-        elif user_confirm == 'n':
-            logger.warning('Startup cancelled by user due to insufficient balance. Exiting.')
-            sys.exit()
-        else:
-            logger.error('Unrecognized user input. Exiting.')
-            sys.exit(1)
+    if db[coll_current].count() > 0:
+        logger.info('Collection not empty. Calculating USDT amount remaining for trading.')
+
+        # Verify STR balance with recorded amount bought
+        if float(balance_str) < float(calc_trade_totals('bought')):
+            logger.warning('STR balance less than recorded bought amount.')
+            
+            logger.warning('Creating new MongoDB database with available STR balance as total bought.')
+            
+            # Create new database and add available STR balance as buy trade
+            modify_collections('create')
+
+            if float(balance_str) > 0:
+                try:
+                    mongo_response = db[coll_current].insert_one({'amount': float(balance_str), 'price': float(base_price), 'side': 'buy', 'date': datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')})
+                    logger.debug('[BALANCE ADJUSTMENT] mongo_response: ' + str(mongo_response))
+                    logger.info('Adjustment logged to new MongoDB database collection ' + coll_current)
+                except:
+                    logger.exception('[BALANCE ADJUSTMENT] Failed to write to MongoDB log!')
+                    mongo_failures += 1
+
+            else:
+                logger.warning('STR balance is 0. Leaving new collection empty.')
+
+    # Verify remaining USDT balance with expected available trade amount
+    trade_usdt_remaining = trade_usdt_max - calc_trade_totals('spent')
+    logger.debug('trade_usdt_remaining: ' + "{:.4f}".format(trade_usdt_remaining))
+    if float(balance_usdt) < float(trade_usdt_remaining):
+        logger.warning('USDT balance less than remaining USDT amount allotted for trading. Adjusting allotment to available balance.')
+        trade_usdt_max = balance_usdt + calc_trade_totals('spent')
+        trade_usdt_remaining = trade_usdt_max - calc_trade_totals('spent')
+        logger.debug('[ADJUSTED]trade_usdt_remaining: ' + "{:.4f}".format(trade_usdt_remaining))
+        logger.info('Remaining Tradable USDT Balance Adjusted: ' + "{:.4f}".format(trade_usdt_remaining))
+    
+    logger.debug('trade_usdt_remaining: ' + "{:.2f}".format(trade_usdt_remaining))
+    logger.info('Tradable USDT Remaining: ' + "{:.2f}".format(trade_usdt_remaining))
 
 # Functions Used/Arguments Required/Values Returned:
 #
@@ -930,18 +940,6 @@ if __name__ == '__main__':
 
             logger.info('Total Buy Count: ' + str(db[coll_current].count()))
 
-            # Verify remaining USDT balance with expected available trade amount
-            trade_usdt_remaining = trade_usdt_max - calc_trade_totals('spent')
-            logger.debug('trade_usdt_remaining: ' + "{:.4f}".format(trade_usdt_remaining))
-            if float(balance_usdt) < float(trade_usdt_remaining):
-                logger.warning('USDT balance less than remaining USDT amount allotted for trading. Adjusting allotment to available balance.')
-                trade_usdt_max = balance_usdt + calc_trade_totals('spent')
-                trade_usdt_remaining = trade_usdt_max - calc_trade_totals('spent')
-                logger.debug('[ADJUSTED]trade_usdt_remaining: ' + "{:.4f}".format(trade_usdt_remaining))
-                logger.info('Remaining Tradable USDT Balance Adjusted: ' + "{:.4f}".format(trade_usdt_remaining))
-
-                skip_trade_check = True
-
             # Verify STR balance with recorded amount bought
             if float(balance_str) < float(calc_trade_totals('bought')):
                 logger.warning('STR balance less than recorded bought amount.')
@@ -965,6 +963,19 @@ if __name__ == '__main__':
 
                 skip_trade_check = True
 
+            # Verify remaining USDT balance with expected available trade amount
+            trade_usdt_remaining = trade_usdt_max - calc_trade_totals('spent')
+            logger.debug('trade_usdt_remaining: ' + "{:.4f}".format(trade_usdt_remaining))
+            if float(balance_usdt) < float(trade_usdt_remaining):
+                logger.warning('USDT balance less than remaining USDT amount allotted for trading. Adjusting allotment to available balance.')
+                trade_usdt_max = balance_usdt + calc_trade_totals('spent')
+                trade_usdt_remaining = trade_usdt_max - calc_trade_totals('spent')
+                logger.debug('[ADJUSTED]trade_usdt_remaining: ' + "{:.4f}".format(trade_usdt_remaining))
+                logger.info('Remaining Tradable USDT Balance Adjusted: ' + "{:.4f}".format(trade_usdt_remaining))
+
+                skip_trade_check = True
+
+            # If balances and trade logs agree, proceed with check for trade conditions
             if skip_trade_check == False:
                 # Calculate buy amount based on current conditions
                 buy_amount_current = calc_dynamic('amount', base_price_target, calc_limit_price(trade_amount, 'buy', withFees=True))
