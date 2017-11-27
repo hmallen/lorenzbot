@@ -457,7 +457,7 @@ def exec_trade(position, limit, amount):
         log_trade_csv(csv_list)
 
     if telegram_active == True:
-        if len(connected_users) > 0
+        if len(connected_users) > 0:
             if position == 'buy':
                 pos_msg = 'Bought '
             elif position == 'sell':
