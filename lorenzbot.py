@@ -690,6 +690,8 @@ def calc_dynamic(selection, base, limit):
                 lt = loop_time_min
         
         else:
+            logger.debug('Using static loop time.')
+            
             lt = loop_time
 
         logger.debug('lt: ' + "{:.2f}".format(lt))
@@ -699,6 +701,8 @@ def calc_dynamic(selection, base, limit):
     # Map magnitude of difference b/w base price and buy price to buy amount
     elif selection == 'amount':
         if amount_dynamic == True:
+            logger.debug('Calculating trade amount.')
+            
             trade_proportion_low = trade_proportion_initial # Default = 0.05
             logger.debug('trade_proportion_low: ' + "{:.2f}".format(trade_proportion_low))
             trade_proportion_high = Decimal(0.50)    # If limit price 100% less than base price, trade with this proportion of available USDT remaining
@@ -716,6 +720,8 @@ def calc_dynamic(selection, base, limit):
             logger.debug('[DYNAMIC]amount: ' + "{:.8f}".format(amount))
 
         else:
+            logger.debug('Using static loop time.')
+            
             amount = trade_amount  # STELLAR LUMENS
             logger.debug('[STATIC]amount: ' + "{:.8f}".format(amount))
 
@@ -958,8 +964,8 @@ if __name__ == '__main__':
                     logger.warning('STR balance is 0. Leaving new collection empty.')
 
                 # Recalculate available USDT remaining for trading
-                #trade_usdt_remaining = trade_usdt_max - total_spent_usdt
-                #logger.debug('trade_usdt_remaining: ' + "{:.4f}".format(trade_usdt_remaining))
+                trade_usdt_remaining = trade_usdt_max - total_spent_usdt
+                logger.debug('trade_usdt_remaining: ' + "{:.4f}".format(trade_usdt_remaining))
 
             else:
                 # Calculate buy amount based on current conditions
