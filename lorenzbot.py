@@ -936,7 +936,7 @@ if __name__ == '__main__':
                 logger.info('Remaining Tradable USDT Balance Adjusted: ' + "{:.4f}".format(trade_usdt_remaining))
 
             # Verify STR balance with recorded amount bought
-            if float(balance_str) < float(total_bought_str):
+            elif float(balance_str) < float(total_bought_str):
                 logger.warning('STR balance less than recorded bought amount.')
                 logger.debug('total_bought_str: ' + "{:.8f}".format(total_bought_str))
                 
@@ -958,65 +958,65 @@ if __name__ == '__main__':
                     logger.warning('STR balance is 0. Leaving new collection empty.')
 
                 # Recalculate available USDT remaining for trading
-                trade_usdt_remaining = trade_usdt_max - total_spent_usdt
-                logger.debug('trade_usdt_remaining: ' + "{:.4f}".format(trade_usdt_remaining))
-            
+                #trade_usdt_remaining = trade_usdt_max - total_spent_usdt
+                #logger.debug('trade_usdt_remaining: ' + "{:.4f}".format(trade_usdt_remaining))
 
-            # Calculate buy amount based on current conditions
-            buy_amount_current = calc_dynamic('amount', base_price_target, calc_limit_price(trade_amount, 'buy', withFees=True))
-            logger.debug('buy_amount_current: ' + "{:.8f}".format(buy_amount_current))
-            logger.info('Current Buy Amount: ' + "{:.4f}".format(buy_amount_current))
-
-            # Calculate true low ask (sufficient volume for buy)
-            low_ask_actual = calc_limit_price(buy_amount_current, 'buy', withFees=True)
-            logger.debug('low_ask_actual: ' + "{:.8f}".format(low_ask_actual))
-            logger.info('Low Ask (Actual): ' + "{:.4f}".format(low_ask_actual))
-
-            # Set sell amount based on total amount bought
-            sell_amount_current = calc_trade_totals('bought')
-            logger.debug('sell_amount_current: ' + "{:.8f}".format(sell_amount_current))
-            logger.info('Current Sell Amount: ' + "{:.4f}".format(sell_amount_current))
-
-            # Calculate true high bid (sufficient volume for sell)
-            high_bid_actual = calc_limit_price(sell_amount_current, 'sell', withFees=True)
-            logger.debug('high_bid_actual: ' + "{:.8f}".format(high_bid_actual))
-            logger.info('High Bid (Actual): ' + "{:.4f}".format(high_bid_actual))
-
-            # Calculate target sell price
-            sell_price_target = base_price * (Decimal(1) + profit_threshold + taker_fee)  # Add fee in calc_limit_price()
-            logger.debug('sell_price_target: ' + "{:.8f}".format(sell_price_target))
-            logger.info('Sell Target: ' + "{:.4f}".format(sell_price_target))
-
-            # Check for sell conditions
-            if float(high_bid_actual) >= float(sell_price_target):
-                # Check if sell total greater than minimum allowed
-                if (sell_amount_current * sell_price_target) < Decimal(0.0001):
-                    logger.warning('Trade total must be >= $0.0001. Skipping Trade.')
-                    sell_skips += 1
-                else:
-                    logger.info('TRADE CONDITIONS MET --> SELLING')
-                    exec_trade('sell', sell_price_target, sell_amount_current)
-
-            # Check for buy conditions
-            elif float(low_ask_actual) <= float(base_price):
-                # Check if buy total greater than minimum allowed
-                if (buy_amount_current * low_ask_actual) < Decimal(0.0001):
-                    logger.warning('Trade total must be >= $0.0001. Skipping Trade.')
-                    buy_skips += 1
-                else:
-                    logger.info('TRADE CONDITIONS MET --> BUYING')
-                    exec_trade('buy', base_price_target, buy_amount_current)
-
-            # Calculate loop time based on current conditions
-            loop_time_dynamic = calc_dynamic('loop', base_price, low_ask_actual)
-            logger.info('Trade loop complete. Sleeping for ' + "{:.2f}".format(loop_time_dynamic) + ' seconds.')
-
-            if debug == True:
-                logger.debug('----[LOOP END]----')
             else:
-                logger.info('--------------------')
+                # Calculate buy amount based on current conditions
+                buy_amount_current = calc_dynamic('amount', base_price_target, calc_limit_price(trade_amount, 'buy', withFees=True))
+                logger.debug('buy_amount_current: ' + "{:.8f}".format(buy_amount_current))
+                logger.info('Current Buy Amount: ' + "{:.4f}".format(buy_amount_current))
 
-            time.sleep(loop_time_dynamic)
+                # Calculate true low ask (sufficient volume for buy)
+                low_ask_actual = calc_limit_price(buy_amount_current, 'buy', withFees=True)
+                logger.debug('low_ask_actual: ' + "{:.8f}".format(low_ask_actual))
+                logger.info('Low Ask (Actual): ' + "{:.4f}".format(low_ask_actual))
+
+                # Set sell amount based on total amount bought
+                sell_amount_current = calc_trade_totals('bought')
+                logger.debug('sell_amount_current: ' + "{:.8f}".format(sell_amount_current))
+                logger.info('Current Sell Amount: ' + "{:.4f}".format(sell_amount_current))
+
+                # Calculate true high bid (sufficient volume for sell)
+                high_bid_actual = calc_limit_price(sell_amount_current, 'sell', withFees=True)
+                logger.debug('high_bid_actual: ' + "{:.8f}".format(high_bid_actual))
+                logger.info('High Bid (Actual): ' + "{:.4f}".format(high_bid_actual))
+
+                # Calculate target sell price
+                sell_price_target = base_price * (Decimal(1) + profit_threshold + taker_fee)  # Add fee in calc_limit_price()
+                logger.debug('sell_price_target: ' + "{:.8f}".format(sell_price_target))
+                logger.info('Sell Target: ' + "{:.4f}".format(sell_price_target))
+
+                # Check for sell conditions
+                if float(high_bid_actual) >= float(sell_price_target):
+                    # Check if sell total greater than minimum allowed
+                    if (sell_amount_current * sell_price_target) < Decimal(0.0001):
+                        logger.warning('Trade total must be >= $0.0001. Skipping Trade.')
+                        sell_skips += 1
+                    else:
+                        logger.info('TRADE CONDITIONS MET --> SELLING')
+                        exec_trade('sell', sell_price_target, sell_amount_current)
+
+                # Check for buy conditions
+                elif float(low_ask_actual) <= float(base_price):
+                    # Check if buy total greater than minimum allowed
+                    if (buy_amount_current * low_ask_actual) < Decimal(0.0001):
+                        logger.warning('Trade total must be >= $0.0001. Skipping Trade.')
+                        buy_skips += 1
+                    else:
+                        logger.info('TRADE CONDITIONS MET --> BUYING')
+                        exec_trade('buy', base_price_target, buy_amount_current)
+
+                # Calculate loop time based on current conditions
+                loop_time_dynamic = calc_dynamic('loop', base_price, low_ask_actual)
+                logger.info('Trade loop complete. Sleeping for ' + "{:.2f}".format(loop_time_dynamic) + ' seconds.')
+
+                if debug == True:
+                    logger.debug('----[LOOP END]----')
+                else:
+                    logger.info('--------------------')
+
+                time.sleep(loop_time_dynamic)
 
         except Exception as e:
             logger.exception(e)
