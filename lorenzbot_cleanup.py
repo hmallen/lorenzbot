@@ -17,8 +17,7 @@ import time
 global coll_current
 
 log_out = 'logs/' + datetime.datetime.now().strftime('%m%d%Y-%H%M%S') + '.log'
-
-#logging.basicConfig(level=logging.INFO, format=FORMAT)
+log_file = 'logs/lorezbot_log.csv'
 
 logger = logging.getLogger(__name__)
 formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
@@ -31,12 +30,19 @@ console_handler.setFormatter(formatter)
 logger.addHandler(console_handler)
 
 if not os.path.exists('logs'):
-    logger.info('Log directory not found. Creating...')
+    logger.info('Log directory not found. Creating.')
     try:
         os.makedirs('logs')
     except:
         logger.exception('Failed to create log directory. Exiting.')
-        sys.exit()
+        sys.exit(1)
+if not os.path.exists('logs/old'):
+    logger.info('Log archive directory not found. Creating.')
+    try:
+        os.makedirs('logs/old')
+    except:
+        logger.exception('Failed to create log archive directory. Exiting.')
+        sys.exit(1)
 
 # Add handler to write log messages to file
 file_handler = logging.FileHandler(log_out)
@@ -46,7 +52,7 @@ logger.addHandler(file_handler)
 
 # Variable modifiers
 product = 'USDT_STR'
-loop_time_min = Decimal(6) # Minimum allowed loop time with dynamic adjustment (seconds)
+loop_time_min = Decimal(6)  # Minimum allowed loop time with dynamic adjustment (seconds)
 
 buy_threshold = Decimal(0.000105)
 sell_padding = Decimal(0.9975)  # Proportion of total amount bought to sell when triggered
@@ -70,7 +76,7 @@ parser = argparse.ArgumentParser(
     epilog='\r')
 
 # Define arguments that can be passed to program
-parser.add_argument('-c', '--clean', action='store_true', default=False, help='Add argument to drop all collections and start fresh. [Default = False]')
+parser.add_argument('-c', '--clean', action='store_true', default=False, help='Add argument to drop all collections and csv trade log to start fresh. [Default = False]')
 
 parser.add_argument('-a', '--amount', default=1.0, type=float, help='Set static base amount of quote product to trade. [Default = 1.0]')
 parser.add_argument('--dynamicamount', action='store_true', default=False, help='Add flag to dynamically set trade amount based on current conditions.')
@@ -98,7 +104,7 @@ if debug == True:
     console_handler.setLevel(logging.DEBUG)
     logger.debug('Activated debug logging.')
 
-clean_collections = args.clean; logger.debug('clean_collections: ' + str(clean_collections))
+clean_logs = args.clean; logger.debug('clean_logs: ' + str(clean_logs))
 
 trade_amount = Decimal(args.amount); logger.debug('trade_amount: ' + "{:.2f}".format(trade_amount))
 amount_dynamic = args.dynamicamount; logger.debug('amount_dynamic: ' + str(amount_dynamic))
@@ -114,63 +120,6 @@ live_trading = args.live; logger.debug('live_trading: ' + str(live_trading))
 csv_logging = args.nocsv; logger.debug('csv_logging: ' + str(csv_logging))
 telegram_active = args.telegram; logger.debug('telegram_active: ' + str(telegram_active))
 mongo_alt = args.mongoalt; logger.debug('mongo_alt: ' + str(mongo_alt))
-
-# Check if MongoDB is running before beginning
-mongo_running = False
-for proc in psutil.process_iter(attrs=['pid', 'name']):
-    if proc.info['name'] == 'mongod':
-        mongo_pid = proc.info['pid']
-        mongo_running = True
-        logger.info('MongoDB running.')
-        break
-if mongo_running == False:
-    logger.error('Mongodb not running. Type \"mongod\" in terminal to start.')
-    sys.exit(1)
-
-if clean_collections == False:
-    # Handle all of the arguments delivered appropriately
-    if trade_usdt_max >= Decimal(10):
-        logger.warning('Total USDT trade amount is set to $' + "{:.2f}".format(trade_usdt_max) + '.')
-        user_confirm = input('Is this correct? (y/n): ')
-
-        if user_confirm == 'y':
-            logger.info('USDT trade amount confirmed.')
-        elif user_confirm == 'n':
-            logger.warning('Startup cancelled by user due to USDT trade amount. Exiting.')
-            sys.exit()
-        else:
-            logger.error('Unrecognized user input. Exiting.')
-            sys.exit(1)
-
-    if amount_dynamic == True:
-        logger.info('Dynamic trade amount calculation activated.')
-        if float(trade_amount) != 1.0:
-            logger.warning('Ignoring trade amount argument passed. Will set initial trade amount on program start.')
-    
-    elif amount_dynamic == False and trade_amount >= Decimal(10):
-        logger.warning('Total STR trade amount is set to ' + "{:.2f}".format(trade_amount) + '.')
-        user_confirm = input('Is this correct? (y/n): ')
-
-        if user_confirm == 'y':
-            logger.info('STR trade amount confirmed.')
-        elif user_confirm == 'n':
-            logger.warning('Startup cancelled by user due to STR trade amount. Exiting.')
-            sys.exit()
-        else:
-            logger.error('Unrecognized user input. Exiting.')
-            sys.exit(1)
-
-    if loop_dynamic == True:
-        logger.info('Dynamic loop time calculation activated. Base loop time set to ' + str(loop_time) + ' seconds.')
-    else:
-        logger.info('Using fixed loop time of ' + str(loop_time) + ' seconds.')
-
-    if csv_logging == True:
-        log_file = 'logs/' + 'lorenzbot_log_' + datetime.datetime.now().strftime('%m%d%Y-%H%M%S') + '.csv'
-        logger.info('CSV log file path: ' + log_file)
-
-    if telegram_active == True:
-        logger.info('Telegram logging active. Send \"/connect\" to @lorenzbot_bot to receive alerts.')
 
 
 def modify_collections(action):
@@ -542,14 +491,14 @@ def calc_profit_csv():
         except csv.Error as e:
             logger.exception('Exception occurred while reading csv file.')
 
-    bought_amount = 0
-    spent_amount = 0
-    sold_amount = 0
-    gain_amount = 0
+    bought_amount = Decimal(0)
+    spent_amount = Decimal(0)
+    sold_amount = Decimal(0)
+    gain_amount = Decimal(0)
     for x in range(0, len(t)):
         trade_position = t[x][1]
-        amount = float(t[x][2])
-        rate = float(t[x][3])
+        amount = Decimal(t[x][2])
+        rate = Decimal(t[x][3])
 
         if trade_position == 'buy':
             bought_amount += amount
@@ -568,10 +517,13 @@ def calc_profit_csv():
 
     if gain_amount > 0:
         profit = gain_amount - spent_amount
-        #logger.debug(profit)
+        
     else:
-        #logger.debug('No sells.')
-        pass
+        profit = Decimal(-1)
+
+    logger.debug('[CSVPROFIT] profit: ' + "{:.8f}".format(profit))
+
+    return {'profit': profit}
 
 
 def telegram_connect(bot, update):    
@@ -651,14 +603,25 @@ def telegram_profit(bot, update):
     if connected_users.count(telegram_user) > 0:
         logger.debug('Access confirmed for requesting user.')
 
-        trade_profit = calc_profit_csv()
+        if csv_logging == True:
+            trade_profit_info = calc_profit_csv()
+            trade_profit = trade_profit_info['profit']
 
-        telegram_message = ''   # CSV PROFIT CALCULATION
+            if float(trade_profit) < 0:
+                telegram_message = 'No sell trades executed.'
 
+            else:
+                telegram_message = 'Total Profit: ' + "{:.4f}".format(trade_profit)   # CSV PROFIT CALCULATION
+
+        else:
+            telegram_message = 'CSV logging not active. Cannot calculate profit.'
     else:
         logger.warning('Access denied for requesting user.')
         
         telegram_message = 'Not currently in list of connected users. Type \"/connect\" to connect to Lorenzbot.'
+
+    logger.debug('[PROFIT] telegram_message: ' + telegram_message)
+    bot.send_message(chat_id=telegram_user, text=telegram_message)
 
 
 def telegram_send_message(bot, trade_message):
@@ -738,6 +701,18 @@ def calc_dynamic(selection, base, limit):
 
 
 if __name__ == '__main__':
+    # Check if MongoDB is running before beginning
+    mongo_running = False
+    for proc in psutil.process_iter(attrs=['pid', 'name']):
+        if proc.info['name'] == 'mongod':
+            mongo_pid = proc.info['pid']
+            mongo_running = True
+            logger.info('MongoDB running.')
+            break
+    if mongo_running == False:
+        logger.error('Mongodb not running. Type \"mongod\" in terminal to start.')
+        sys.exit(1)
+    
     # Connect to MongoDB
     if mongo_alt == False:
         db = MongoClient().lorenzbot
@@ -746,12 +721,12 @@ if __name__ == '__main__':
         db = MongoClient().lorenzbotalt
         logger.info('Using alternate MongoDB database \"lorenzbotalt\".')
 
-    if clean_collections == True:
-        logger.warning('Option to delete all existing collections selected.')
+    if clean_logs == True:
+        logger.warning('Selected option to delete existing collections and archive current csv trade log.')
         user_confirm = input('Continue? (y/n): ')
 
         if user_confirm == 'y':
-            logger.info('Confirmed. Deleting all collections')
+            logger.info('Confirmed. Deleting all collections and csv trade log.')
         elif user_confirm == 'n':
             logger.warning('Collection deletion cancelled by user. Exiting.')
             sys.exit()
@@ -762,10 +737,62 @@ if __name__ == '__main__':
         logger.info('Dropping all collections from database.')
         modify_collections('drop')
         logger.info('Process complete. Restart program without boolean switch.')
-        # COULD JUST PROCEED WITH MAIN PROGRAM...
-        sys.exit()
+
+        if csv_logging == True:
+            if os.path.isfile(log_file):
+                logger.info('Archiving old csv trade log.')
+                os.rename(log_file, ('logs/old' + 'lorenzbot_log_' + datetime.datetime.now().strftime('%m%d%Y-%H%M%S') + '.csv'))
+            else:
+                logger.info('No csv log found to archive.')
+        
+        sys.exit()  # COULD JUST PROCEED WITH MAIN PROGRAM...
     
     else:
+        # Handle all of the arguments delivered appropriately
+        if trade_usdt_max >= Decimal(10):
+            logger.warning('Total USDT trade amount is set to $' + "{:.2f}".format(trade_usdt_max) + '.')
+            user_confirm = input('Is this correct? (y/n): ')
+
+            if user_confirm == 'y':
+                logger.info('USDT trade amount confirmed.')
+            elif user_confirm == 'n':
+                logger.warning('Startup cancelled by user due to USDT trade amount. Exiting.')
+                sys.exit()
+            else:
+                logger.error('Unrecognized user input. Exiting.')
+                sys.exit(1)
+
+        if amount_dynamic == True:
+            logger.info('Dynamic trade amount calculation activated.')
+            if float(trade_amount) != 1.0:
+                logger.warning('Ignoring trade amount argument passed. Will set initial trade amount on program start.')
+        
+        elif amount_dynamic == False and trade_amount >= Decimal(10):
+            logger.warning('Total STR trade amount is set to ' + "{:.2f}".format(trade_amount) + '.')
+            user_confirm = input('Is this correct? (y/n): ')
+
+            if user_confirm == 'y':
+                logger.info('STR trade amount confirmed.')
+            elif user_confirm == 'n':
+                logger.warning('Startup cancelled by user due to STR trade amount. Exiting.')
+                sys.exit()
+            else:
+                logger.error('Unrecognized user input. Exiting.')
+                sys.exit(1)
+
+        if loop_dynamic == True:
+            logger.info('Dynamic loop time calculation activated. Base loop time set to ' + str(loop_time) + ' seconds.')
+        else:
+            logger.info('Using fixed loop time of ' + str(loop_time) + ' seconds.')
+
+        if csv_logging == True:
+            #log_file = 'logs/' + 'lorenzbot_log_' + datetime.datetime.now().strftime('%m%d%Y-%H%M%S') + '.csv'
+            logger.info('CSV logging activated.')
+            logger.debug('CSV log file path: ' + log_file)
+
+        if telegram_active == True:
+            logger.info('Telegram logging active. Send \"/connect\" to @lorenzbot_bot to receive alerts.')
+
         try:
             # Try to retrieve latest collection
             coll_names = db.collection_names()
