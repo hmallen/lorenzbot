@@ -1,0 +1,20 @@
+2017-11-26 18:03:49,461 - DEBUG - Parsing arguments.
+2017-11-26 18:03:49,461 - DEBUG - Activated debug logging.
+2017-11-26 18:03:49,462 - DEBUG - clean_collections: False
+2017-11-26 18:03:49,462 - DEBUG - trade_amount: 1.00
+2017-11-26 18:03:49,462 - DEBUG - amount_dynamic: True
+2017-11-26 18:03:49,462 - DEBUG - trade_proportion_initial: 0.05
+2017-11-26 18:03:49,462 - DEBUG - trade_usdt_max: 1.00
+2017-11-26 18:03:49,463 - DEBUG - profit_threshold: 0.05
+2017-11-26 18:03:49,463 - DEBUG - loop_time: 20
+2017-11-26 18:03:49,463 - DEBUG - loop_dynamic: True
+2017-11-26 18:03:49,463 - DEBUG - live_trading: True
+2017-11-26 18:03:49,463 - DEBUG - csv_logging: True
+2017-11-26 18:03:49,463 - DEBUG - telegram_active: True
+2017-11-26 18:03:49,464 - DEBUG - mongo_alt: False
+2017-11-26 18:03:49,464 - INFO - Dynamic trade amount calculation activated.
+2017-11-26 18:03:49,464 - INFO - Dynamic loop time calculation activated. Base loop time set to 20 seconds.
+2017-11-26 18:03:49,464 - INFO - CSV log file path: logs/lorenzbot_log_11262017-180349.csv
+2017-11-26 18:03:49,464 - INFO - Telegram logging active. Send '/connect' to @lorenzbot_bot to receive alerts.
+2017-11-26 18:03:49,466 - INFO - Using default MongoDB database 'lorenzbot'.
+2017-11-26 18:04:00,241 - INFO - No collections found in database. Creating new.

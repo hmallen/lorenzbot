@@ -1,0 +1,893 @@
+2017-11-27 05:00:57,286 - DEBUG - Parsing arguments.
+2017-11-27 05:00:57,287 - DEBUG - Activated debug logging.
+2017-11-27 05:00:57,287 - DEBUG - clean_logs: False
+2017-11-27 05:00:57,287 - DEBUG - trade_amount: 1.00
+2017-11-27 05:00:57,287 - DEBUG - amount_dynamic: True
+2017-11-27 05:00:57,288 - DEBUG - trade_proportion_initial: 0.05
+2017-11-27 05:00:57,288 - DEBUG - trade_usdt_max: 1.00
+2017-11-27 05:00:57,288 - DEBUG - profit_threshold: 0.05
+2017-11-27 05:00:57,288 - DEBUG - loop_time: 20
+2017-11-27 05:00:57,288 - DEBUG - loop_dynamic: True
+2017-11-27 05:00:57,289 - DEBUG - live_trading: True
+2017-11-27 05:00:57,289 - DEBUG - csv_logging: True
+2017-11-27 05:00:57,289 - DEBUG - telegram_active: True
+2017-11-27 05:00:57,289 - DEBUG - mongo_alt: False
+2017-11-27 05:00:57,329 - INFO - MongoDB running.
+2017-11-27 05:00:57,340 - INFO - Using default MongoDB database "lorenzbot".
+2017-11-27 05:00:57,343 - INFO - Dynamic trade amount calculation activated.
+2017-11-27 05:00:57,344 - INFO - Dynamic loop time calculation activated. Base loop time set to 20 seconds.
+2017-11-27 05:00:57,344 - INFO - CSV logging activated.
+2017-11-27 05:00:57,344 - DEBUG - CSV log file path: logs/lorezbot_log.csv
+2017-11-27 05:00:57,345 - INFO - Telegram logging active. Send "/connect" to @lorenzbot_bot to receive alerts.
+2017-11-27 05:00:57,353 - INFO - Found existing collection: 11272017_045658
+2017-11-27 05:00:57,354 - INFO - Found Telegram config file.
+2017-11-27 05:00:57,357 - DEBUG - telegram_token: 411687950:AAFOIzovAmjDoy_0qJeBfdtzTFkM74BI0Fs
+2017-11-27 05:00:57,362 - INFO - Found Poloniex config file.
+2017-11-27 05:00:57,369 - WARNING - Live trading ENABLED.
+2017-11-27 05:00:57,875 - INFO - Current Maker Fee: 0.1500%
+2017-11-27 05:00:57,875 - INFO - Current Taker Fee: 0.2500%
+2017-11-27 05:00:58,080 - INFO - Balance STR:  433.3647
+2017-11-27 05:00:58,080 - INFO - Balance USDT: 0.5813
+2017-11-27 05:00:58,082 - DEBUG - agg: [{'_id': None, 'total_bought': 0.9975001995}]
+2017-11-27 05:00:58,082 - DEBUG - trade_total[bought]: 0.99750020
+2017-11-27 05:00:58,082 - INFO - Total STR Bought: 0.9975
+2017-11-27 05:00:58,084 - DEBUG - trade_total[spent]: 0.04987500
+2017-11-27 05:00:58,084 - INFO - Total USDT Spent: 0.0499
+2017-11-27 05:00:58,085 - INFO - Total Buy Count: 1
+2017-11-27 05:00:58,086 - INFO - Collection not empty. Calculating USDT amount remaining for trading.
+2017-11-27 05:00:58,087 - DEBUG - agg: [{'_id': None, 'total_bought': 0.9975001995}]
+2017-11-27 05:00:58,087 - DEBUG - trade_total[bought]: 0.99750020
+2017-11-27 05:00:58,088 - DEBUG - trade_total[spent]: 0.04987500
+2017-11-27 05:00:58,089 - DEBUG - trade_usdt_remaining: 0.9501
+2017-11-27 05:00:58,089 - WARNING - USDT balance less than remaining USDT amount allotted for trading. Adjusting allotment to available balance.
+2017-11-27 05:00:58,090 - DEBUG - trade_total[spent]: 0.04987500
+2017-11-27 05:00:58,092 - DEBUG - trade_total[spent]: 0.04987500
+2017-11-27 05:00:58,092 - DEBUG - [ADJUSTED]trade_usdt_remaining: 0.5813
+2017-11-27 05:00:58,092 - INFO - Remaining Tradable USDT Balance Adjusted: 0.5813
+2017-11-27 05:00:58,092 - DEBUG - trade_usdt_remaining: 0.58
+2017-11-27 05:00:58,092 - INFO - Tradable USDT Remaining: 0.58
+2017-11-27 05:00:58,093 - DEBUG - ----[LOOP START]----
+2017-11-27 05:00:58,093 - DEBUG - Entering base_price calculation.
+2017-11-27 05:00:58,093 - DEBUG - db[coll_current].count(): 1
+2017-11-27 05:00:58,095 - DEBUG - trade_total[spent]: 0.04987500
+2017-11-27 05:00:58,096 - DEBUG - agg: [{'_id': None, 'total_bought': 0.9975001995}]
+2017-11-27 05:00:58,096 - DEBUG - trade_total[bought]: 0.99750020
+2017-11-27 05:00:58,097 - DEBUG - trade_total[spent]: 0.04987500
+2017-11-27 05:00:58,099 - DEBUG - agg: [{'_id': None, 'total_bought': 0.9975001995}]
+2017-11-27 05:00:58,099 - DEBUG - trade_total[bought]: 0.99750020
+2017-11-27 05:00:58,099 - DEBUG - rate_avg: 0.04999999
+2017-11-27 05:00:58,099 - DEBUG - base_price: 0.04999999
+2017-11-27 05:00:58,099 - INFO - Base Price: 0.050000
+2017-11-27 05:00:58,099 - DEBUG - base_price_target: 0.04987499
+2017-11-27 05:00:58,100 - INFO - Base Price Target: 0.049875
+2017-11-27 05:00:58,493 - INFO - Balance STR:  433.3647
+2017-11-27 05:00:58,493 - INFO - Balance USDT: 0.5813
+2017-11-27 05:00:58,496 - DEBUG - agg: [{'_id': None, 'total_bought': 0.9975001995}]
+2017-11-27 05:00:58,497 - DEBUG - trade_total[bought]: 0.99750020
+2017-11-27 05:00:58,497 - INFO - Total STR Bought: 0.9975
+2017-11-27 05:00:58,502 - DEBUG - trade_total[spent]: 0.04987500
+2017-11-27 05:00:58,502 - INFO - Total USDT Spent: 0.0499
+2017-11-27 05:00:58,503 - INFO - Total Buy Count: 1
+2017-11-27 05:00:58,504 - DEBUG - agg: [{'_id': None, 'total_bought': 0.9975001995}]
+2017-11-27 05:00:58,505 - DEBUG - trade_total[bought]: 0.99750020
+2017-11-27 05:00:58,508 - DEBUG - trade_total[spent]: 0.04987500
+2017-11-27 05:00:58,509 - DEBUG - trade_usdt_remaining: 0.5813
+2017-11-27 05:00:58,698 - DEBUG - Regular lookup (price) in calc_limit_price().
+2017-11-27 05:00:58,698 - DEBUG - actual: 0.04990000
+2017-11-27 05:00:58,699 - DEBUG - book_tot: 141310.00
+2017-11-27 05:00:58,699 - DEBUG - actual: 0.04990000
+2017-11-27 05:00:58,699 - DEBUG - book_tot: 141310.00
+2017-11-27 05:00:58,699 - DEBUG - calc_limit_price() successful within limits (depth=40).
+2017-11-27 05:00:58,700 - DEBUG - Adding fees to calc_limit_price() return value.
+2017-11-27 05:00:58,700 - DEBUG - [buy]price_actual[+FEES]: 0.05002475
+2017-11-27 05:00:58,700 - DEBUG - diff: -0.003003
+2017-11-27 05:00:58,700 - INFO - Price Difference from Base: -0.3003%
+2017-11-27 05:00:58,700 - DEBUG - Calculating trade amount.
+2017-11-27 05:00:58,701 - DEBUG - diff < 0 - Using default trade amount.
+2017-11-27 05:00:58,701 - DEBUG - buy_amount_current: 1.00200401
+2017-11-27 05:00:58,701 - INFO - Current Buy Amount: 1.0020
+2017-11-27 05:00:58,847 - DEBUG - Regular lookup (price) in calc_limit_price().
+2017-11-27 05:00:58,848 - DEBUG - actual: 0.04990000
+2017-11-27 05:00:58,848 - DEBUG - book_tot: 141310.00
+2017-11-27 05:00:58,848 - DEBUG - actual: 0.04990000
+2017-11-27 05:00:58,848 - DEBUG - book_tot: 141310.00
+2017-11-27 05:00:58,848 - DEBUG - calc_limit_price() successful within limits (depth=40).
+2017-11-27 05:00:58,849 - DEBUG - Adding fees to calc_limit_price() return value.
+2017-11-27 05:00:58,849 - DEBUG - [buy]price_actual[+FEES]: 0.05002475
+2017-11-27 05:00:58,849 - DEBUG - low_ask_actual: 0.05002475
+2017-11-27 05:00:58,849 - INFO - Low Ask (Actual): 0.0500
+2017-11-27 05:00:58,851 - DEBUG - agg: [{'_id': None, 'total_bought': 0.9975001995}]
+2017-11-27 05:00:58,851 - DEBUG - trade_total[bought]: 0.99750020
+2017-11-27 05:00:58,851 - DEBUG - sell_amount_current: 0.99750020
+2017-11-27 05:00:58,851 - INFO - Current Sell Amount: 0.9975
+2017-11-27 05:00:58,976 - DEBUG - Regular lookup (price) in calc_limit_price().
+2017-11-27 05:00:58,976 - DEBUG - actual: 0.04960012
+2017-11-27 05:00:58,976 - DEBUG - book_tot: 149754.61
+2017-11-27 05:00:58,976 - DEBUG - actual: 0.04960012
+2017-11-27 05:00:58,977 - DEBUG - book_tot: 149754.61
+2017-11-27 05:00:58,977 - DEBUG - calc_limit_price() successful within limits (depth=40).
+2017-11-27 05:00:58,977 - DEBUG - Adding fees to calc_limit_price() return value.
+2017-11-27 05:00:58,977 - DEBUG - [sell]price_actual[+FEES]: 0.04947612
+2017-11-27 05:00:58,977 - DEBUG - high_bid_actual: 0.04947612
+2017-11-27 05:00:58,978 - INFO - High Bid (Actual): 0.0495
+2017-11-27 05:00:58,978 - DEBUG - sell_price_target: 0.05262499
+2017-11-27 05:00:58,978 - INFO - Sell Target: 0.0526
+2017-11-27 05:00:58,978 - DEBUG - diff: -0.000495
+2017-11-27 05:00:58,978 - INFO - Price Difference from Base: -0.0495%
+2017-11-27 05:00:58,979 - DEBUG - Calculating loop time.
+2017-11-27 05:00:58,979 - DEBUG - diff <= 0
+2017-11-27 05:00:58,979 - DEBUG - lt: 20.00
+2017-11-27 05:00:58,979 - DEBUG - skip_trade_check: False
+2017-11-27 05:00:58,980 - INFO - Trade loop complete. Sleeping for 20.00 seconds.
+2017-11-27 05:00:58,980 - DEBUG - ----[LOOP END]----
+2017-11-27 05:01:06,445 - DEBUG - [CONNECT] chat_id: 382606465
+2017-11-27 05:01:06,445 - INFO - Telegram user connected: 382606465
+2017-11-27 05:01:06,445 - DEBUG - [CONNECT] telegram_message: Subscribed to Lorenzbot alerts.
+2017-11-27 05:01:13,546 - DEBUG - [STATUS] chat_id: 382606465
+2017-11-27 05:01:13,546 - INFO - Telegram user requesting status: 382606465
+2017-11-27 05:01:13,547 - DEBUG - Access confirmed for requesting user.
+2017-11-27 05:01:13,547 - DEBUG - Entering base_price calculation.
+2017-11-27 05:01:13,549 - DEBUG - db[coll_current].count(): 1
+2017-11-27 05:01:13,551 - DEBUG - trade_total[spent]: 0.04987500
+2017-11-27 05:01:13,553 - DEBUG - agg: [{'_id': None, 'total_bought': 0.9975001995}]
+2017-11-27 05:01:13,553 - DEBUG - trade_total[bought]: 0.99750020
+2017-11-27 05:01:13,555 - DEBUG - trade_total[spent]: 0.04987500
+2017-11-27 05:01:13,556 - DEBUG - agg: [{'_id': None, 'total_bought': 0.9975001995}]
+2017-11-27 05:01:13,556 - DEBUG - trade_total[bought]: 0.99750020
+2017-11-27 05:01:13,556 - DEBUG - rate_avg: 0.04999999
+2017-11-27 05:01:13,557 - DEBUG - trade_total[spent]: 0.04987500
+2017-11-27 05:01:13,558 - DEBUG - agg: [{'_id': None, 'total_bought': 0.9975001995}]
+2017-11-27 05:01:13,559 - DEBUG - trade_total[bought]: 0.99750020
+2017-11-27 05:01:13,559 - DEBUG - [STATUS] telegram_message: Bought 0.9975STR for $0.0499 at an average rate of $0.0500.
+2017-11-27 05:01:18,982 - DEBUG - ----[LOOP START]----
+2017-11-27 05:01:18,982 - DEBUG - Entering base_price calculation.
+2017-11-27 05:01:18,983 - DEBUG - db[coll_current].count(): 1
+2017-11-27 05:01:18,985 - DEBUG - trade_total[spent]: 0.04987500
+2017-11-27 05:01:18,987 - DEBUG - agg: [{'_id': None, 'total_bought': 0.9975001995}]
+2017-11-27 05:01:18,987 - DEBUG - trade_total[bought]: 0.99750020
+2017-11-27 05:01:18,988 - DEBUG - trade_total[spent]: 0.04987500
+2017-11-27 05:01:18,990 - DEBUG - agg: [{'_id': None, 'total_bought': 0.9975001995}]
+2017-11-27 05:01:18,990 - DEBUG - trade_total[bought]: 0.99750020
+2017-11-27 05:01:18,990 - DEBUG - rate_avg: 0.04999999
+2017-11-27 05:01:18,991 - DEBUG - base_price: 0.04999999
+2017-11-27 05:01:18,991 - INFO - Base Price: 0.050000
+2017-11-27 05:01:18,991 - DEBUG - base_price_target: 0.04987499
+2017-11-27 05:01:18,991 - INFO - Base Price Target: 0.049875
+2017-11-27 05:01:19,321 - DEBUG - [CONNECT] telegram_message: Already subscribed to Lorenzbot alerts.
+2017-11-27 05:01:19,411 - INFO - Balance STR:  433.3647
+2017-11-27 05:01:19,411 - INFO - Balance USDT: 0.5813
+2017-11-27 05:01:19,413 - DEBUG - agg: [{'_id': None, 'total_bought': 0.9975001995}]
+2017-11-27 05:01:19,413 - DEBUG - trade_total[bought]: 0.99750020
+2017-11-27 05:01:19,414 - INFO - Total STR Bought: 0.9975
+2017-11-27 05:01:19,415 - DEBUG - trade_total[spent]: 0.04987500
+2017-11-27 05:01:19,415 - INFO - Total USDT Spent: 0.0499
+2017-11-27 05:01:19,416 - INFO - Total Buy Count: 1
+2017-11-27 05:01:19,417 - DEBUG - agg: [{'_id': None, 'total_bought': 0.9975001995}]
+2017-11-27 05:01:19,417 - DEBUG - trade_total[bought]: 0.99750020
+2017-11-27 05:01:19,418 - DEBUG - trade_total[spent]: 0.04987500
+2017-11-27 05:01:19,418 - DEBUG - trade_usdt_remaining: 0.5813
+2017-11-27 05:01:19,656 - DEBUG - Regular lookup (price) in calc_limit_price().
+2017-11-27 05:01:19,656 - DEBUG - actual: 0.04990000
+2017-11-27 05:01:19,656 - DEBUG - book_tot: 141310.00
+2017-11-27 05:01:19,657 - DEBUG - actual: 0.04990000
+2017-11-27 05:01:19,659 - DEBUG - book_tot: 141310.00
+2017-11-27 05:01:19,659 - DEBUG - calc_limit_price() successful within limits (depth=40).
+2017-11-27 05:01:19,660 - DEBUG - Adding fees to calc_limit_price() return value.
+2017-11-27 05:01:19,660 - DEBUG - [buy]price_actual[+FEES]: 0.05002475
+2017-11-27 05:01:19,661 - DEBUG - diff: -0.003003
+2017-11-27 05:01:19,664 - INFO - Price Difference from Base: -0.3003%
+2017-11-27 05:01:19,664 - DEBUG - Calculating trade amount.
+2017-11-27 05:01:19,665 - DEBUG - diff < 0 - Using default trade amount.
+2017-11-27 05:01:19,665 - DEBUG - buy_amount_current: 1.00200401
+2017-11-27 05:01:19,665 - INFO - Current Buy Amount: 1.0020
+2017-11-27 05:01:19,933 - DEBUG - Regular lookup (price) in calc_limit_price().
+2017-11-27 05:01:19,940 - DEBUG - actual: 0.04990000
+2017-11-27 05:01:19,940 - DEBUG - book_tot: 141310.00
+2017-11-27 05:01:19,941 - DEBUG - actual: 0.04990000
+2017-11-27 05:01:19,941 - DEBUG - book_tot: 141310.00
+2017-11-27 05:01:19,944 - DEBUG - calc_limit_price() successful within limits (depth=40).
+2017-11-27 05:01:19,976 - DEBUG - Adding fees to calc_limit_price() return value.
+2017-11-27 05:01:19,976 - DEBUG - [buy]price_actual[+FEES]: 0.05002475
+2017-11-27 05:01:19,985 - DEBUG - low_ask_actual: 0.05002475
+2017-11-27 05:01:19,990 - INFO - Low Ask (Actual): 0.0500
+2017-11-27 05:01:19,992 - DEBUG - agg: [{'_id': None, 'total_bought': 0.9975001995}]
+2017-11-27 05:01:19,994 - DEBUG - trade_total[bought]: 0.99750020
+2017-11-27 05:01:19,994 - DEBUG - sell_amount_current: 0.99750020
+2017-11-27 05:01:19,995 - INFO - Current Sell Amount: 0.9975
+2017-11-27 05:01:20,286 - DEBUG - Regular lookup (price) in calc_limit_price().
+2017-11-27 05:01:20,287 - DEBUG - actual: 0.04960014
+2017-11-27 05:01:20,287 - DEBUG - book_tot: 89018.75
+2017-11-27 05:01:20,287 - DEBUG - actual: 0.04960014
+2017-11-27 05:01:20,288 - DEBUG - book_tot: 89018.75
+2017-11-27 05:01:20,288 - DEBUG - calc_limit_price() successful within limits (depth=40).
+2017-11-27 05:01:20,288 - DEBUG - Adding fees to calc_limit_price() return value.
+2017-11-27 05:01:20,288 - DEBUG - [sell]price_actual[+FEES]: 0.04947614
+2017-11-27 05:01:20,288 - DEBUG - high_bid_actual: 0.04947614
+2017-11-27 05:01:20,289 - INFO - High Bid (Actual): 0.0495
+2017-11-27 05:01:20,289 - DEBUG - sell_price_target: 0.05262499
+2017-11-27 05:01:20,289 - INFO - Sell Target: 0.0526
+2017-11-27 05:01:20,289 - DEBUG - diff: -0.000495
+2017-11-27 05:01:20,290 - INFO - Price Difference from Base: -0.0495%
+2017-11-27 05:01:20,290 - DEBUG - Calculating loop time.
+2017-11-27 05:01:20,290 - DEBUG - diff <= 0
+2017-11-27 05:01:20,290 - DEBUG - lt: 20.00
+2017-11-27 05:01:20,291 - DEBUG - skip_trade_check: False
+2017-11-27 05:01:20,291 - INFO - Trade loop complete. Sleeping for 20.00 seconds.
+2017-11-27 05:01:20,291 - DEBUG - ----[LOOP END]----
+2017-11-27 05:01:23,479 - DEBUG - [PROFIT] chat_id: 382606465
+2017-11-27 05:01:23,480 - INFO - Telegram user requesting profit calculation: 382606465
+2017-11-27 05:01:23,480 - DEBUG - Access confirmed for requesting user.
+2017-11-27 05:01:40,296 - DEBUG - ----[LOOP START]----
+2017-11-27 05:01:40,297 - DEBUG - Entering base_price calculation.
+2017-11-27 05:01:40,298 - DEBUG - db[coll_current].count(): 1
+2017-11-27 05:01:40,300 - DEBUG - trade_total[spent]: 0.04987500
+2017-11-27 05:01:40,302 - DEBUG - agg: [{'_id': None, 'total_bought': 0.9975001995}]
+2017-11-27 05:01:40,302 - DEBUG - trade_total[bought]: 0.99750020
+2017-11-27 05:01:40,304 - DEBUG - trade_total[spent]: 0.04987500
+2017-11-27 05:01:40,306 - DEBUG - agg: [{'_id': None, 'total_bought': 0.9975001995}]
+2017-11-27 05:01:40,306 - DEBUG - trade_total[bought]: 0.99750020
+2017-11-27 05:01:40,306 - DEBUG - rate_avg: 0.04999999
+2017-11-27 05:01:40,306 - DEBUG - base_price: 0.04999999
+2017-11-27 05:01:40,306 - INFO - Base Price: 0.050000
+2017-11-27 05:01:40,306 - DEBUG - base_price_target: 0.04987499
+2017-11-27 05:01:40,307 - INFO - Base Price Target: 0.049875
+2017-11-27 05:01:40,470 - INFO - Balance STR:  433.3647
+2017-11-27 05:01:40,470 - INFO - Balance USDT: 0.5813
+2017-11-27 05:01:40,474 - DEBUG - agg: [{'_id': None, 'total_bought': 0.9975001995}]
+2017-11-27 05:01:40,475 - DEBUG - trade_total[bought]: 0.99750020
+2017-11-27 05:01:40,475 - INFO - Total STR Bought: 0.9975
+2017-11-27 05:01:40,481 - DEBUG - trade_total[spent]: 0.04987500
+2017-11-27 05:01:40,481 - INFO - Total USDT Spent: 0.0499
+2017-11-27 05:01:40,483 - INFO - Total Buy Count: 1
+2017-11-27 05:01:40,485 - DEBUG - agg: [{'_id': None, 'total_bought': 0.9975001995}]
+2017-11-27 05:01:40,486 - DEBUG - trade_total[bought]: 0.99750020
+2017-11-27 05:01:40,488 - DEBUG - trade_total[spent]: 0.04987500
+2017-11-27 05:01:40,490 - DEBUG - trade_usdt_remaining: 0.5813
+2017-11-27 05:01:40,634 - DEBUG - Regular lookup (price) in calc_limit_price().
+2017-11-27 05:01:40,634 - DEBUG - actual: 0.04989999
+2017-11-27 05:01:40,634 - DEBUG - book_tot: 4873.54
+2017-11-27 05:01:40,634 - DEBUG - actual: 0.04989999
+2017-11-27 05:01:40,634 - DEBUG - book_tot: 4873.54
+2017-11-27 05:01:40,635 - DEBUG - calc_limit_price() successful within limits (depth=40).
+2017-11-27 05:01:40,635 - DEBUG - Adding fees to calc_limit_price() return value.
+2017-11-27 05:01:40,635 - DEBUG - [buy]price_actual[+FEES]: 0.05002474
+2017-11-27 05:01:40,635 - DEBUG - diff: -0.003003
+2017-11-27 05:01:40,635 - INFO - Price Difference from Base: -0.3003%
+2017-11-27 05:01:40,635 - DEBUG - Calculating trade amount.
+2017-11-27 05:01:40,635 - DEBUG - diff < 0 - Using default trade amount.
+2017-11-27 05:01:40,636 - DEBUG - buy_amount_current: 1.00200401
+2017-11-27 05:01:40,636 - INFO - Current Buy Amount: 1.0020
+2017-11-27 05:01:40,761 - DEBUG - Regular lookup (price) in calc_limit_price().
+2017-11-27 05:01:40,761 - DEBUG - actual: 0.04989999
+2017-11-27 05:01:40,762 - DEBUG - book_tot: 4873.54
+2017-11-27 05:01:40,762 - DEBUG - actual: 0.04989999
+2017-11-27 05:01:40,762 - DEBUG - book_tot: 4873.54
+2017-11-27 05:01:40,762 - DEBUG - calc_limit_price() successful within limits (depth=40).
+2017-11-27 05:01:40,762 - DEBUG - Adding fees to calc_limit_price() return value.
+2017-11-27 05:01:40,762 - DEBUG - [buy]price_actual[+FEES]: 0.05002474
+2017-11-27 05:01:40,763 - DEBUG - low_ask_actual: 0.05002474
+2017-11-27 05:01:40,763 - INFO - Low Ask (Actual): 0.0500
+2017-11-27 05:01:40,765 - DEBUG - agg: [{'_id': None, 'total_bought': 0.9975001995}]
+2017-11-27 05:01:40,766 - DEBUG - trade_total[bought]: 0.99750020
+2017-11-27 05:01:40,766 - DEBUG - sell_amount_current: 0.99750020
+2017-11-27 05:01:40,766 - INFO - Current Sell Amount: 0.9975
+2017-11-27 05:01:40,888 - DEBUG - Regular lookup (price) in calc_limit_price().
+2017-11-27 05:01:40,888 - DEBUG - actual: 0.04960014
+2017-11-27 05:01:40,888 - DEBUG - book_tot: 60999.69
+2017-11-27 05:01:40,889 - DEBUG - actual: 0.04960014
+2017-11-27 05:01:40,889 - DEBUG - book_tot: 60999.69
+2017-11-27 05:01:40,889 - DEBUG - calc_limit_price() successful within limits (depth=40).
+2017-11-27 05:01:40,889 - DEBUG - Adding fees to calc_limit_price() return value.
+2017-11-27 05:01:40,889 - DEBUG - [sell]price_actual[+FEES]: 0.04947614
+2017-11-27 05:01:40,890 - DEBUG - high_bid_actual: 0.04947614
+2017-11-27 05:01:40,890 - INFO - High Bid (Actual): 0.0495
+2017-11-27 05:01:40,890 - DEBUG - sell_price_target: 0.05262499
+2017-11-27 05:01:40,890 - INFO - Sell Target: 0.0526
+2017-11-27 05:01:40,890 - DEBUG - diff: -0.000495
+2017-11-27 05:01:40,891 - INFO - Price Difference from Base: -0.0495%
+2017-11-27 05:01:40,891 - DEBUG - Calculating loop time.
+2017-11-27 05:01:40,891 - DEBUG - diff <= 0
+2017-11-27 05:01:40,891 - DEBUG - lt: 20.00
+2017-11-27 05:01:40,891 - DEBUG - skip_trade_check: False
+2017-11-27 05:01:40,891 - INFO - Trade loop complete. Sleeping for 20.00 seconds.
+2017-11-27 05:01:40,892 - DEBUG - ----[LOOP END]----
+2017-11-27 05:02:00,895 - DEBUG - ----[LOOP START]----
+2017-11-27 05:02:00,895 - DEBUG - Entering base_price calculation.
+2017-11-27 05:02:00,897 - DEBUG - db[coll_current].count(): 1
+2017-11-27 05:02:00,899 - DEBUG - trade_total[spent]: 0.04987500
+2017-11-27 05:02:00,901 - DEBUG - agg: [{'_id': None, 'total_bought': 0.9975001995}]
+2017-11-27 05:02:00,901 - DEBUG - trade_total[bought]: 0.99750020
+2017-11-27 05:02:00,903 - DEBUG - trade_total[spent]: 0.04987500
+2017-11-27 05:02:00,904 - DEBUG - agg: [{'_id': None, 'total_bought': 0.9975001995}]
+2017-11-27 05:02:00,904 - DEBUG - trade_total[bought]: 0.99750020
+2017-11-27 05:02:00,904 - DEBUG - rate_avg: 0.04999999
+2017-11-27 05:02:00,905 - DEBUG - base_price: 0.04999999
+2017-11-27 05:02:00,905 - INFO - Base Price: 0.050000
+2017-11-27 05:02:00,905 - DEBUG - base_price_target: 0.04987499
+2017-11-27 05:02:00,905 - INFO - Base Price Target: 0.049875
+2017-11-27 05:02:01,269 - INFO - Balance STR:  433.3647
+2017-11-27 05:02:01,269 - INFO - Balance USDT: 0.5813
+2017-11-27 05:02:01,272 - DEBUG - agg: [{'_id': None, 'total_bought': 0.9975001995}]
+2017-11-27 05:02:01,272 - DEBUG - trade_total[bought]: 0.99750020
+2017-11-27 05:02:01,272 - INFO - Total STR Bought: 0.9975
+2017-11-27 05:02:01,273 - DEBUG - trade_total[spent]: 0.04987500
+2017-11-27 05:02:01,274 - INFO - Total USDT Spent: 0.0499
+2017-11-27 05:02:01,275 - INFO - Total Buy Count: 1
+2017-11-27 05:02:01,278 - DEBUG - agg: [{'_id': None, 'total_bought': 0.9975001995}]
+2017-11-27 05:02:01,278 - DEBUG - trade_total[bought]: 0.99750020
+2017-11-27 05:02:01,280 - DEBUG - trade_total[spent]: 0.04987500
+2017-11-27 05:02:01,280 - DEBUG - trade_usdt_remaining: 0.5813
+2017-11-27 05:02:01,420 - DEBUG - Regular lookup (price) in calc_limit_price().
+2017-11-27 05:02:01,420 - DEBUG - actual: 0.04989999
+2017-11-27 05:02:01,420 - DEBUG - book_tot: 4873.54
+2017-11-27 05:02:01,421 - DEBUG - actual: 0.04989999
+2017-11-27 05:02:01,421 - DEBUG - book_tot: 4873.54
+2017-11-27 05:02:01,421 - DEBUG - calc_limit_price() successful within limits (depth=40).
+2017-11-27 05:02:01,421 - DEBUG - Adding fees to calc_limit_price() return value.
+2017-11-27 05:02:01,421 - DEBUG - [buy]price_actual[+FEES]: 0.05002474
+2017-11-27 05:02:01,422 - DEBUG - diff: -0.003003
+2017-11-27 05:02:01,422 - INFO - Price Difference from Base: -0.3003%
+2017-11-27 05:02:01,422 - DEBUG - Calculating trade amount.
+2017-11-27 05:02:01,422 - DEBUG - diff < 0 - Using default trade amount.
+2017-11-27 05:02:01,422 - DEBUG - buy_amount_current: 1.00200401
+2017-11-27 05:02:01,423 - INFO - Current Buy Amount: 1.0020
+2017-11-27 05:02:01,554 - DEBUG - Regular lookup (price) in calc_limit_price().
+2017-11-27 05:02:01,554 - DEBUG - actual: 0.04989999
+2017-11-27 05:02:01,554 - DEBUG - book_tot: 4873.54
+2017-11-27 05:02:01,556 - DEBUG - actual: 0.04989999
+2017-11-27 05:02:01,557 - DEBUG - book_tot: 4873.54
+2017-11-27 05:02:01,559 - DEBUG - calc_limit_price() successful within limits (depth=40).
+2017-11-27 05:02:01,560 - DEBUG - Adding fees to calc_limit_price() return value.
+2017-11-27 05:02:01,561 - DEBUG - [buy]price_actual[+FEES]: 0.05002474
+2017-11-27 05:02:01,561 - DEBUG - low_ask_actual: 0.05002474
+2017-11-27 05:02:01,561 - INFO - Low Ask (Actual): 0.0500
+2017-11-27 05:02:01,564 - DEBUG - agg: [{'_id': None, 'total_bought': 0.9975001995}]
+2017-11-27 05:02:01,564 - DEBUG - trade_total[bought]: 0.99750020
+2017-11-27 05:02:01,565 - DEBUG - sell_amount_current: 0.99750020
+2017-11-27 05:02:01,565 - INFO - Current Sell Amount: 0.9975
+2017-11-27 05:02:01,796 - DEBUG - Regular lookup (price) in calc_limit_price().
+2017-11-27 05:02:01,797 - DEBUG - actual: 0.04960017
+2017-11-27 05:02:01,801 - DEBUG - book_tot: 9735.00
+2017-11-27 05:02:01,801 - DEBUG - actual: 0.04960017
+2017-11-27 05:02:01,802 - DEBUG - book_tot: 9735.00
+2017-11-27 05:02:01,802 - DEBUG - calc_limit_price() successful within limits (depth=40).
+2017-11-27 05:02:01,802 - DEBUG - Adding fees to calc_limit_price() return value.
+2017-11-27 05:02:01,802 - DEBUG - [sell]price_actual[+FEES]: 0.04947617
+2017-11-27 05:02:01,803 - DEBUG - high_bid_actual: 0.04947617
+2017-11-27 05:02:01,803 - INFO - High Bid (Actual): 0.0495
+2017-11-27 05:02:01,803 - DEBUG - sell_price_target: 0.05262499
+2017-11-27 05:02:01,803 - INFO - Sell Target: 0.0526
+2017-11-27 05:02:01,803 - DEBUG - diff: -0.000495
+2017-11-27 05:02:01,804 - INFO - Price Difference from Base: -0.0495%
+2017-11-27 05:02:01,804 - DEBUG - Calculating loop time.
+2017-11-27 05:02:01,804 - DEBUG - diff <= 0
+2017-11-27 05:02:01,804 - DEBUG - lt: 20.00
+2017-11-27 05:02:01,804 - DEBUG - skip_trade_check: False
+2017-11-27 05:02:01,805 - INFO - Trade loop complete. Sleeping for 20.00 seconds.
+2017-11-27 05:02:01,807 - DEBUG - ----[LOOP END]----
+2017-11-27 05:02:02,877 - DEBUG - [PROFIT] chat_id: 382606465
+2017-11-27 05:02:02,878 - INFO - Telegram user requesting profit calculation: 382606465
+2017-11-27 05:02:02,878 - DEBUG - Access confirmed for requesting user.
+2017-11-27 05:02:21,808 - DEBUG - ----[LOOP START]----
+2017-11-27 05:02:21,808 - DEBUG - Entering base_price calculation.
+2017-11-27 05:02:21,810 - DEBUG - db[coll_current].count(): 1
+2017-11-27 05:02:21,813 - DEBUG - trade_total[spent]: 0.04987500
+2017-11-27 05:02:21,814 - DEBUG - agg: [{'_id': None, 'total_bought': 0.9975001995}]
+2017-11-27 05:02:21,815 - DEBUG - trade_total[bought]: 0.99750020
+2017-11-27 05:02:21,816 - DEBUG - trade_total[spent]: 0.04987500
+2017-11-27 05:02:21,818 - DEBUG - agg: [{'_id': None, 'total_bought': 0.9975001995}]
+2017-11-27 05:02:21,819 - DEBUG - trade_total[bought]: 0.99750020
+2017-11-27 05:02:21,819 - DEBUG - rate_avg: 0.04999999
+2017-11-27 05:02:21,819 - DEBUG - base_price: 0.04999999
+2017-11-27 05:02:21,819 - INFO - Base Price: 0.050000
+2017-11-27 05:02:21,819 - DEBUG - base_price_target: 0.04987499
+2017-11-27 05:02:21,819 - INFO - Base Price Target: 0.049875
+2017-11-27 05:02:22,042 - INFO - Balance STR:  433.3647
+2017-11-27 05:02:22,042 - INFO - Balance USDT: 0.5813
+2017-11-27 05:02:22,045 - DEBUG - agg: [{'_id': None, 'total_bought': 0.9975001995}]
+2017-11-27 05:02:22,045 - DEBUG - trade_total[bought]: 0.99750020
+2017-11-27 05:02:22,046 - INFO - Total STR Bought: 0.9975
+2017-11-27 05:02:22,048 - DEBUG - trade_total[spent]: 0.04987500
+2017-11-27 05:02:22,048 - INFO - Total USDT Spent: 0.0499
+2017-11-27 05:02:22,051 - INFO - Total Buy Count: 1
+2017-11-27 05:02:22,054 - DEBUG - agg: [{'_id': None, 'total_bought': 0.9975001995}]
+2017-11-27 05:02:22,055 - DEBUG - trade_total[bought]: 0.99750020
+2017-11-27 05:02:22,057 - DEBUG - trade_total[spent]: 0.04987500
+2017-11-27 05:02:22,058 - DEBUG - trade_usdt_remaining: 0.5813
+2017-11-27 05:02:22,274 - DEBUG - Regular lookup (price) in calc_limit_price().
+2017-11-27 05:02:22,274 - DEBUG - actual: 0.04989999
+2017-11-27 05:02:22,275 - DEBUG - book_tot: 4873.54
+2017-11-27 05:02:22,275 - DEBUG - actual: 0.04989999
+2017-11-27 05:02:22,277 - DEBUG - book_tot: 4873.54
+2017-11-27 05:02:22,277 - DEBUG - calc_limit_price() successful within limits (depth=40).
+2017-11-27 05:02:22,278 - DEBUG - Adding fees to calc_limit_price() return value.
+2017-11-27 05:02:22,278 - DEBUG - [buy]price_actual[+FEES]: 0.05002474
+2017-11-27 05:02:22,279 - DEBUG - diff: -0.003003
+2017-11-27 05:02:22,279 - INFO - Price Difference from Base: -0.3003%
+2017-11-27 05:02:22,279 - DEBUG - Calculating trade amount.
+2017-11-27 05:02:22,279 - DEBUG - diff < 0 - Using default trade amount.
+2017-11-27 05:02:22,279 - DEBUG - buy_amount_current: 1.00200401
+2017-11-27 05:02:22,283 - INFO - Current Buy Amount: 1.0020
+2017-11-27 05:02:22,444 - DEBUG - Regular lookup (price) in calc_limit_price().
+2017-11-27 05:02:22,445 - DEBUG - actual: 0.04989999
+2017-11-27 05:02:22,445 - DEBUG - book_tot: 4873.54
+2017-11-27 05:02:22,445 - DEBUG - actual: 0.04989999
+2017-11-27 05:02:22,445 - DEBUG - book_tot: 4873.54
+2017-11-27 05:02:22,445 - DEBUG - calc_limit_price() successful within limits (depth=40).
+2017-11-27 05:02:22,446 - DEBUG - Adding fees to calc_limit_price() return value.
+2017-11-27 05:02:22,446 - DEBUG - [buy]price_actual[+FEES]: 0.05002474
+2017-11-27 05:02:22,447 - DEBUG - low_ask_actual: 0.05002474
+2017-11-27 05:02:22,447 - INFO - Low Ask (Actual): 0.0500
+2017-11-27 05:02:22,450 - DEBUG - agg: [{'_id': None, 'total_bought': 0.9975001995}]
+2017-11-27 05:02:22,451 - DEBUG - trade_total[bought]: 0.99750020
+2017-11-27 05:02:22,452 - DEBUG - sell_amount_current: 0.99750020
+2017-11-27 05:02:22,454 - INFO - Current Sell Amount: 0.9975
+2017-11-27 05:02:22,589 - DEBUG - Regular lookup (price) in calc_limit_price().
+2017-11-27 05:02:22,589 - DEBUG - actual: 0.04960022
+2017-11-27 05:02:22,589 - DEBUG - book_tot: 90697.60
+2017-11-27 05:02:22,589 - DEBUG - actual: 0.04960022
+2017-11-27 05:02:22,590 - DEBUG - book_tot: 90697.60
+2017-11-27 05:02:22,590 - DEBUG - calc_limit_price() successful within limits (depth=40).
+2017-11-27 05:02:22,590 - DEBUG - Adding fees to calc_limit_price() return value.
+2017-11-27 05:02:22,590 - DEBUG - [sell]price_actual[+FEES]: 0.04947622
+2017-11-27 05:02:22,590 - DEBUG - high_bid_actual: 0.04947622
+2017-11-27 05:02:22,591 - INFO - High Bid (Actual): 0.0495
+2017-11-27 05:02:22,591 - DEBUG - sell_price_target: 0.05262499
+2017-11-27 05:02:22,591 - INFO - Sell Target: 0.0526
+2017-11-27 05:02:22,591 - DEBUG - diff: -0.000495
+2017-11-27 05:02:22,591 - INFO - Price Difference from Base: -0.0495%
+2017-11-27 05:02:22,591 - DEBUG - Calculating loop time.
+2017-11-27 05:02:22,591 - DEBUG - diff <= 0
+2017-11-27 05:02:22,592 - DEBUG - lt: 20.00
+2017-11-27 05:02:22,592 - DEBUG - skip_trade_check: False
+2017-11-27 05:02:22,592 - INFO - Trade loop complete. Sleeping for 20.00 seconds.
+2017-11-27 05:02:22,594 - DEBUG - ----[LOOP END]----
+2017-11-27 05:02:42,594 - DEBUG - ----[LOOP START]----
+2017-11-27 05:02:42,594 - DEBUG - Entering base_price calculation.
+2017-11-27 05:02:42,595 - DEBUG - db[coll_current].count(): 1
+2017-11-27 05:02:42,598 - DEBUG - trade_total[spent]: 0.04987500
+2017-11-27 05:02:42,600 - DEBUG - agg: [{'_id': None, 'total_bought': 0.9975001995}]
+2017-11-27 05:02:42,600 - DEBUG - trade_total[bought]: 0.99750020
+2017-11-27 05:02:42,605 - DEBUG - trade_total[spent]: 0.04987500
+2017-11-27 05:02:42,607 - DEBUG - agg: [{'_id': None, 'total_bought': 0.9975001995}]
+2017-11-27 05:02:42,607 - DEBUG - trade_total[bought]: 0.99750020
+2017-11-27 05:02:42,608 - DEBUG - rate_avg: 0.04999999
+2017-11-27 05:02:42,608 - DEBUG - base_price: 0.04999999
+2017-11-27 05:02:42,608 - INFO - Base Price: 0.050000
+2017-11-27 05:02:42,608 - DEBUG - base_price_target: 0.04987499
+2017-11-27 05:02:42,608 - INFO - Base Price Target: 0.049875
+2017-11-27 05:02:42,838 - INFO - Balance STR:  433.3647
+2017-11-27 05:02:42,838 - INFO - Balance USDT: 0.5813
+2017-11-27 05:02:42,840 - DEBUG - agg: [{'_id': None, 'total_bought': 0.9975001995}]
+2017-11-27 05:02:42,840 - DEBUG - trade_total[bought]: 0.99750020
+2017-11-27 05:02:42,840 - INFO - Total STR Bought: 0.9975
+2017-11-27 05:02:42,842 - DEBUG - trade_total[spent]: 0.04987500
+2017-11-27 05:02:42,843 - INFO - Total USDT Spent: 0.0499
+2017-11-27 05:02:42,844 - INFO - Total Buy Count: 1
+2017-11-27 05:02:42,845 - DEBUG - agg: [{'_id': None, 'total_bought': 0.9975001995}]
+2017-11-27 05:02:42,845 - DEBUG - trade_total[bought]: 0.99750020
+2017-11-27 05:02:42,847 - DEBUG - trade_total[spent]: 0.04987500
+2017-11-27 05:02:42,847 - DEBUG - trade_usdt_remaining: 0.5813
+2017-11-27 05:02:42,972 - DEBUG - Regular lookup (price) in calc_limit_price().
+2017-11-27 05:02:42,973 - DEBUG - actual: 0.04990000
+2017-11-27 05:02:42,973 - DEBUG - book_tot: 141310.00
+2017-11-27 05:02:42,973 - DEBUG - actual: 0.04990000
+2017-11-27 05:02:42,973 - DEBUG - book_tot: 141310.00
+2017-11-27 05:02:42,973 - DEBUG - calc_limit_price() successful within limits (depth=40).
+2017-11-27 05:02:42,973 - DEBUG - Adding fees to calc_limit_price() return value.
+2017-11-27 05:02:42,974 - DEBUG - [buy]price_actual[+FEES]: 0.05002475
+2017-11-27 05:02:42,974 - DEBUG - diff: -0.003003
+2017-11-27 05:02:42,974 - INFO - Price Difference from Base: -0.3003%
+2017-11-27 05:02:42,974 - DEBUG - Calculating trade amount.
+2017-11-27 05:02:42,974 - DEBUG - diff < 0 - Using default trade amount.
+2017-11-27 05:02:42,976 - DEBUG - buy_amount_current: 1.00200401
+2017-11-27 05:02:42,977 - INFO - Current Buy Amount: 1.0020
+2017-11-27 05:02:43,331 - DEBUG - Regular lookup (price) in calc_limit_price().
+2017-11-27 05:02:43,331 - DEBUG - actual: 0.04990000
+2017-11-27 05:02:43,331 - DEBUG - book_tot: 141310.00
+2017-11-27 05:02:43,331 - DEBUG - actual: 0.04990000
+2017-11-27 05:02:43,332 - DEBUG - book_tot: 141310.00
+2017-11-27 05:02:43,332 - DEBUG - calc_limit_price() successful within limits (depth=40).
+2017-11-27 05:02:43,332 - DEBUG - Adding fees to calc_limit_price() return value.
+2017-11-27 05:02:43,332 - DEBUG - [buy]price_actual[+FEES]: 0.05002475
+2017-11-27 05:02:43,332 - DEBUG - low_ask_actual: 0.05002475
+2017-11-27 05:02:43,332 - INFO - Low Ask (Actual): 0.0500
+2017-11-27 05:02:43,334 - DEBUG - agg: [{'_id': None, 'total_bought': 0.9975001995}]
+2017-11-27 05:02:43,335 - DEBUG - trade_total[bought]: 0.99750020
+2017-11-27 05:02:43,335 - DEBUG - sell_amount_current: 0.99750020
+2017-11-27 05:02:43,336 - INFO - Current Sell Amount: 0.9975
+2017-11-27 05:02:43,462 - DEBUG - Regular lookup (price) in calc_limit_price().
+2017-11-27 05:02:43,463 - DEBUG - actual: 0.04960024
+2017-11-27 05:02:43,463 - DEBUG - book_tot: 126278.15
+2017-11-27 05:02:43,463 - DEBUG - actual: 0.04960024
+2017-11-27 05:02:43,463 - DEBUG - book_tot: 126278.15
+2017-11-27 05:02:43,464 - DEBUG - calc_limit_price() successful within limits (depth=40).
+2017-11-27 05:02:43,465 - DEBUG - Adding fees to calc_limit_price() return value.
+2017-11-27 05:02:43,466 - DEBUG - [sell]price_actual[+FEES]: 0.04947624
+2017-11-27 05:02:43,466 - DEBUG - high_bid_actual: 0.04947624
+2017-11-27 05:02:43,467 - INFO - High Bid (Actual): 0.0495
+2017-11-27 05:02:43,467 - DEBUG - sell_price_target: 0.05262499
+2017-11-27 05:02:43,478 - INFO - Sell Target: 0.0526
+2017-11-27 05:02:43,478 - DEBUG - diff: -0.000495
+2017-11-27 05:02:43,479 - INFO - Price Difference from Base: -0.0495%
+2017-11-27 05:02:43,479 - DEBUG - Calculating loop time.
+2017-11-27 05:02:43,480 - DEBUG - diff <= 0
+2017-11-27 05:02:43,480 - DEBUG - lt: 20.00
+2017-11-27 05:02:43,481 - DEBUG - skip_trade_check: False
+2017-11-27 05:02:43,481 - INFO - Trade loop complete. Sleeping for 20.00 seconds.
+2017-11-27 05:02:43,481 - DEBUG - ----[LOOP END]----
+2017-11-27 05:03:03,484 - DEBUG - ----[LOOP START]----
+2017-11-27 05:03:03,484 - DEBUG - Entering base_price calculation.
+2017-11-27 05:03:03,486 - DEBUG - db[coll_current].count(): 1
+2017-11-27 05:03:03,489 - DEBUG - trade_total[spent]: 0.04987500
+2017-11-27 05:03:03,491 - DEBUG - agg: [{'_id': None, 'total_bought': 0.9975001995}]
+2017-11-27 05:03:03,491 - DEBUG - trade_total[bought]: 0.99750020
+2017-11-27 05:03:03,496 - DEBUG - trade_total[spent]: 0.04987500
+2017-11-27 05:03:03,498 - DEBUG - agg: [{'_id': None, 'total_bought': 0.9975001995}]
+2017-11-27 05:03:03,498 - DEBUG - trade_total[bought]: 0.99750020
+2017-11-27 05:03:03,498 - DEBUG - rate_avg: 0.04999999
+2017-11-27 05:03:03,498 - DEBUG - base_price: 0.04999999
+2017-11-27 05:03:03,498 - INFO - Base Price: 0.050000
+2017-11-27 05:03:03,499 - DEBUG - base_price_target: 0.04987499
+2017-11-27 05:03:03,499 - INFO - Base Price Target: 0.049875
+2017-11-27 05:03:03,782 - INFO - Balance STR:  433.3647
+2017-11-27 05:03:03,782 - INFO - Balance USDT: 0.5813
+2017-11-27 05:03:03,785 - DEBUG - agg: [{'_id': None, 'total_bought': 0.9975001995}]
+2017-11-27 05:03:03,786 - DEBUG - trade_total[bought]: 0.99750020
+2017-11-27 05:03:03,786 - INFO - Total STR Bought: 0.9975
+2017-11-27 05:03:03,788 - DEBUG - trade_total[spent]: 0.04987500
+2017-11-27 05:03:03,789 - INFO - Total USDT Spent: 0.0499
+2017-11-27 05:03:03,790 - INFO - Total Buy Count: 1
+2017-11-27 05:03:03,794 - DEBUG - agg: [{'_id': None, 'total_bought': 0.9975001995}]
+2017-11-27 05:03:03,795 - DEBUG - trade_total[bought]: 0.99750020
+2017-11-27 05:03:03,797 - DEBUG - trade_total[spent]: 0.04987500
+2017-11-27 05:03:03,797 - DEBUG - trade_usdt_remaining: 0.5813
+2017-11-27 05:03:04,056 - DEBUG - Regular lookup (price) in calc_limit_price().
+2017-11-27 05:03:04,056 - DEBUG - actual: 0.04990000
+2017-11-27 05:03:04,057 - DEBUG - book_tot: 141310.00
+2017-11-27 05:03:04,057 - DEBUG - actual: 0.04990000
+2017-11-27 05:03:04,057 - DEBUG - book_tot: 141310.00
+2017-11-27 05:03:04,057 - DEBUG - calc_limit_price() successful within limits (depth=40).
+2017-11-27 05:03:04,057 - DEBUG - Adding fees to calc_limit_price() return value.
+2017-11-27 05:03:04,058 - DEBUG - [buy]price_actual[+FEES]: 0.05002475
+2017-11-27 05:03:04,058 - DEBUG - diff: -0.003003
+2017-11-27 05:03:04,058 - INFO - Price Difference from Base: -0.3003%
+2017-11-27 05:03:04,058 - DEBUG - Calculating trade amount.
+2017-11-27 05:03:04,058 - DEBUG - diff < 0 - Using default trade amount.
+2017-11-27 05:03:04,058 - DEBUG - buy_amount_current: 1.00200401
+2017-11-27 05:03:04,059 - INFO - Current Buy Amount: 1.0020
+2017-11-27 05:03:04,192 - DEBUG - Regular lookup (price) in calc_limit_price().
+2017-11-27 05:03:04,192 - DEBUG - actual: 0.04990000
+2017-11-27 05:03:04,192 - DEBUG - book_tot: 141310.00
+2017-11-27 05:03:04,192 - DEBUG - actual: 0.04990000
+2017-11-27 05:03:04,192 - DEBUG - book_tot: 141310.00
+2017-11-27 05:03:04,193 - DEBUG - calc_limit_price() successful within limits (depth=40).
+2017-11-27 05:03:04,193 - DEBUG - Adding fees to calc_limit_price() return value.
+2017-11-27 05:03:04,193 - DEBUG - [buy]price_actual[+FEES]: 0.05002475
+2017-11-27 05:03:04,193 - DEBUG - low_ask_actual: 0.05002475
+2017-11-27 05:03:04,195 - INFO - Low Ask (Actual): 0.0500
+2017-11-27 05:03:04,197 - DEBUG - agg: [{'_id': None, 'total_bought': 0.9975001995}]
+2017-11-27 05:03:04,197 - DEBUG - trade_total[bought]: 0.99750020
+2017-11-27 05:03:04,197 - DEBUG - sell_amount_current: 0.99750020
+2017-11-27 05:03:04,197 - INFO - Current Sell Amount: 0.9975
+2017-11-27 05:03:04,329 - DEBUG - Regular lookup (price) in calc_limit_price().
+2017-11-27 05:03:04,329 - DEBUG - actual: 0.04960025
+2017-11-27 05:03:04,330 - DEBUG - book_tot: 7350.40
+2017-11-27 05:03:04,332 - DEBUG - actual: 0.04960025
+2017-11-27 05:03:04,333 - DEBUG - book_tot: 7350.40
+2017-11-27 05:03:04,333 - DEBUG - calc_limit_price() successful within limits (depth=40).
+2017-11-27 05:03:04,334 - DEBUG - Adding fees to calc_limit_price() return value.
+2017-11-27 05:03:04,334 - DEBUG - [sell]price_actual[+FEES]: 0.04947625
+2017-11-27 05:03:04,335 - DEBUG - high_bid_actual: 0.04947625
+2017-11-27 05:03:04,335 - INFO - High Bid (Actual): 0.0495
+2017-11-27 05:03:04,336 - DEBUG - sell_price_target: 0.05262499
+2017-11-27 05:03:04,336 - INFO - Sell Target: 0.0526
+2017-11-27 05:03:04,336 - DEBUG - diff: -0.000495
+2017-11-27 05:03:04,337 - INFO - Price Difference from Base: -0.0495%
+2017-11-27 05:03:04,337 - DEBUG - Calculating loop time.
+2017-11-27 05:03:04,338 - DEBUG - diff <= 0
+2017-11-27 05:03:04,338 - DEBUG - lt: 20.00
+2017-11-27 05:03:04,339 - DEBUG - skip_trade_check: False
+2017-11-27 05:03:04,339 - INFO - Trade loop complete. Sleeping for 20.00 seconds.
+2017-11-27 05:03:04,341 - DEBUG - ----[LOOP END]----
+2017-11-27 05:03:24,342 - DEBUG - ----[LOOP START]----
+2017-11-27 05:03:24,342 - DEBUG - Entering base_price calculation.
+2017-11-27 05:03:24,344 - DEBUG - db[coll_current].count(): 1
+2017-11-27 05:03:24,346 - DEBUG - trade_total[spent]: 0.04987500
+2017-11-27 05:03:24,347 - DEBUG - agg: [{'_id': None, 'total_bought': 0.9975001995}]
+2017-11-27 05:03:24,347 - DEBUG - trade_total[bought]: 0.99750020
+2017-11-27 05:03:24,349 - DEBUG - trade_total[spent]: 0.04987500
+2017-11-27 05:03:24,350 - DEBUG - agg: [{'_id': None, 'total_bought': 0.9975001995}]
+2017-11-27 05:03:24,351 - DEBUG - trade_total[bought]: 0.99750020
+2017-11-27 05:03:24,351 - DEBUG - rate_avg: 0.04999999
+2017-11-27 05:03:24,351 - DEBUG - base_price: 0.04999999
+2017-11-27 05:03:24,351 - INFO - Base Price: 0.050000
+2017-11-27 05:03:24,351 - DEBUG - base_price_target: 0.04987499
+2017-11-27 05:03:24,352 - INFO - Base Price Target: 0.049875
+2017-11-27 05:03:24,829 - INFO - Balance STR:  433.3647
+2017-11-27 05:03:24,830 - INFO - Balance USDT: 0.5813
+2017-11-27 05:03:24,831 - DEBUG - agg: [{'_id': None, 'total_bought': 0.9975001995}]
+2017-11-27 05:03:24,832 - DEBUG - trade_total[bought]: 0.99750020
+2017-11-27 05:03:24,832 - INFO - Total STR Bought: 0.9975
+2017-11-27 05:03:24,833 - DEBUG - trade_total[spent]: 0.04987500
+2017-11-27 05:03:24,834 - INFO - Total USDT Spent: 0.0499
+2017-11-27 05:03:24,834 - INFO - Total Buy Count: 1
+2017-11-27 05:03:24,836 - DEBUG - agg: [{'_id': None, 'total_bought': 0.9975001995}]
+2017-11-27 05:03:24,836 - DEBUG - trade_total[bought]: 0.99750020
+2017-11-27 05:03:24,837 - DEBUG - trade_total[spent]: 0.04987500
+2017-11-27 05:03:24,837 - DEBUG - trade_usdt_remaining: 0.5813
+2017-11-27 05:03:25,121 - DEBUG - Regular lookup (price) in calc_limit_price().
+2017-11-27 05:03:25,122 - DEBUG - actual: 0.04989999
+2017-11-27 05:03:25,122 - DEBUG - book_tot: 15027.93
+2017-11-27 05:03:25,122 - DEBUG - actual: 0.04989999
+2017-11-27 05:03:25,122 - DEBUG - book_tot: 15027.93
+2017-11-27 05:03:25,122 - DEBUG - calc_limit_price() successful within limits (depth=40).
+2017-11-27 05:03:25,123 - DEBUG - Adding fees to calc_limit_price() return value.
+2017-11-27 05:03:25,123 - DEBUG - [buy]price_actual[+FEES]: 0.05002474
+2017-11-27 05:03:25,123 - DEBUG - diff: -0.003003
+2017-11-27 05:03:25,123 - INFO - Price Difference from Base: -0.3003%
+2017-11-27 05:03:25,123 - DEBUG - Calculating trade amount.
+2017-11-27 05:03:25,123 - DEBUG - diff < 0 - Using default trade amount.
+2017-11-27 05:03:25,124 - DEBUG - buy_amount_current: 1.00200401
+2017-11-27 05:03:25,124 - INFO - Current Buy Amount: 1.0020
+2017-11-27 05:03:25,274 - DEBUG - Regular lookup (price) in calc_limit_price().
+2017-11-27 05:03:25,275 - DEBUG - actual: 0.04989999
+2017-11-27 05:03:25,275 - DEBUG - book_tot: 15027.93
+2017-11-27 05:03:25,275 - DEBUG - actual: 0.04989999
+2017-11-27 05:03:25,275 - DEBUG - book_tot: 15027.93
+2017-11-27 05:03:25,275 - DEBUG - calc_limit_price() successful within limits (depth=40).
+2017-11-27 05:03:25,275 - DEBUG - Adding fees to calc_limit_price() return value.
+2017-11-27 05:03:25,276 - DEBUG - [buy]price_actual[+FEES]: 0.05002474
+2017-11-27 05:03:25,276 - DEBUG - low_ask_actual: 0.05002474
+2017-11-27 05:03:25,276 - INFO - Low Ask (Actual): 0.0500
+2017-11-27 05:03:25,278 - DEBUG - agg: [{'_id': None, 'total_bought': 0.9975001995}]
+2017-11-27 05:03:25,278 - DEBUG - trade_total[bought]: 0.99750020
+2017-11-27 05:03:25,278 - DEBUG - sell_amount_current: 0.99750020
+2017-11-27 05:03:25,279 - INFO - Current Sell Amount: 0.9975
+2017-11-27 05:03:25,484 - DEBUG - Regular lookup (price) in calc_limit_price().
+2017-11-27 05:03:25,485 - DEBUG - actual: 0.04950015
+2017-11-27 05:03:25,485 - DEBUG - book_tot: 311.35
+2017-11-27 05:03:25,485 - DEBUG - actual: 0.04950015
+2017-11-27 05:03:25,485 - DEBUG - book_tot: 311.35
+2017-11-27 05:03:25,486 - DEBUG - calc_limit_price() successful within limits (depth=40).
+2017-11-27 05:03:25,486 - DEBUG - Adding fees to calc_limit_price() return value.
+2017-11-27 05:03:25,486 - DEBUG - [sell]price_actual[+FEES]: 0.04937640
+2017-11-27 05:03:25,486 - DEBUG - high_bid_actual: 0.04937640
+2017-11-27 05:03:25,486 - INFO - High Bid (Actual): 0.0494
+2017-11-27 05:03:25,486 - DEBUG - sell_price_target: 0.05262499
+2017-11-27 05:03:25,487 - INFO - Sell Target: 0.0526
+2017-11-27 05:03:25,487 - DEBUG - diff: -0.000495
+2017-11-27 05:03:25,487 - INFO - Price Difference from Base: -0.0495%
+2017-11-27 05:03:25,487 - DEBUG - Calculating loop time.
+2017-11-27 05:03:25,487 - DEBUG - diff <= 0
+2017-11-27 05:03:25,487 - DEBUG - lt: 20.00
+2017-11-27 05:03:25,488 - DEBUG - skip_trade_check: False
+2017-11-27 05:03:25,488 - INFO - Trade loop complete. Sleeping for 20.00 seconds.
+2017-11-27 05:03:25,488 - DEBUG - ----[LOOP END]----
+2017-11-27 05:03:45,488 - DEBUG - ----[LOOP START]----
+2017-11-27 05:03:45,489 - DEBUG - Entering base_price calculation.
+2017-11-27 05:03:45,490 - DEBUG - db[coll_current].count(): 1
+2017-11-27 05:03:45,492 - DEBUG - trade_total[spent]: 0.04987500
+2017-11-27 05:03:45,494 - DEBUG - agg: [{'_id': None, 'total_bought': 0.9975001995}]
+2017-11-27 05:03:45,494 - DEBUG - trade_total[bought]: 0.99750020
+2017-11-27 05:03:45,496 - DEBUG - trade_total[spent]: 0.04987500
+2017-11-27 05:03:45,497 - DEBUG - agg: [{'_id': None, 'total_bought': 0.9975001995}]
+2017-11-27 05:03:45,498 - DEBUG - trade_total[bought]: 0.99750020
+2017-11-27 05:03:45,498 - DEBUG - rate_avg: 0.04999999
+2017-11-27 05:03:45,498 - DEBUG - base_price: 0.04999999
+2017-11-27 05:03:45,498 - INFO - Base Price: 0.050000
+2017-11-27 05:03:45,498 - DEBUG - base_price_target: 0.04987499
+2017-11-27 05:03:45,499 - INFO - Base Price Target: 0.049875
+2017-11-27 05:03:45,783 - INFO - Balance STR:  433.3647
+2017-11-27 05:03:45,783 - INFO - Balance USDT: 0.5813
+2017-11-27 05:03:45,785 - DEBUG - agg: [{'_id': None, 'total_bought': 0.9975001995}]
+2017-11-27 05:03:45,785 - DEBUG - trade_total[bought]: 0.99750020
+2017-11-27 05:03:45,785 - INFO - Total STR Bought: 0.9975
+2017-11-27 05:03:45,787 - DEBUG - trade_total[spent]: 0.04987500
+2017-11-27 05:03:45,787 - INFO - Total USDT Spent: 0.0499
+2017-11-27 05:03:45,788 - INFO - Total Buy Count: 1
+2017-11-27 05:03:45,789 - DEBUG - agg: [{'_id': None, 'total_bought': 0.9975001995}]
+2017-11-27 05:03:45,790 - DEBUG - trade_total[bought]: 0.99750020
+2017-11-27 05:03:45,791 - DEBUG - trade_total[spent]: 0.04987500
+2017-11-27 05:03:45,791 - DEBUG - trade_usdt_remaining: 0.5813
+2017-11-27 05:03:46,000 - DEBUG - Regular lookup (price) in calc_limit_price().
+2017-11-27 05:03:46,002 - DEBUG - actual: 0.04989999
+2017-11-27 05:03:46,002 - DEBUG - book_tot: 15027.93
+2017-11-27 05:03:46,003 - DEBUG - actual: 0.04989999
+2017-11-27 05:03:46,003 - DEBUG - book_tot: 15027.93
+2017-11-27 05:03:46,003 - DEBUG - calc_limit_price() successful within limits (depth=40).
+2017-11-27 05:03:46,003 - DEBUG - Adding fees to calc_limit_price() return value.
+2017-11-27 05:03:46,003 - DEBUG - [buy]price_actual[+FEES]: 0.05002474
+2017-11-27 05:03:46,004 - DEBUG - diff: -0.003003
+2017-11-27 05:03:46,004 - INFO - Price Difference from Base: -0.3003%
+2017-11-27 05:03:46,004 - DEBUG - Calculating trade amount.
+2017-11-27 05:03:46,004 - DEBUG - diff < 0 - Using default trade amount.
+2017-11-27 05:03:46,004 - DEBUG - buy_amount_current: 1.00200401
+2017-11-27 05:03:46,005 - INFO - Current Buy Amount: 1.0020
+2017-11-27 05:03:46,123 - DEBUG - Regular lookup (price) in calc_limit_price().
+2017-11-27 05:03:46,123 - DEBUG - actual: 0.04989999
+2017-11-27 05:03:46,123 - DEBUG - book_tot: 15027.93
+2017-11-27 05:03:46,123 - DEBUG - actual: 0.04989999
+2017-11-27 05:03:46,124 - DEBUG - book_tot: 15027.93
+2017-11-27 05:03:46,124 - DEBUG - calc_limit_price() successful within limits (depth=40).
+2017-11-27 05:03:46,124 - DEBUG - Adding fees to calc_limit_price() return value.
+2017-11-27 05:03:46,124 - DEBUG - [buy]price_actual[+FEES]: 0.05002474
+2017-11-27 05:03:46,124 - DEBUG - low_ask_actual: 0.05002474
+2017-11-27 05:03:46,125 - INFO - Low Ask (Actual): 0.0500
+2017-11-27 05:03:46,126 - DEBUG - agg: [{'_id': None, 'total_bought': 0.9975001995}]
+2017-11-27 05:03:46,126 - DEBUG - trade_total[bought]: 0.99750020
+2017-11-27 05:03:46,127 - DEBUG - sell_amount_current: 0.99750020
+2017-11-27 05:03:46,127 - INFO - Current Sell Amount: 0.9975
+2017-11-27 05:03:46,263 - DEBUG - Regular lookup (price) in calc_limit_price().
+2017-11-27 05:03:46,263 - DEBUG - actual: 0.04948001
+2017-11-27 05:03:46,279 - DEBUG - book_tot: 2950.82
+2017-11-27 05:03:46,279 - DEBUG - actual: 0.04948001
+2017-11-27 05:03:46,279 - DEBUG - book_tot: 2950.82
+2017-11-27 05:03:46,279 - DEBUG - calc_limit_price() successful within limits (depth=40).
+2017-11-27 05:03:46,279 - DEBUG - Adding fees to calc_limit_price() return value.
+2017-11-27 05:03:46,279 - DEBUG - [sell]price_actual[+FEES]: 0.04935631
+2017-11-27 05:03:46,280 - DEBUG - high_bid_actual: 0.04935631
+2017-11-27 05:03:46,280 - INFO - High Bid (Actual): 0.0494
+2017-11-27 05:03:46,280 - DEBUG - sell_price_target: 0.05262499
+2017-11-27 05:03:46,280 - INFO - Sell Target: 0.0526
+2017-11-27 05:03:46,280 - DEBUG - diff: -0.000495
+2017-11-27 05:03:46,280 - INFO - Price Difference from Base: -0.0495%
+2017-11-27 05:03:46,280 - DEBUG - Calculating loop time.
+2017-11-27 05:03:46,281 - DEBUG - diff <= 0
+2017-11-27 05:03:46,281 - DEBUG - lt: 20.00
+2017-11-27 05:03:46,281 - DEBUG - skip_trade_check: False
+2017-11-27 05:03:46,281 - INFO - Trade loop complete. Sleeping for 20.00 seconds.
+2017-11-27 05:03:46,291 - DEBUG - ----[LOOP END]----
+2017-11-27 05:04:06,295 - DEBUG - ----[LOOP START]----
+2017-11-27 05:04:06,295 - DEBUG - Entering base_price calculation.
+2017-11-27 05:04:06,299 - DEBUG - db[coll_current].count(): 1
+2017-11-27 05:04:06,301 - DEBUG - trade_total[spent]: 0.04987500
+2017-11-27 05:04:06,303 - DEBUG - agg: [{'_id': None, 'total_bought': 0.9975001995}]
+2017-11-27 05:04:06,303 - DEBUG - trade_total[bought]: 0.99750020
+2017-11-27 05:04:06,307 - DEBUG - trade_total[spent]: 0.04987500
+2017-11-27 05:04:06,309 - DEBUG - agg: [{'_id': None, 'total_bought': 0.9975001995}]
+2017-11-27 05:04:06,309 - DEBUG - trade_total[bought]: 0.99750020
+2017-11-27 05:04:06,309 - DEBUG - rate_avg: 0.04999999
+2017-11-27 05:04:06,309 - DEBUG - base_price: 0.04999999
+2017-11-27 05:04:06,310 - INFO - Base Price: 0.050000
+2017-11-27 05:04:06,310 - DEBUG - base_price_target: 0.04987499
+2017-11-27 05:04:06,310 - INFO - Base Price Target: 0.049875
+2017-11-27 05:04:06,713 - INFO - Balance STR:  433.3647
+2017-11-27 05:04:06,713 - INFO - Balance USDT: 0.5813
+2017-11-27 05:04:06,715 - DEBUG - agg: [{'_id': None, 'total_bought': 0.9975001995}]
+2017-11-27 05:04:06,715 - DEBUG - trade_total[bought]: 0.99750020
+2017-11-27 05:04:06,716 - INFO - Total STR Bought: 0.9975
+2017-11-27 05:04:06,717 - DEBUG - trade_total[spent]: 0.04987500
+2017-11-27 05:04:06,717 - INFO - Total USDT Spent: 0.0499
+2017-11-27 05:04:06,719 - INFO - Total Buy Count: 1
+2017-11-27 05:04:06,722 - DEBUG - agg: [{'_id': None, 'total_bought': 0.9975001995}]
+2017-11-27 05:04:06,723 - DEBUG - trade_total[bought]: 0.99750020
+2017-11-27 05:04:06,725 - DEBUG - trade_total[spent]: 0.04987500
+2017-11-27 05:04:06,725 - DEBUG - trade_usdt_remaining: 0.5813
+2017-11-27 05:04:06,861 - DEBUG - Regular lookup (price) in calc_limit_price().
+2017-11-27 05:04:06,862 - DEBUG - actual: 0.04989999
+2017-11-27 05:04:06,862 - DEBUG - book_tot: 15027.85
+2017-11-27 05:04:06,862 - DEBUG - actual: 0.04989999
+2017-11-27 05:04:06,862 - DEBUG - book_tot: 15027.85
+2017-11-27 05:04:06,862 - DEBUG - calc_limit_price() successful within limits (depth=40).
+2017-11-27 05:04:06,863 - DEBUG - Adding fees to calc_limit_price() return value.
+2017-11-27 05:04:06,863 - DEBUG - [buy]price_actual[+FEES]: 0.05002474
+2017-11-27 05:04:06,863 - DEBUG - diff: -0.003003
+2017-11-27 05:04:06,863 - INFO - Price Difference from Base: -0.3003%
+2017-11-27 05:04:06,863 - DEBUG - Calculating trade amount.
+2017-11-27 05:04:06,863 - DEBUG - diff < 0 - Using default trade amount.
+2017-11-27 05:04:06,863 - DEBUG - buy_amount_current: 1.00200401
+2017-11-27 05:04:06,864 - INFO - Current Buy Amount: 1.0020
+2017-11-27 05:04:07,103 - DEBUG - Regular lookup (price) in calc_limit_price().
+2017-11-27 05:04:07,104 - DEBUG - actual: 0.04989999
+2017-11-27 05:04:07,104 - DEBUG - book_tot: 15027.85
+2017-11-27 05:04:07,104 - DEBUG - actual: 0.04989999
+2017-11-27 05:04:07,104 - DEBUG - book_tot: 15027.85
+2017-11-27 05:04:07,105 - DEBUG - calc_limit_price() successful within limits (depth=40).
+2017-11-27 05:04:07,105 - DEBUG - Adding fees to calc_limit_price() return value.
+2017-11-27 05:04:07,105 - DEBUG - [buy]price_actual[+FEES]: 0.05002474
+2017-11-27 05:04:07,105 - DEBUG - low_ask_actual: 0.05002474
+2017-11-27 05:04:07,105 - INFO - Low Ask (Actual): 0.0500
+2017-11-27 05:04:07,107 - DEBUG - agg: [{'_id': None, 'total_bought': 0.9975001995}]
+2017-11-27 05:04:07,107 - DEBUG - trade_total[bought]: 0.99750020
+2017-11-27 05:04:07,107 - DEBUG - sell_amount_current: 0.99750020
+2017-11-27 05:04:07,108 - INFO - Current Sell Amount: 0.9975
+2017-11-27 05:04:07,226 - DEBUG - Regular lookup (price) in calc_limit_price().
+2017-11-27 05:04:07,227 - DEBUG - actual: 0.04948001
+2017-11-27 05:04:07,227 - DEBUG - book_tot: 2950.82
+2017-11-27 05:04:07,228 - DEBUG - actual: 0.04948001
+2017-11-27 05:04:07,228 - DEBUG - book_tot: 2950.82
+2017-11-27 05:04:07,228 - DEBUG - calc_limit_price() successful within limits (depth=40).
+2017-11-27 05:04:07,228 - DEBUG - Adding fees to calc_limit_price() return value.
+2017-11-27 05:04:07,228 - DEBUG - [sell]price_actual[+FEES]: 0.04935631
+2017-11-27 05:04:07,228 - DEBUG - high_bid_actual: 0.04935631
+2017-11-27 05:04:07,229 - INFO - High Bid (Actual): 0.0494
+2017-11-27 05:04:07,229 - DEBUG - sell_price_target: 0.05262499
+2017-11-27 05:04:07,229 - INFO - Sell Target: 0.0526
+2017-11-27 05:04:07,229 - DEBUG - diff: -0.000495
+2017-11-27 05:04:07,229 - INFO - Price Difference from Base: -0.0495%
+2017-11-27 05:04:07,229 - DEBUG - Calculating loop time.
+2017-11-27 05:04:07,229 - DEBUG - diff <= 0
+2017-11-27 05:04:07,230 - DEBUG - lt: 20.00
+2017-11-27 05:04:07,230 - DEBUG - skip_trade_check: False
+2017-11-27 05:04:07,230 - INFO - Trade loop complete. Sleeping for 20.00 seconds.
+2017-11-27 05:04:07,230 - DEBUG - ----[LOOP END]----
+2017-11-27 05:04:27,234 - DEBUG - ----[LOOP START]----
+2017-11-27 05:04:27,235 - DEBUG - Entering base_price calculation.
+2017-11-27 05:04:27,236 - DEBUG - db[coll_current].count(): 1
+2017-11-27 05:04:27,247 - DEBUG - trade_total[spent]: 0.04987500
+2017-11-27 05:04:27,248 - DEBUG - agg: [{'_id': None, 'total_bought': 0.9975001995}]
+2017-11-27 05:04:27,248 - DEBUG - trade_total[bought]: 0.99750020
+2017-11-27 05:04:27,249 - DEBUG - trade_total[spent]: 0.04987500
+2017-11-27 05:04:27,251 - DEBUG - agg: [{'_id': None, 'total_bought': 0.9975001995}]
+2017-11-27 05:04:27,287 - DEBUG - trade_total[bought]: 0.99750020
+2017-11-27 05:04:27,289 - DEBUG - rate_avg: 0.04999999
+2017-11-27 05:04:27,289 - DEBUG - base_price: 0.04999999
+2017-11-27 05:04:27,290 - INFO - Base Price: 0.050000
+2017-11-27 05:04:27,290 - DEBUG - base_price_target: 0.04987499
+2017-11-27 05:04:27,290 - INFO - Base Price Target: 0.049875
+2017-11-27 05:04:27,623 - INFO - Balance STR:  433.3647
+2017-11-27 05:04:27,623 - INFO - Balance USDT: 0.5813
+2017-11-27 05:04:27,627 - DEBUG - agg: [{'_id': None, 'total_bought': 0.9975001995}]
+2017-11-27 05:04:27,628 - DEBUG - trade_total[bought]: 0.99750020
+2017-11-27 05:04:27,628 - INFO - Total STR Bought: 0.9975
+2017-11-27 05:04:27,631 - DEBUG - trade_total[spent]: 0.04987500
+2017-11-27 05:04:27,631 - INFO - Total USDT Spent: 0.0499
+2017-11-27 05:04:27,632 - INFO - Total Buy Count: 1
+2017-11-27 05:04:27,634 - DEBUG - agg: [{'_id': None, 'total_bought': 0.9975001995}]
+2017-11-27 05:04:27,635 - DEBUG - trade_total[bought]: 0.99750020
+2017-11-27 05:04:27,637 - DEBUG - trade_total[spent]: 0.04987500
+2017-11-27 05:04:27,637 - DEBUG - trade_usdt_remaining: 0.5813
+2017-11-27 05:04:27,870 - DEBUG - Regular lookup (price) in calc_limit_price().
+2017-11-27 05:04:27,871 - DEBUG - actual: 0.04989999
+2017-11-27 05:04:27,871 - DEBUG - book_tot: 15914.87
+2017-11-27 05:04:27,871 - DEBUG - actual: 0.04989999
+2017-11-27 05:04:27,871 - DEBUG - book_tot: 15914.87
+2017-11-27 05:04:27,872 - DEBUG - calc_limit_price() successful within limits (depth=40).
+2017-11-27 05:04:27,872 - DEBUG - Adding fees to calc_limit_price() return value.
+2017-11-27 05:04:27,872 - DEBUG - [buy]price_actual[+FEES]: 0.05002474
+2017-11-27 05:04:27,872 - DEBUG - diff: -0.003003
+2017-11-27 05:04:27,872 - INFO - Price Difference from Base: -0.3003%
+2017-11-27 05:04:27,873 - DEBUG - Calculating trade amount.
+2017-11-27 05:04:27,873 - DEBUG - diff < 0 - Using default trade amount.
+2017-11-27 05:04:27,873 - DEBUG - buy_amount_current: 1.00200401
+2017-11-27 05:04:27,873 - INFO - Current Buy Amount: 1.0020
+2017-11-27 05:04:28,095 - DEBUG - Regular lookup (price) in calc_limit_price().
+2017-11-27 05:04:28,095 - DEBUG - actual: 0.04989999
+2017-11-27 05:04:28,095 - DEBUG - book_tot: 15914.87
+2017-11-27 05:04:28,095 - DEBUG - actual: 0.04989999
+2017-11-27 05:04:28,096 - DEBUG - book_tot: 15914.87
+2017-11-27 05:04:28,096 - DEBUG - calc_limit_price() successful within limits (depth=40).
+2017-11-27 05:04:28,096 - DEBUG - Adding fees to calc_limit_price() return value.
+2017-11-27 05:04:28,096 - DEBUG - [buy]price_actual[+FEES]: 0.05002474
+2017-11-27 05:04:28,096 - DEBUG - low_ask_actual: 0.05002474
+2017-11-27 05:04:28,096 - INFO - Low Ask (Actual): 0.0500
+2017-11-27 05:04:28,099 - DEBUG - agg: [{'_id': None, 'total_bought': 0.9975001995}]
+2017-11-27 05:04:28,099 - DEBUG - trade_total[bought]: 0.99750020
+2017-11-27 05:04:28,099 - DEBUG - sell_amount_current: 0.99750020
+2017-11-27 05:04:28,099 - INFO - Current Sell Amount: 0.9975
+2017-11-27 05:04:28,350 - DEBUG - Regular lookup (price) in calc_limit_price().
+2017-11-27 05:04:28,350 - DEBUG - actual: 0.04948005
+2017-11-27 05:04:28,351 - DEBUG - book_tot: 147465.19
+2017-11-27 05:04:28,351 - DEBUG - actual: 0.04948005
+2017-11-27 05:04:28,352 - DEBUG - book_tot: 147465.19
+2017-11-27 05:04:28,352 - DEBUG - calc_limit_price() successful within limits (depth=40).
+2017-11-27 05:04:28,352 - DEBUG - Adding fees to calc_limit_price() return value.
+2017-11-27 05:04:28,352 - DEBUG - [sell]price_actual[+FEES]: 0.04935635
+2017-11-27 05:04:28,352 - DEBUG - high_bid_actual: 0.04935635
+2017-11-27 05:04:28,353 - INFO - High Bid (Actual): 0.0494
+2017-11-27 05:04:28,353 - DEBUG - sell_price_target: 0.05262499
+2017-11-27 05:04:28,353 - INFO - Sell Target: 0.0526
+2017-11-27 05:04:28,353 - DEBUG - diff: -0.000495
+2017-11-27 05:04:28,354 - INFO - Price Difference from Base: -0.0495%
+2017-11-27 05:04:28,354 - DEBUG - Calculating loop time.
+2017-11-27 05:04:28,354 - DEBUG - diff <= 0
+2017-11-27 05:04:28,354 - DEBUG - lt: 20.00
+2017-11-27 05:04:28,354 - DEBUG - skip_trade_check: False
+2017-11-27 05:04:28,354 - INFO - Trade loop complete. Sleeping for 20.00 seconds.
+2017-11-27 05:04:28,355 - DEBUG - ----[LOOP END]----
+2017-11-27 05:04:31,704 - INFO - Exit signal received.
+2017-11-27 05:04:31,709 - INFO - Mongo write errors: 0
+2017-11-27 05:04:31,709 - INFO - Buy trades skipped: 0
+2017-11-27 05:04:31,709 - INFO - Sell trades skipped: 0
+2017-11-27 05:04:31,709 - INFO - CSV write errors: 0
