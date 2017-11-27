@@ -867,6 +867,8 @@ if __name__ == '__main__':
         # Verify STR balance with recorded amount bought
         if float(balance_str) < float(calc_trade_totals('bought')):
             logger.warning('STR balance less than recorded bought amount.')
+
+            base_price = calc_base()
             
             logger.warning('Creating new MongoDB database with available STR balance as total bought.')
             
