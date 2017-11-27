@@ -899,6 +899,8 @@ if __name__ == '__main__':
             else:
                 logger.info('--------------------')
 
+            skip_trade_check = False  # Will become true if balance/collection adjustment performed
+
             # Calculate base price
             base_price = calc_base()
             logger.debug('base_price: ' + "{:.8f}".format(base_price))
@@ -923,28 +925,31 @@ if __name__ == '__main__':
 
             logger.info('Total Buy Count: ' + str(db[coll_current].count()))
 
-            # Get total amount of STR bought and USDT spent
-            total_bought_str = calc_trade_totals('bought')
-            logger.debug('total_bought_str: ' + "{:.8f}".format(total_bought_str))
-            logger.info('Total STR Bought: ' + "{:.4f}".format(total_bought_str))
+            """
+            # Get total amount of USDT spent and STR bought
             total_spent_usdt = calc_trade_totals('spent')
             logger.debug('total_spent_usdt: ' + "{:.8f}".format(total_spent_usdt))
             logger.info('Total USDT Spent: ' + "{:.4f}".format(total_spent_usdt))
+            total_bought_str = calc_trade_totals('bought')
+            logger.debug('total_bought_str: ' + "{:.8f}".format(total_bought_str))
+            logger.info('Total STR Bought: ' + "{:.4f}".format(total_bought_str))
+            """
 
-            # Verify remaining USDT balance with expected trade amount
-            trade_usdt_remaining = trade_usdt_max - total_spent_usdt
+            # Verify remaining USDT balance with expected available trade amount
+            trade_usdt_remaining = trade_usdt_max - calc_trade_totals('spent')
             logger.debug('trade_usdt_remaining: ' + "{:.4f}".format(trade_usdt_remaining))
             if float(balance_usdt) < float(trade_usdt_remaining):
                 logger.warning('USDT balance less than remaining USDT amount allotted for trading. Adjusting allotment to available balance.')
-                trade_usdt_max = balance_usdt + total_spent_usdt
-                trade_usdt_remaining = trade_usdt_max - total_spent_usdt
+                trade_usdt_max = balance_usdt + calc_trade_totals('spent')
+                trade_usdt_remaining = trade_usdt_max - calc_trade_totals('spent')
                 logger.debug('[ADJUSTED]trade_usdt_remaining: ' + "{:.4f}".format(trade_usdt_remaining))
                 logger.info('Remaining Tradable USDT Balance Adjusted: ' + "{:.4f}".format(trade_usdt_remaining))
 
+                skip_trade_check = True
+
             # Verify STR balance with recorded amount bought
-            elif float(balance_str) < float(total_bought_str):
+            if float(balance_str) < float(calc_trade_totals('bought')):
                 logger.warning('STR balance less than recorded bought amount.')
-                logger.debug('total_bought_str: ' + "{:.8f}".format(total_bought_str))
                 
                 logger.warning('Creating new MongoDB database with available STR balance as total bought.')
                 
@@ -963,11 +968,9 @@ if __name__ == '__main__':
                 else:
                     logger.warning('STR balance is 0. Leaving new collection empty.')
 
-                # Recalculate available USDT remaining for trading
-                trade_usdt_remaining = trade_usdt_max - total_spent_usdt
-                logger.debug('trade_usdt_remaining: ' + "{:.4f}".format(trade_usdt_remaining))
+                skip_trade_check = True
 
-            else:
+            if skip_trade_check == False:
                 # Calculate buy amount based on current conditions
                 buy_amount_current = calc_dynamic('amount', base_price_target, calc_limit_price(trade_amount, 'buy', withFees=True))
                 logger.debug('buy_amount_current: ' + "{:.8f}".format(buy_amount_current))
@@ -1017,12 +1020,12 @@ if __name__ == '__main__':
                 loop_time_dynamic = calc_dynamic('loop', base_price, low_ask_actual)
                 logger.info('Trade loop complete. Sleeping for ' + "{:.2f}".format(loop_time_dynamic) + ' seconds.')
 
-                if debug == True:
-                    logger.debug('----[LOOP END]----')
-                else:
-                    logger.info('--------------------')
+            if debug == True:
+                logger.debug('----[LOOP END]----')
+            else:
+                logger.info('--------------------')
 
-                time.sleep(loop_time_dynamic)
+            time.sleep(loop_time_dynamic)
 
         except Exception as e:
             logger.exception(e)
