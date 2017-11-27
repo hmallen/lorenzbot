@@ -702,22 +702,27 @@ def calc_dynamic(selection, base, limit):
     elif selection == 'amount':
         if amount_dynamic == True:
             logger.debug('Calculating trade amount.')
-            
-            trade_proportion_low = trade_proportion_initial # Default = 0.05
-            logger.debug('trade_proportion_low: ' + "{:.2f}".format(trade_proportion_low))
-            trade_proportion_high = Decimal(0.50)    # If limit price 100% less than base price, trade with this proportion of available USDT remaining
-            logger.debug('trade_proportion_high: ' + "{:.2f}".format(trade_proportion_high))
-            trade_proportion_adj = trade_proportion_low + (diff * (trade_proportion_high - trade_proportion_low))
-            logger.debug('trade_proportion_adj: ' + "{:.2f}".format(trade_proportion_adj))
 
-            global trade_usdt_remaining
-            logger.debug('trade_usdt_remaining: ' + "{:.2f}".format(trade_usdt_remaining))
-            
-            amount_usdt = trade_usdt_remaining * trade_proportion_adj  # USDT
-            logger.debug('[DYNAMIC]amount_usdt: ' + "{:.8f}".format(amount_usdt))
+            if diff > Decimal(0):
+                trade_proportion_low = trade_proportion_initial # Default = 0.05
+                logger.debug('trade_proportion_low: ' + "{:.2f}".format(trade_proportion_low))
+                trade_proportion_high = Decimal(0.50)    # If limit price 100% less than base price, trade with this proportion of available USDT remaining
+                logger.debug('trade_proportion_high: ' + "{:.2f}".format(trade_proportion_high))
+                trade_proportion_adj = trade_proportion_low + (diff * (trade_proportion_high - trade_proportion_low))
+                logger.debug('trade_proportion_adj: ' + "{:.2f}".format(trade_proportion_adj))
 
-            amount = calc_limit_price(amount_usdt, 'buy', reverseLookup=True)
-            logger.debug('[DYNAMIC]amount: ' + "{:.8f}".format(amount))
+                global trade_usdt_remaining
+                logger.debug('trade_usdt_remaining: ' + "{:.2f}".format(trade_usdt_remaining))
+                
+                amount_usdt = trade_usdt_remaining * trade_proportion_adj  # USDT
+                logger.debug('[DYNAMIC]amount_usdt: ' + "{:.8f}".format(amount_usdt))
+
+                amount = calc_limit_price(amount_usdt, 'buy', reverseLookup=True)
+                logger.debug('[DYNAMIC]amount: ' + "{:.8f}".format(amount))
+
+            else:
+                logger.debug('diff < 0 - Using default trade amount.')
+                amount = trade_amount
 
         else:
             logger.debug('Using static loop time.')
@@ -1018,13 +1023,19 @@ if __name__ == '__main__':
 
                 # Calculate loop time based on current conditions
                 loop_time_dynamic = calc_dynamic('loop', base_price, low_ask_actual)
-                logger.info('Trade loop complete. Sleeping for ' + "{:.2f}".format(loop_time_dynamic) + ' seconds.')
+
+            else:
+                logger.warning('Skipping trade check until balances and trade logs agree.')
+                loop_time_dynamic = loop_time
+
+            logger.debug('skip_trade_check: ' + str(skip_trade_check))
+            logger.info('Trade loop complete. Sleeping for ' + "{:.2f}".format(loop_time_dynamic) + ' seconds.')
 
             if debug == True:
                 logger.debug('----[LOOP END]----')
             else:
                 logger.info('--------------------')
-
+            
             time.sleep(loop_time_dynamic)
 
         except Exception as e:
