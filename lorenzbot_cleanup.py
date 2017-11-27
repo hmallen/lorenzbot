@@ -486,6 +486,7 @@ def calc_profit_csv():
 
         try:
             for row in csv_reader:
+                logger.debut(row)
                 trade_list.append(row)
         
         except csv.Error as e:
@@ -511,9 +512,9 @@ def calc_profit_csv():
 
     rate_avg = spent_amount / bought_amount
 
-    #logger.debug(bought_amount)
-    #logger.debug(spent_amount)
-    #logger.debug(rate_avg)
+    logger.debug(bought_amount)
+    logger.debug(spent_amount)
+    logger.debug(rate_avg)
 
     if gain_amount > 0:
         profit = gain_amount - spent_amount
@@ -604,14 +605,17 @@ def telegram_profit(bot, update):
         logger.debug('Access confirmed for requesting user.')
 
         if csv_logging == True:
+            logger.debug('CSV logging active. Calculating profit.')
             trade_profit_info = calc_profit_csv()
             trade_profit = trade_profit_info['profit']
+            logger.debug(trade_profit_info['profit'])
 
             if float(trade_profit) < 0:
                 telegram_message = 'No sell trades executed.'
+                logger.debug('No sell trades executed.')
 
             else:
-                telegram_message = 'Total Profit: ' + "{:.4f}".format(trade_profit)   # CSV PROFIT CALCULATION
+                telegram_message = 'Total Profit: ' + str(trade_profit)#"{:.4f}".format(trade_profit)   # CSV PROFIT CALCULATION
 
         else:
             telegram_message = 'CSV logging not active. Cannot calculate profit.'
