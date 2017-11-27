@@ -929,11 +929,11 @@ if __name__ == '__main__':
             # Calculate base price
             base_price = calc_base()
             logger.debug('base_price: ' + "{:.8f}".format(base_price))
-            logger.info('Base Price: ' + "{:.4f}".format(base_price))
+            logger.info('Base Price: ' + "{:.6f}".format(base_price))
             #base_price_target = base_price - buy_threshold    # IS BUY_THRESHOLD NEEDED IF CALCULATING FEES TOO?
             base_price_target = base_price * (Decimal(1) - taker_fee)
             logger.debug('base_price_target: ' + "{:.8f}".format(base_price_target))
-            logger.info('Base Price Target: ' + "{:.4f}".format(base_price_target))
+            logger.info('Base Price Target: ' + "{:.6f}".format(base_price_target))
 
             # Get current account balances
             account_balances = get_balances()
