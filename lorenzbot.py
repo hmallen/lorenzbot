@@ -7,6 +7,7 @@ from decimal import *
 import logging
 import os
 import poloniex
+import psutil
 from pymongo import MongoClient
 import sys
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
@@ -114,6 +115,18 @@ csv_logging = args.nocsv; logger.debug('csv_logging: ' + str(csv_logging))
 telegram_active = args.telegram; logger.debug('telegram_active: ' + str(telegram_active))
 mongo_alt = args.mongoalt; logger.debug('mongo_alt: ' + str(mongo_alt))
 
+# Check if MongoDB is running before beginning
+mongo_running = False
+for proc in psutil.process_iter(attrs=['pid', 'name']):
+    if proc.info['name'] == 'mongod':
+        mongo_pid = proc.info['pid']
+        mongo_running = True
+        logger.info('MongoDB running.')
+        break
+if mongo_running == False:
+    logger.error('Mongodb not running. Type \"mongod\" in terminal to start.')
+    sys.exit(1)
+
 if clean_collections == False:
     # Handle all of the arguments delivered appropriately
     if trade_usdt_max >= Decimal(10):
@@ -157,7 +170,7 @@ if clean_collections == False:
         logger.info('CSV log file path: ' + log_file)
 
     if telegram_active == True:
-        logger.info('Telegram logging active. Send \'/connect\' to @lorenzbot_bot to receive alerts.')
+        logger.info('Telegram logging active. Send \"/connect\" to @lorenzbot_bot to receive alerts.')
 
 
 def modify_collections(action):
@@ -300,18 +313,14 @@ def calc_limit_price(amount, position, reverseLookup=None, withFees=None):
                 amt_tot += Decimal(book[book_pos][x][1])
                 if float(book_tot) == float(amount):
                     actual = amt_tot
+                    
                     break
+                
                 elif float(book_tot) > float(amount):
                     book_tot -= Decimal(book[book_pos][x][0]) * Decimal(book[book_pos][x][1])
                     amt_tot -= Decimal(book[book_pos][x][1])
 
-                    while (True):
-                        book_tot += Decimal(1) * Decimal(book[book_pos][x][0])
-                        if book_tot > amount:
-                            actual = amt_tot
-                            break
-                        else:
-                            amt_tot += Decimal(1)
+                    actual = amt_tot + (amount / Decimal(book[book_pos][x][0]))
                     
                     break
             else:
@@ -333,8 +342,22 @@ def calc_limit_price(amount, position, reverseLookup=None, withFees=None):
 
         logger.debug('actual: ' + "{:.8f}".format(actual))
         logger.debug('book_tot: ' + "{:.2f}".format(book_tot))
+        
+        if float(actual) <= 0:
+            # NEED TO FIGURE OUT HOW TO HANDLE THIS!!!!
+            if book_depth >= 200:
+                #logger.exception('Failed to set price_actual in calc_limit_price().')
+                #break
+                logger.exception('Failed to set price_actual in calc_limit_price(). Exiting.')
+                sys.exit(1)
 
-        if actual > 0:
+            else:
+                logger.warning('Volume not satisfied at default order book depth=' + str(book_depth) + '. Retrying with depth = ' + str(book_depth + 40) + '.')
+                book_depth += 40
+                
+                time.sleep(1)
+
+        else:
             logger.debug('calc_limit_price() successful within limits (depth=' + str(book_depth) + ').')
 
             if withFees:
@@ -346,19 +369,6 @@ def calc_limit_price(amount, position, reverseLookup=None, withFees=None):
                 logger.debug('[' + position + ']price_actual[+FEES]: ' + "{:.8f}".format(actual))
             
             break
-        
-        else:
-            # NEED TO FIGURE OUT HOW TO HANDLE THIS!!!!
-            if book_depth >= 200:
-                logger.exception('Failed to set price_actual in calc_limit_price().')
-                break
-                #logger.exception('Failed to set price_actual in calc_limit_price(). Exiting.')
-                #sys.exit(1)
-            
-            logger.warning('Volume not satisfied at default order book depth=' + str(book_depth) + '. Retrying with depth = ' + str(book_depth + 40) + '.')
-            book_depth += 40
-            
-            time.sleep(1)
 
     return actual
 
@@ -622,7 +632,7 @@ def telegram_status(bot, update):
     else:
         logger.warning('Access denied for requesting user.')
         
-        telegram_message = 'Not currently in list of connected users. Type \'/connect\' to subscribe to alerts.'
+        telegram_message = 'Not currently in list of connected users. Type \"/connect\" to subscribe to alerts.'
 
     logger.debug('[STATUS] telegram_message: ' + telegram_message)
     bot.send_message(chat_id=telegram_user, text=telegram_message)
@@ -644,7 +654,7 @@ def telegram_profit(bot, update):
     else:
         logger.warning('Access denied for requesting user.')
         
-        telegram_message = 'Not currently in list of connected users. Type \'/connect\' to connect to Lorenzbot.'
+        telegram_message = 'Not currently in list of connected users. Type \"/connect\" to connect to Lorenzbot.'
 
 
 def telegram_send_message(bot, trade_message):
@@ -716,10 +726,10 @@ if __name__ == '__main__':
     # Connect to MongoDB
     if mongo_alt == False:
         db = MongoClient().lorenzbot
-        logger.info('Using default MongoDB database \'lorenzbot\'.')
+        logger.info('Using default MongoDB database \"lorenzbot\".')
     else:
         db = MongoClient().lorenzbotalt
-        logger.info('Using alternate MongoDB database \'lorenzbotalt\'.')
+        logger.info('Using alternate MongoDB database \"lorenzbotalt\".')
 
     if clean_collections == True:
         logger.warning('Option to delete all existing collections selected.')
@@ -759,7 +769,7 @@ if __name__ == '__main__':
 
     if telegram_active == True:
         if not os.path.isfile(telegram_config_path):
-            logger.error('No Telegram config file found! Must create \'.telegram.ini\'. Exiting.')
+            logger.error('No Telegram config file found! Must create \".telegram.ini\". Exiting.')
             sys.exit(1)
         else:
             logger.info('Found Telegram config file.')
@@ -789,7 +799,7 @@ if __name__ == '__main__':
         connected_users = []
 
     if not os.path.isfile(poloniex_config_path):
-        logger.error('No Poloniex config file found! Must create \'.poloniex.ini\'. Exiting.')
+        logger.error('No Poloniex config file found! Must create \".poloniex.ini\". Exiting.')
         sys.exit(1)
     else:
         logger.info('Found Poloniex config file.')
