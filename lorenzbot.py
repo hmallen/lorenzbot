@@ -857,6 +857,10 @@ if __name__ == '__main__':
     logger.info('Balance STR:  ' + "{:.4f}".format(balance_str))
     logger.info('Balance USDT: ' + "{:.4f}".format(balance_usdt))
 
+    # Present trade totals
+    logger.info('Total STR Bought: ' + "{:.4f}".format(calc_trade_totals('bought')))
+    logger.info('Total USDT Spent: ' + "{:.4f}".format(calc_trade_totals('spent')))
+
     # If USDT and STR balances both ~0, then exit
     if balance_usdt < Decimal(0.0001) and float(balance_str) == 0:
         logger.error('USDT and STR balances both 0. Exiting.')
