@@ -457,14 +457,18 @@ def exec_trade(position, limit, amount):
         log_trade_csv(csv_list)
 
     if telegram_active == True:
-        if position == 'buy':
-            pos_msg = 'Bought '
-        elif position == 'sell':
-            pos_msg = 'Sold '
-        
-        telegram_message = pos_msg + "{:.4f}".format(order_details['amount']) + ' @ ' + "{:.4f}".format(order_details['rate'])
-        logger.info('Sending Telegram alert.')
-        telegram_send_message(updater.bot, telegram_message)
+        if len(connected_users) > 0
+            if position == 'buy':
+                pos_msg = 'Bought '
+            elif position == 'sell':
+                pos_msg = 'Sold '
+                
+            telegram_message = pos_msg + "{:.4f}".format(order_details['amount']) + ' @ ' + "{:.4f}".format(order_details['rate'])
+            logger.info('Sending Telegram alert.')
+            telegram_send_message(updater.bot, telegram_message)
+
+        else:
+            logger.info('No users connected to Telegram. Skipping alert.')
 
 
 def process_trade_response(response, position):
@@ -665,7 +669,7 @@ def telegram_send_message(bot, trade_message):
             bot.send_message(chat_id=user, text=trade_message)
             logger.debug('Sent alert to user ' + str(user) + '.')
     else:
-        logger.debug('No Telegram users connected. Skipping alert.')
+        logger.debug('No Telegram users connected. Message not sent.')
 
 
 def calc_dynamic(selection, base, limit):
