@@ -563,7 +563,9 @@ def telegram_disconnect(bot, update):
     bot.send_message(chat_id=telegram_user, text=telegram_message)
 
 
-def telegram_status(bot, update):    
+def telegram_status(bot, update):
+    global trade_usdt_remaining
+    
     telegram_user = update.message.chat_id
     
     logger.debug('[STATUS] chat_id: ' + str(telegram_user))
@@ -581,7 +583,7 @@ def telegram_status(bot, update):
         bought_msg = "{:.4f}".format(bought)
         rate_msg = "{:.4f}".format(rate)
 
-        telegram_message = 'Bought ' + bought_msg + 'STR for $' + spent_msg + ' at an average rate of $' + rate_msg + '.'
+        telegram_message = 'Bought ' + bought_msg + ' STR for $' + spent_msg + ' at an average rate of $' + rate_msg + '.'
 
     else:
         logger.warning('Access denied for requesting user.')
@@ -638,6 +640,8 @@ def telegram_send_message(bot, trade_message):
 
 
 def calc_dynamic(selection, base, limit):
+    global trade_usdt_remaining
+    
     diff = (base - limit) / base
     logger.debug('diff: ' + "{:.6f}".format(diff))
     logger.info('Price Difference from Base: ' + "{:.4f}".format(diff * Decimal(100)) + '%')
@@ -680,9 +684,7 @@ def calc_dynamic(selection, base, limit):
                 trade_proportion_adj = trade_proportion_low + (diff * (trade_proportion_high - trade_proportion_low))
                 logger.debug('trade_proportion_adj: ' + "{:.2f}".format(trade_proportion_adj))
 
-                global trade_usdt_remaining
-                logger.debug('trade_usdt_remaining: ' + "{:.2f}".format(trade_usdt_remaining))
-                
+                logger.debug('trade_usdt_remaining: ' + "{:.2f}".format(trade_usdt_remaining))                
                 amount_usdt = trade_usdt_remaining * trade_proportion_adj  # USDT
                 logger.debug('[DYNAMIC]amount_usdt: ' + "{:.8f}".format(amount_usdt))
 
@@ -703,7 +705,7 @@ def calc_dynamic(selection, base, limit):
 
 
 def verify_amounts():
-    global trade_amount, trade_usdt_max
+    global trade_amount, trade_usdt_max, trade_usdt_remaining
     
     verification = True
     
