@@ -480,49 +480,39 @@ def log_trade_csv(csv_row): # Must pass list as argument
 
 def calc_profit_csv():
     trade_list = []
-
-    logger.debug('Reading csv file.')
+    
     with open(log_file, newline='') as csv_file:
         csv_reader = csv.reader(csv_file, delimiter=',', quotechar='|')
         try:
             for row in csv_reader:
-                #logger.debug(row)
+                logger.debut(row)
                 trade_list.append(row)
         except csv.Error as e:
             logger.exception('Exception occurred while reading csv file.')
 
-    #logger.debug('len(trade_list): ' + str(len(trade_list)))
-    logger.debug('Calculating profit from csv data.')
-
     bought_amount = Decimal(0)
     spent_amount = Decimal(0)
-    buy_count = 0
     sold_amount = Decimal(0)
     gain_amount = Decimal(0)
-    sell_count = 0
-    for x in range(0, len(trade_list)):
-        trade_position = trade_list[x][1]
-        amount = Decimal(trade_list[x][2])
-        rate = Decimal(trade_list[x][3])
+    for x in range(0, len(t)):
+        trade_position = t[x][1]
+        amount = Decimal(t[x][2])
+        rate = Decimal(t[x][3])
 
         if trade_position == 'buy':
             bought_amount += amount
             spent_amount += amount * rate
-            buy_count += 1
         elif trade_position == 'sell':
             sold_amount += amount
             gain_amount += amount * rate
-            sell_count += 1
-    
+        
+        logger.debug(t[x])
+
     rate_avg = spent_amount / bought_amount
 
-    logger.debug('bought_amount: ' + "{:.8f}".format(bought_amount))
-    logger.debug('spent_amount: ' + "{:.8f}".format(spent_amount))
-    logger.debug('buy_count: ' + str(buy_count))
-    logger.debug('sold_amount: ' + "{:.8f}".format(sold_amount))
-    logger.debug('gain_amount: ' + "{:.8f}".format(gain_amount))
-    logger.debug('sell_count: ' + str(sell_count))
-    logger.debug('rate_avg: ' + "{:.8f}".format(rate_avg))
+    logger.debug(bought_amount)
+    logger.debug(spent_amount)
+    logger.debug(rate_avg)
 
     if gain_amount > 0:
         profit = gain_amount - spent_amount
@@ -530,7 +520,7 @@ def calc_profit_csv():
     else:
         profit = Decimal(-1)
 
-    logger.debug('profit: ' + "{:.8f}".format(profit))
+    logger.debug('[CSVPROFIT] profit: ' + "{:.8f}".format(profit))
 
     return {'profit': profit}
 
@@ -614,18 +604,17 @@ def telegram_profit(bot, update):
         logger.debug('Access confirmed for requesting user.')
 
         if csv_logging == True:
-            trade_profit_return = calc_profit_csv()
-            logger.debug('trade_profit_return: ' + str(trade_profit_return))
+            logger.debug('CSV logging active. Calculating profit.')
+            trade_profit_info = calc_profit_csv()
+            trade_profit = trade_profit_info['profit']
+            logger.debug(trade_profit_info['profit'])
 
-            trade_profit = trade_profit_return['profit']
-            logger.debug('[CSVPROFIT] trade_profit: ' + "{:.8f}".format(trade_profit))
-    
             if float(trade_profit) < 0:
                 telegram_message = 'No sell trades executed.'
                 logger.debug('No sell trades executed.')
 
             else:
-                telegram_message = 'Total Profit: ' + "{:.4f}".format(profit)   # CSV PROFIT CALCULATION
+                telegram_message = 'Total Profit: ' + str(trade_profit)#"{:.4f}".format(trade_profit)   # CSV PROFIT CALCULATION
 
         else:
             telegram_message = 'CSV logging not active. Cannot calculate profit.'
@@ -688,8 +677,6 @@ def calc_dynamic(selection, base, limit):
             logger.debug('Calculating trade amount.')
 
             if diff > Decimal(0):
-                logger.debug('diff > 0')
-                
                 trade_proportion_low = trade_proportion_initial # Default = 0.05
                 logger.debug('trade_proportion_low: ' + "{:.2f}".format(trade_proportion_low))
                 trade_proportion_high = Decimal(0.50)    # If limit price 100% less than base price, trade with this proportion of available USDT remaining
@@ -702,14 +689,11 @@ def calc_dynamic(selection, base, limit):
                 logger.debug('[DYNAMIC]amount_usdt: ' + "{:.8f}".format(amount_usdt))
 
                 amount = calc_limit_price(amount_usdt, 'buy', reverseLookup=True)
-
                 logger.debug('[DYNAMIC]amount: ' + "{:.8f}".format(amount))
 
             else:
-                logger.debug('diff < 0')
+                logger.debug('diff < 0 -- Using default trade amount.')
                 amount = trade_amount
-
-            logger.debug('[DYNAMIC] amount: ' + "{:.8f}".format(amount))
 
         else:
             logger.debug('Using static loop time.')

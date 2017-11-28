@@ -2,10 +2,9 @@
 Poloniex exchange trading bot
 
 TO DO:
-- Finish Telegram-triggered csv profit calculator
 - Make csv profit calc ignore last group of buys without a sell for calculation
 - Multi-line Telegram message formatting
-- Add MongoDB collection to store Telegram users
+- Telegram error/exception alerts
 - Return weighted average from calc_limit_price()
 - Test if program functions without defining global variables
 - List out all variables used and formalize to clean up program
@@ -20,10 +19,10 @@ LATER:
 
 IF TIME:
 - Add argument for product selection
+- Add MongoDB collection to store Telegram users
 
 NEEDS TESTING:
 - Determine what is causing mismatch between calculated and executed order size
-- Move balance/trade log verification to isolated function
 
 DONE:
 - Add argument for trade amount
@@ -49,3 +48,5 @@ DONE:
 -- Sell = 0.0001USDT
 - Base csv name and renaming on collection cleaning
 - Check is csv logging true before activating Telegram profit calculation
+- Move balance/trade log verification to isolated function
+- Fix Telegram-triggered csv profit calculator
