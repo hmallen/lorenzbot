@@ -15,7 +15,7 @@ import textwrap
 import time
 
 global coll_current
-global trade_amount, trade_usdt_max
+global base_price, trade_amount, trade_usdt_max
 
 log_out = 'logs/' + datetime.datetime.now().strftime('%m%d%Y-%H%M%S') + '.log'
 log_file = 'logs/lorenzbot_log.csv'
@@ -721,7 +721,7 @@ def calc_dynamic(selection, base, limit):
 
 
 def verify_amounts():
-    global trade_amount, trade_usdt_max, trade_usdt_remaining
+    global base_price, trade_amount, trade_usdt_max, trade_usdt_remaining
     
     verification = True
     
