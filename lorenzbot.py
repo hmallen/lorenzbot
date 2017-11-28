@@ -18,7 +18,7 @@ global coll_current
 global trade_amount, trade_usdt_max
 
 log_out = 'logs/' + datetime.datetime.now().strftime('%m%d%Y-%H%M%S') + '.log'
-log_file = 'logs/lorezbot_log.csv'
+log_file = 'logs/lorenzbot_log.csv'
 
 logger = logging.getLogger(__name__)
 formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
