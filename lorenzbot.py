@@ -725,8 +725,7 @@ def verify_amounts():
     
     verification = True
 
-    if not base_price:
-        calc_base()
+    base_price = calc_base()
     
     # Get account balances
     account_balances = get_balances()
