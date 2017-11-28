@@ -1,0 +1,18 @@
+2017-11-27 18:47:26,756 - DEBUG - Parsing arguments.
+2017-11-27 18:47:26,757 - DEBUG - Activated debug logging.
+2017-11-27 18:47:26,757 - DEBUG - clean_logs: True
+2017-11-27 18:47:26,757 - DEBUG - trade_amount: 1.00
+2017-11-27 18:47:26,757 - DEBUG - amount_dynamic: True
+2017-11-27 18:47:26,758 - DEBUG - trade_proportion_initial: 0.05
+2017-11-27 18:47:26,758 - DEBUG - trade_usdt_max: 1.00
+2017-11-27 18:47:26,758 - DEBUG - profit_threshold: 0.05
+2017-11-27 18:47:26,758 - DEBUG - loop_time: 30
+2017-11-27 18:47:26,758 - DEBUG - loop_dynamic: True
+2017-11-27 18:47:26,759 - DEBUG - live_trading: True
+2017-11-27 18:47:26,759 - DEBUG - csv_logging: True
+2017-11-27 18:47:26,759 - DEBUG - telegram_active: True
+2017-11-27 18:47:26,760 - DEBUG - mongo_alt: False
+2017-11-27 18:47:26,789 - INFO - MongoDB running.
+2017-11-27 18:47:26,801 - INFO - Using default MongoDB database "lorenzbot".
+2017-11-27 18:47:26,803 - WARNING - Selected option to delete existing collections and archive current csv trade log.
+2017-11-27 18:47:31,473 - ERROR - Unrecognized user input. Exiting.

@@ -1,0 +1,43 @@
+2017-11-27 18:44:22,970 - DEBUG - Parsing arguments.
+2017-11-27 18:44:22,971 - DEBUG - Activated debug logging.
+2017-11-27 18:44:22,971 - DEBUG - clean_logs: False
+2017-11-27 18:44:22,971 - DEBUG - trade_amount: 1.00
+2017-11-27 18:44:22,972 - DEBUG - amount_dynamic: True
+2017-11-27 18:44:22,972 - DEBUG - trade_proportion_initial: 0.05
+2017-11-27 18:44:22,972 - DEBUG - trade_usdt_max: 1.00
+2017-11-27 18:44:22,974 - DEBUG - profit_threshold: 0.05
+2017-11-27 18:44:22,975 - DEBUG - loop_time: 30
+2017-11-27 18:44:22,975 - DEBUG - loop_dynamic: True
+2017-11-27 18:44:22,975 - DEBUG - live_trading: True
+2017-11-27 18:44:22,975 - DEBUG - csv_logging: True
+2017-11-27 18:44:22,976 - DEBUG - telegram_active: True
+2017-11-27 18:44:22,976 - DEBUG - mongo_alt: False
+2017-11-27 18:44:23,013 - INFO - MongoDB running.
+2017-11-27 18:44:23,016 - INFO - Using default MongoDB database "lorenzbot".
+2017-11-27 18:44:23,016 - INFO - Dynamic trade amount calculation activated.
+2017-11-27 18:44:23,016 - INFO - Dynamic loop time calculation activated. Base loop time set to 30 seconds.
+2017-11-27 18:44:23,017 - INFO - CSV logging activated.
+2017-11-27 18:44:23,017 - DEBUG - CSV log file path: logs/lorezbot_log.csv
+2017-11-27 18:44:23,017 - INFO - Telegram logging active. Send "/connect" to @lorenzbot_bot to receive alerts.
+2017-11-27 18:44:23,022 - INFO - No collections found in database. Creating new.
+2017-11-27 18:44:23,570 - INFO - Created new collection: 11272017_184423
+2017-11-27 18:44:23,570 - INFO - Found Telegram config file.
+2017-11-27 18:44:23,594 - DEBUG - telegram_token: 411687950:AAFOIzovAmjDoy_0qJeBfdtzTFkM74BI0Fs
+2017-11-27 18:44:23,601 - INFO - Found Poloniex config file.
+2017-11-27 18:44:23,619 - WARNING - Live trading ENABLED.
+2017-11-27 18:44:24,411 - INFO - Current Maker Fee: 0.1500%
+2017-11-27 18:44:24,412 - INFO - Current Taker Fee: 0.2500%
+2017-11-27 18:44:24,704 - INFO - Balance STR:  181.7471
+2017-11-27 18:44:24,704 - INFO - Balance USDT: 13.9030
+2017-11-27 18:44:24,705 - DEBUG - No documents found in collection. Setting total to 0.
+2017-11-27 18:44:24,705 - DEBUG - trade_total[bought]: 0.00000000
+2017-11-27 18:44:24,706 - INFO - Total STR Bought: 0.0000
+2017-11-27 18:44:24,706 - DEBUG - No documents found in collection. Setting total to 0.
+2017-11-27 18:44:24,706 - DEBUG - trade_total[spent]: 0.00000000
+2017-11-27 18:44:24,708 - INFO - Total USDT Spent: 0.0000
+2017-11-27 18:44:24,711 - INFO - Total Buy Count: 0
+2017-11-27 18:44:24,712 - DEBUG - No documents found in collection. Setting total to 0.
+2017-11-27 18:44:24,712 - DEBUG - trade_total[bought]: 0.00000000
+2017-11-27 18:44:24,852 - DEBUG - [CONNECT] chat_id: 382606465
+2017-11-27 18:44:24,853 - INFO - Telegram user connected: 382606465
+2017-11-27 18:44:24,853 - DEBUG - [CONNECT] telegram_message: Subscribed to Lorenzbot alerts.
