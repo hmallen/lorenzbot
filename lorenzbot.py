@@ -1066,12 +1066,6 @@ if __name__ == '__main__':
             if csv_logging == True:
                 logger.info('CSV write errors: ' + str(csv_failures))
 
-                if os.path.isfile(log_file):
-                    logger.info('Archiving csv trade log.')
-                    os.rename(log_file, ('logs/old/' + 'lorenzbot_log_' + datetime.datetime.now().strftime('%m%d%Y-%H%M%S') + '.csv'))
-                else:
-                    logger.info('No csv log found to archive.')
-
             if telegram_active == True:
                 updater.stop()
             
