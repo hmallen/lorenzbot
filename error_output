@@ -1,0 +1,107 @@
+11282017-054608.log
+
+1) Telegram timeout (2x total)
+
+2017-11-28 07:34:51,324 - INFO - Sending Telegram alert.
+2017-11-28 07:34:51,325 - DEBUG - trade_message: Bought 0.1874 @ 0.0591
+2017-11-28 07:34:56,330 - ERROR - Timed out
+Traceback (most recent call last):
+  File "/home/ec2-user/lorenzbot/env/local/lib/python3.6/site-packages/telegram/vendor/ptb_urllib3/urllib3/connectionpool.py", line 402, in _make_request
+    six.raise_from(e, None)
+  File "<string>", line 2, in raise_from
+  File "/home/ec2-user/lorenzbot/env/local/lib/python3.6/site-packages/telegram/vendor/ptb_urllib3/urllib3/connectionpool.py", line 398, in _make_request
+    httplib_response = conn.getresponse()
+  File "/usr/lib64/python3.6/http/client.py", line 1331, in getresponse
+    response.begin()
+  File "/usr/lib64/python3.6/http/client.py", line 297, in begin
+    version, status, reason = self._read_status()
+  File "/usr/lib64/python3.6/http/client.py", line 258, in _read_status
+    line = str(self.fp.readline(_MAXLINE + 1), "iso-8859-1")
+  File "/usr/lib64/python3.6/socket.py", line 586, in readinto
+    return self._sock.recv_into(b)
+  File "/usr/lib64/python3.6/ssl.py", line 1002, in recv_into
+    return self.read(nbytes, buffer)
+  File "/usr/lib64/python3.6/ssl.py", line 865, in read
+    return self._sslobj.read(len, buffer)
+  File "/usr/lib64/python3.6/ssl.py", line 625, in read
+    v = self._sslobj.read(len, buffer)
+socket.timeout: The read operation timed out
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/ec2-user/lorenzbot/env/local/lib/python3.6/site-packages/telegram/utils/request.py", line 190, in _request_wrapper
+    resp = self._con_pool.request(*args, **kwargs)
+  File "/home/ec2-user/lorenzbot/env/local/lib/python3.6/site-packages/telegram/vendor/ptb_urllib3/urllib3/request.py", line 70, in request
+    **urlopen_kw)
+  File "/home/ec2-user/lorenzbot/env/local/lib/python3.6/site-packages/telegram/vendor/ptb_urllib3/urllib3/request.py", line 148, in request_encode_body
+    return self.urlopen(method, url, **extra_kw)
+  File "/home/ec2-user/lorenzbot/env/local/lib/python3.6/site-packages/telegram/vendor/ptb_urllib3/urllib3/poolmanager.py", line 244, in urlopen
+    response = conn.urlopen(method, u.request_uri, **kw)
+  File "/home/ec2-user/lorenzbot/env/local/lib/python3.6/site-packages/telegram/vendor/ptb_urllib3/urllib3/connectionpool.py", line 666, in urlopen
+    _stacktrace=sys.exc_info()[2])
+  File "/home/ec2-user/lorenzbot/env/local/lib/python3.6/site-packages/telegram/vendor/ptb_urllib3/urllib3/util/retry.py", line 347, in increment
+    raise six.reraise(type(error), error, _stacktrace)
+  File "/home/ec2-user/lorenzbot/env/local/lib/python3.6/site-packages/telegram/vendor/ptb_urllib3/urllib3/packages/six.py", line 686, in reraise
+    raise value
+  File "/home/ec2-user/lorenzbot/env/local/lib/python3.6/site-packages/telegram/vendor/ptb_urllib3/urllib3/connectionpool.py", line 617, in urlopen
+    chunked=chunked)
+  File "/home/ec2-user/lorenzbot/env/local/lib/python3.6/site-packages/telegram/vendor/ptb_urllib3/urllib3/connectionpool.py", line 405, in _make_request
+    exc_cls=ReadTimeoutError)
+  File "/home/ec2-user/lorenzbot/env/local/lib/python3.6/site-packages/telegram/vendor/ptb_urllib3/urllib3/connectionpool.py", line 321, in _raise_timeout
+    raise exc_cls(*args)
+telegram.vendor.ptb_urllib3.urllib3.exceptions.ReadTimeoutError: HTTPSConnectionPool(host='api.telegram.org', port=443): Read timed out. (read timeout=5.0)
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "lorenzbot.py", line 1058, in <module>
+    exec_trade('buy', base_price_target, buy_amount_current)
+  File "lorenzbot.py", line 418, in exec_trade
+    telegram_send_message(updater.bot, telegram_message)
+  File "lorenzbot.py", line 647, in telegram_send_message
+    bot.send_message(chat_id=user, text=trade_message)
+  File "/home/ec2-user/lorenzbot/env/local/lib/python3.6/site-packages/telegram/bot.py", line 57, in decorator
+    result = func(self, *args, **kwargs)
+  File "/home/ec2-user/lorenzbot/env/local/lib/python3.6/site-packages/telegram/bot.py", line 82, in decorator
+    result = self._request.post(url, data, timeout=kwargs.get('timeout'))
+  File "/home/ec2-user/lorenzbot/env/local/lib/python3.6/site-packages/telegram/utils/request.py", line 272, in post
+    **urlopen_kwargs)
+  File "/home/ec2-user/lorenzbot/env/local/lib/python3.6/site-packages/telegram/utils/request.py", line 192, in _request_wrapper
+    raise TimedOut()
+telegram.error.TimedOut: Timed out
+
+2) Error when placing new entry buy after sell
+
+2017-11-28 10:02:41,379 - DEBUG - [SELL] mongo_response: <pymongo.results.InsertOneResult object at 0x7f4d9c1609c8>
+2017-11-28 10:02:41,379 - INFO - Sell logged to MongoDB database collection 11282017_054609
+2017-11-28 10:02:41,394 - INFO - Created new collection: 11282017_100241
+2017-11-28 10:02:41,394 - DEBUG - Sell completely filled. New collection starting empty.
+2017-11-28 10:02:41,394 - DEBUG - Entering base_price calculation.
+2017-11-28 10:02:41,395 - DEBUG - db[coll_current].count(): 0
+2017-11-28 10:02:41,395 - INFO - No trade log found. Making entry buy.
+2017-11-28 10:02:41,395 - DEBUG - trade_amount[CALC]: 0.00
+2017-11-28 10:02:41,488 - DEBUG - Regular lookup (price) in calc_limit_price().
+2017-11-28 10:02:41,488 - DEBUG - actual: 0.06365000
+2017-11-28 10:02:41,488 - DEBUG - book_tot: 773.10
+2017-11-28 10:02:41,488 - DEBUG - actual: 0.06365000
+2017-11-28 10:02:41,488 - DEBUG - book_tot: 773.10
+2017-11-28 10:02:41,488 - DEBUG - calc_limit_price() successful within limits (depth=40).
+2017-11-28 10:02:41,488 - DEBUG - trade_price_initial[CALC]: 0.06
+2017-11-28 10:02:41,488 - INFO - Entry trade amount: 0.0007
+2017-11-28 10:02:41,489 - DEBUG - trade_price_initial: 0.06365000
+2017-11-28 10:02:41,659 - ERROR - Entry buy failed. Exiting.
+Traceback (most recent call last):
+  File "lorenzbot.py", line 183, in calc_base
+    exec_trade('buy', trade_price_initial, trade_amount)
+  File "lorenzbot.py", line 336, in exec_trade
+    trade_response = polo.buy('USDT_STR', limit, amount, 'immediateOrCancel')
+  File "/home/ec2-user/lorenzbot/env/local/lib/python3.6/site-packages/poloniex/__init__.py", line 430, in buy
+    return self.__call__('buy', args)
+  File "/home/ec2-user/lorenzbot/env/local/lib/python3.6/site-packages/poloniex/__init__.py", line 143, in retrying
+    return func(*args, **kwargs)
+  File "/home/ec2-user/lorenzbot/env/local/lib/python3.6/site-packages/poloniex/__init__.py", line 203, in __call__
+    return self.handleReturned(ret.text)
+  File "/home/ec2-user/lorenzbot/env/local/lib/python3.6/site-packages/poloniex/__init__.py", line 270, in handleReturned
+    raise PoloniexError(out['error'])
+poloniex.PoloniexError: Total must be at least 0.0001.

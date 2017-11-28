@@ -2,6 +2,7 @@
 Poloniex exchange trading bot
 
 TO DO:
+- NEED TO FIX COLLECTION NOT CLEARING AFTER SELL ETC.
 - Make csv profit calc ignore last group of buys without a sell for calculation
 - Multi-line Telegram message formatting
 - Telegram error/exception alerts
@@ -23,6 +24,7 @@ IF TIME:
 
 NEEDS TESTING:
 - Determine what is causing mismatch between calculated and executed order size
+- Handling of exception from Telegram send message timeout
 
 DONE:
 - Add argument for trade amount
@@ -50,3 +52,4 @@ DONE:
 - Check is csv logging true before activating Telegram profit calculation
 - Move balance/trade log verification to isolated function
 - Fix Telegram-triggered csv profit calculator
+- Integrate telegram_failures counter
