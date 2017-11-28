@@ -395,29 +395,30 @@ def exec_trade(position, limit, amount):
             logger.error('Failed to execute sell order.')
             sell_failures += 1
 
-    if csv_logging == True and len(trade_response['resultingTrades']) > 0:
-        csv_list = [order_details['date'],
-                    position,
-                    "{:.8f}".format(order_details['amount']),
-                    "{:.8f}".format(order_details['rate']),
-                    "{:.8f}".format(base_price_initial),
-                    "{:.8f}".format(calc_base())]
-        logger.debug('csv_list: ' + str(csv_list))
-        log_trade_csv(csv_list)
+    if len(trade_response['resultingTrades']) > 0:
+        if csv_logging == True:
+            csv_list = [order_details['date'],
+                        position,
+                        "{:.8f}".format(order_details['amount']),
+                        "{:.8f}".format(order_details['rate']),
+                        "{:.8f}".format(base_price_initial),
+                        "{:.8f}".format(calc_base())]
+            logger.debug('csv_list: ' + str(csv_list))
+            log_trade_csv(csv_list)
 
-    if telegram_active == True:
-        if len(connected_users) > 0:
-            if position == 'buy':
-                pos_msg = 'Bought '
-            elif position == 'sell':
-                pos_msg = 'Sold '
-                
-            telegram_message = pos_msg + "{:.4f}".format(order_details['amount']) + ' @ ' + "{:.4f}".format(order_details['rate'])
-            logger.info('Sending Telegram alert.')
-            telegram_send_message(updater.bot, telegram_message)
+        if telegram_active == True:
+            if len(connected_users) > 0:
+                if position == 'buy':
+                    pos_msg = 'Bought '
+                elif position == 'sell':
+                    pos_msg = 'Sold '
+                    
+                telegram_message = pos_msg + "{:.4f}".format(order_details['amount']) + ' @ ' + "{:.4f}".format(order_details['rate'])
+                logger.info('Sending Telegram alert.')
+                telegram_send_message(updater.bot, telegram_message)
 
-        else:
-            logger.info('No users connected to Telegram. Skipping alert.')
+            else:
+                logger.info('No users connected to Telegram. Skipping alert.')
 
 
 def process_trade_response(response, position):
@@ -472,9 +473,8 @@ def log_trade_csv(csv_row): # Must pass list as argument
         with open(log_file, 'a', newline='') as csv_file:
             csv_writer = csv.writer(csv_file, delimiter=',', quotechar='|', quoting=csv.QUOTE_MINIMAL)
             csv_writer.writerow(csv_row)
-
-    except:
-        logger.error('Failed to write to csv file.')
+    except csv.Error as e:
+        logger.error('Exception occurred while writing to csv file.')
         csv_failures += 1
 
 
@@ -483,12 +483,10 @@ def calc_profit_csv():
     
     with open(log_file, newline='') as csv_file:
         csv_reader = csv.reader(csv_file, delimiter=',', quotechar='|')
-
         try:
             for row in csv_reader:
                 logger.debut(row)
                 trade_list.append(row)
-        
         except csv.Error as e:
             logger.exception('Exception occurred while reading csv file.')
 
@@ -542,7 +540,7 @@ def telegram_connect(bot, update):
     else:
         telegram_message = 'Already subscribed to Lorenzbot alerts.'
         
-    logger.debug('[CONNECT] telegram_message: ' + telegram_message)
+    logger.debug('[CONNECT] telegram_message: ' + telegram_message)    
     bot.send_message(chat_id=telegram_user, text=telegram_message)
 
 
@@ -562,7 +560,6 @@ def telegram_disconnect(bot, update):
         telegram_message = 'Not currently subscribed to Lorenzbot alerts.'
 
     logger.debug('[DISCONNECT] telegram_message: ' + telegram_message)
-
     bot.send_message(chat_id=telegram_user, text=telegram_message)
 
 
@@ -619,6 +616,7 @@ def telegram_profit(bot, update):
 
         else:
             telegram_message = 'CSV logging not active. Cannot calculate profit.'
+    
     else:
         logger.warning('Access denied for requesting user.')
         
@@ -1067,7 +1065,7 @@ if __name__ == '__main__':
                 logger.info('CSV write errors: ' + str(csv_failures))
 
                 if os.path.isfile(log_file):
-                    logger.info('Archiving old csv trade log.')
+                    logger.info('Archiving csv trade log.')
                     os.rename(log_file, ('logs/old/' + 'lorenzbot_log_' + datetime.datetime.now().strftime('%m%d%Y-%H%M%S') + '.csv'))
                 else:
                     logger.info('No csv log found to archive.')
