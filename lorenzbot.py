@@ -695,7 +695,7 @@ def calc_dynamic(selection, base, limit):
     
     diff = (base - limit) / base
     logger.debug('diff: ' + "{:.6f}".format(diff))
-    logger.info('Price Difference from Base: ' + "{:.4f}".format(diff * Decimal(100)) + '%')
+    logger.info('Price Difference from Base: ' + "{:.4f}".format(diff * Decimal(100) * Decimal(-1)) + '%')
 
     # Map magnitude of difference b/w base price and buy price to loop time
     if selection == 'loop':
