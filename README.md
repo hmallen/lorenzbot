@@ -2,6 +2,8 @@
 Poloniex exchange trading bot
 
 TO DO:
+- Allow verify_amounts() to increase trade_usdt_max
+- Change diff to be relative to low ask actual ("Price Difference from Base")
 - /profit Telegram functions, but always returns 'No sell trades executed.'
 - Fix sells always being triggered on start (incorrect total str bought amount)
 -- Collection retrieved on startup should be most recent but list returned not sorted
