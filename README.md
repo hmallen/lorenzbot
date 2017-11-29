@@ -2,22 +2,22 @@
 Poloniex exchange trading bot
 
 TO DO:
-- Copy/rename most recent log files on program exit for easy access
-- Allow verify_amounts() to increase trade_usdt_max
-- Change diff to be relative to low ask actual ("Price Difference from Base")
+- Consider limiting buy amounts under certain circumstances
 - /profit Telegram functions, but always returns 'No sell trades executed.'
-- Allow trade_usdt_max to be adjusted without stopping program
 - Make Telegram messages include more helpful information
 -- /status: trade_usdt_remaining, trade_usdt_max, etc.
 -- Trade alerts: trade_usdt_remaining
 - Add Telegram alerts when adjustments are made due to balance/trade amount issues
 - Add Telegram alerts when program exception occurs
-- Consider limiting buy amounts under certain circumstances
+- Clean up unnecessary logging output, especially for INFO level
 
 LATER:
 - "Cash out" profits to BTC (or whatever else)
+- Allow verify_amounts() to increase trade_usdt_max
+- Change diff to be relative to low ask actual ("Price Difference from Base")
 - Implement more efficient handling for failure to create new MongoDB collection
 - Return weighted average from calc_limit_price()
+- Allow trade_usdt_max to be adjusted without stopping program
 - Test if program functions without defining global variables
 - List out all variables used and formalize to clean up program
 - Make boolean arguments into human-readable format
@@ -70,3 +70,4 @@ DONE:
 - Limit Telegram buy messages (by time?)
 - Fix sells always being triggered on start (incorrect total str bought amount)
 -- Collection retrieved on startup should be most recent but list returned not sorted
+- Copy/rename most recent log files on program exit for easy access
