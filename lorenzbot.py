@@ -89,7 +89,7 @@ parser.add_argument('-c', '--clean', action='store_true', default=False, help='A
 
 parser.add_argument('-a', '--amount', default=1.0, type=float, help='Set static base amount of quote product to trade. [Default = 1.0]')
 parser.add_argument('--dynamicamount', action='store_true', default=False, help='Add flag to dynamically set trade amount based on current conditions.')
-parser.add_argument('-i', '--initial', default=0.01, type=float, help='Set proportion of total funds to use for initial buy. [Default = 0.05]')
+parser.add_argument('-i', '--initial', default=0.01, type=float, help='Set proportion of total funds to use for initial buy. [Default = 0.01]')
 
 parser.add_argument('-m', '--max', default=1.0, type=float, help='Total amount of USDT to use for trading. [Default = 1.0]')
 parser.add_argument('-p', '--profit', default=0.05, type=float, help='Set profit threshold for sell triggering. [Default = 0.05]')
@@ -746,7 +746,7 @@ def calc_dynamic(selection, base, limit):
     global trade_usdt_remaining
     
     diff = (base - limit) / base
-    logger.debug('diff: ' + "{:.6f}".format(diff))
+    logger.debug('diff: ' + "{:.8f}".format(diff))
     logger.info('Price Difference from Base: ' + "{:.4f}".format(diff * Decimal(100) * Decimal(-1)) + '%')
 
     # Map magnitude of difference b/w base price and buy price to loop time
@@ -784,7 +784,7 @@ def calc_dynamic(selection, base, limit):
                 
                 trade_proportion_low = trade_proportion_initial # Default = 0.01
                 logger.debug('trade_proportion_low: ' + "{:.2f}".format(trade_proportion_low))
-                trade_proportion_high = Decimal(1)    # If limit price 100% less than base price, trade with this proportion of available USDT remaining
+                trade_proportion_high = Decimal(0.5)    # If limit price 100% less than base price, trade with this proportion of available USDT remaining
                 logger.debug('trade_proportion_high: ' + "{:.2f}".format(trade_proportion_high))
                 trade_proportion_adj = trade_proportion_low + (diff * (trade_proportion_high - trade_proportion_low))
                 logger.debug('trade_proportion_adj: ' + "{:.2f}".format(trade_proportion_adj))

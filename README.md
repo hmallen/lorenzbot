@@ -2,7 +2,6 @@
 Poloniex exchange trading bot
 
 TO DO:
-- On Poloniex internal error, buy (and possibly sell) trades are still logged as if they were successful
 - Copy/rename most recent log files on program exit for easy access
 - Allow verify_amounts() to increase trade_usdt_max
 - Change diff to be relative to low ask actual ("Price Difference from Base")
@@ -35,8 +34,7 @@ IF TIME:
 NEEDS TESTING:
 - Determine what is causing mismatch between calculated and executed order size
 - Handling of exception from Telegram send message timeout
-- Fix failure to rebuy after sell due to lack of maximum trade value reset
--- Create "reset maxima" function to reset trade maximum values which may have been reduced during buy phase
+- On Poloniex internal error, buy (and possibly sell) trades are still logged as if they were successful
 
 DONE:
 - Add argument for trade amount
@@ -65,3 +63,5 @@ DONE:
 - Move balance/trade log verification to isolated function
 - Fix Telegram-triggered csv profit calculator
 - Integrate telegram_failures counter
+- Fix failure to rebuy after sell due to lack of maximum trade value reset
+-- Create "reset maxima" function to reset trade maximum values which may have been reduced during buy phase
