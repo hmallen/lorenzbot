@@ -133,7 +133,8 @@ def modify_collections(action):
         global coll_current
 
         #coll_current = 'lorenzbot_collection'
-        coll_current = datetime.datetime.now().strftime('%m%d%Y_%H%M%S')
+        #coll_current = datetime.datetime.now().strftime('%m%d%Y_%H%M%S')
+        coll_current = datetime.datetime.now().strftime('%m%d%Y%H%M%S')
         
         db.create_collection(coll_current)
         
