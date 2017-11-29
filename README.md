@@ -2,10 +2,11 @@
 Poloniex exchange trading bot
 
 TO DO:
-- NEED TO FIX COLLECTION NOT CLEARING AFTER SELL ETC.
+- Limit Telegram buy messages (by time?)
 - Make csv profit calc ignore last group of buys without a sell for calculation
 - Multi-line Telegram message formatting
 - Telegram error/exception alerts
+- Implement more efficient handling for failure to create new MongoDB collection
 - Return weighted average from calc_limit_price()
 - Test if program functions without defining global variables
 - List out all variables used and formalize to clean up program
@@ -25,6 +26,8 @@ IF TIME:
 NEEDS TESTING:
 - Determine what is causing mismatch between calculated and executed order size
 - Handling of exception from Telegram send message timeout
+- Fix failure to rebuy after sell due to lack of maximum trade value reset
+-- Create "reset maxima" function to reset trade maximum values which may have been reduced during buy phase
 
 DONE:
 - Add argument for trade amount
