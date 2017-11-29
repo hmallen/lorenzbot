@@ -621,7 +621,7 @@ def telegram_status(bot, update):
         rate_msg = 'Base Price:   ' + "{:.4f}".format(base_current) + '\n'
         market_current = Decimal(polo.returnTicker()['USDT_STR']['last'])
         logger.debug('market_current: ' + "{:.8f}".format(market_current))
-        market_msg = 'Mkt. Price: ' + "{:.4f}".format()# + '\n'
+        market_msg = 'Mkt. Price: ' + "{:.4f}".format(market_current)# + '\n'
 
         telegram_message = spent_msg + bought_msg + rate_msg + market_msg
         logger.debug('telegram_message: ' + telegram_message)
