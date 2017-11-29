@@ -1,5 +1,5 @@
 env/
-logs/lorenzbot_log.csv
+logs/
 *.DS_Store
 *.ini
 *aws*
