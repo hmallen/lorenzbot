@@ -603,7 +603,6 @@ def telegram_disconnect(bot, update):
 
 
 def telegram_status(bot, update):
-    global base_price
     global trade_usdt_remaining
     global telegram_failures
     
@@ -617,10 +616,15 @@ def telegram_status(bot, update):
                 
         spent_msg = 'USDT Spent:  ' + "{:.4f}".format(calc_trade_totals('spent')) + '\n'
         bought_msg = 'STR Bought: ' + "{:.4f}".format(calc_trade_totals('bought')) + '\n'
-        rate_msg = 'Base Price:   ' + "{:.4f}".format(base_price) + '\n'
-        market_msg = 'Mkt. Price: ' + "{:.4f}".format(polo.returnTicker()['USDT_STR']['last'])# + '\n'
+        base_current = calc_base()
+        logger.debug('base_current: ' + "{:.8f}".format(base_current))
+        rate_msg = 'Base Price:   ' + "{:.4f}".format(base_current) + '\n'
+        market_current = Decimal(polo.returnTicker()['USDT_STR']['last'])
+        logger.debug('market_current: ' + "{:.8f}".format(market_current))
+        market_msg = 'Mkt. Price: ' + "{:.4f}".format()# + '\n'
 
         telegram_message = spent_msg + bought_msg + rate_msg + market_msg
+        logger.debug('telegram_message: ' + telegram_message)
 
     else:
         logger.warning('Access denied for requesting user.')
@@ -825,7 +829,7 @@ def verify_amounts():
     logger.debug('trade_usdt_remaining: ' + "{:.8f}".format(trade_usdt_remaining))
     if float(balance_usdt) < float(trade_usdt_remaining):
         logger.warning('USDT balance less than remaining USDT amount allotted for trading. Adjusting allotment to available balance.')
-        trade_usdt_max = balance_usdt + calc_trade_totals('spent')
+        trade_usdt_max = (balance_usdt + calc_trade_totals('spent')) * Decimal(0.98)
         trade_usdt_remaining = trade_usdt_max - calc_trade_totals('spent')
         logger.debug('[ADJUSTED]trade_usdt_remaining: ' + "{:.8f}".format(trade_usdt_remaining))
         logger.info('Remaining Tradable USDT Balance Adjusted: ' + "{:.4f}".format(trade_usdt_remaining))
