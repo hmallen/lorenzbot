@@ -346,8 +346,13 @@ def exec_trade(position, limit, amount):
         base_price_initial = 0
         
     if position == 'buy':
-        trade_response = polo.buy('USDT_STR', limit, amount, 'immediateOrCancel')
-        logger.debug('[BUY] trade_response: ' + str(trade_response))
+        try:
+            trade_response = polo.buy('USDT_STR', limit, amount, 'immediateOrCancel')
+            logger.debug('[BUY] trade_response: ' + str(trade_response))
+        except:
+            logger.exception('Exception occurred while executing buy trade.')
+            buy_failures += 1
+            return -1
 
         if len(trade_response['resultingTrades']) > 0:
             order_details = process_trade_response(trade_response, position)
@@ -362,12 +367,16 @@ def exec_trade(position, limit, amount):
                 mongo_failures += 1
 
         else:
-            logger.error('Failed to execute buy order.')
-            buy_failures += 1
+            logger.warning('No trades were executed on buy attempt.')
         
     elif position == 'sell':
-        trade_response = polo.sell('USDT_STR', limit, amount, 'immediateOrCancel')  # CHANGE TO REGULAR LIMIT ORDER?
-        logger.debug('[SELL] trade_response: ' + str(trade_response))
+        try:
+            trade_response = polo.sell('USDT_STR', limit, amount, 'immediateOrCancel')  # CHANGE TO REGULAR LIMIT ORDER?
+            logger.debug('[SELL] trade_response: ' + str(trade_response))
+        except:
+            logger.exception('Exception occurred while executing sell trade.')
+            sell_failures += 1
+            return -1
 
         if len(trade_response['resultingTrades']) > 0:
             amount_unfilled = Decimal(trade_response['amountUnfilled'])
@@ -411,8 +420,7 @@ def exec_trade(position, limit, amount):
             reset_trade_maxima()
 
         else:
-            logger.error('Failed to execute sell order.')
-            sell_failures += 1
+            logger.warning('No trades were executed on sell attempt.')
 
     if len(trade_response['resultingTrades']) > 0:
         if csv_logging == True:
@@ -431,8 +439,20 @@ def exec_trade(position, limit, amount):
                     pos_msg = 'Bought '
                 elif position == 'sell':
                     pos_msg = 'Sold '
+
+                trade_details_msg = pos_msg + "{:.4f}".format(order_details['amount']) + ' @ ' + "{:.4f}".format(order_details['rate']) + '\n'
                 
-                telegram_message = pos_msg + "{:.4f}".format(order_details['amount']) + ' @ ' + "{:.4f}".format(order_details['rate'])
+                base_current = calc_base()
+                logger.debug('base_current: ' + "{:.8f}".format(base_current))
+                base_msg = 'Base Price:   ' + "{:.4f}".format(base_current) + '\n'
+
+                spent_msg = 'USDT Spent: ' + "{:.4f}".format(calc_trade_totals('spent')) + '\n'
+                bought_msg = 'STR Bought: ' + "{:.4f}".format(calc_trade_totals('bought')) + '\n'
+            
+                
+                telegram_message = trade_details_msg + base_msg + spent_msg + bought_msg
+                logger.debug('telegram_message: ' + telegram_message)
+                
                 logger.info('Sending Telegram alert.')
 
                 telegram_delay = time.time() - telegram_time_last
@@ -635,14 +655,16 @@ def telegram_status(bot, update):
                 
         spent_msg = 'USDT Spent:  ' + "{:.4f}".format(calc_trade_totals('spent')) + '\n'
         bought_msg = 'STR Bought: ' + "{:.4f}".format(calc_trade_totals('bought')) + '\n'
+        
         base_current = calc_base()
         logger.debug('base_current: ' + "{:.8f}".format(base_current))
-        rate_msg = 'Base Price:   ' + "{:.4f}".format(base_current) + '\n'
+        base_msg = 'Base Price:   ' + "{:.4f}".format(base_current) + '\n'
+        
         market_current = Decimal(polo.returnTicker()['USDT_STR']['last'])
         logger.debug('market_current: ' + "{:.8f}".format(market_current))
         market_msg = 'Mkt. Price: ' + "{:.4f}".format(market_current)# + '\n'
 
-        telegram_message = spent_msg + bought_msg + rate_msg + market_msg
+        telegram_message = spent_msg + bought_msg + base_msg + market_msg
         logger.debug('telegram_message: ' + telegram_message)
 
     else:

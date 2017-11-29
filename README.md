@@ -2,6 +2,8 @@
 Poloniex exchange trading bot
 
 TO DO:
+- On Poloniex internal error, buy (and possibly sell) trades are still logged as if they were successful
+- Copy/rename most recent log files on program exit for easy access
 - Allow verify_amounts() to increase trade_usdt_max
 - Change diff to be relative to low ask actual ("Price Difference from Base")
 - /profit Telegram functions, but always returns 'No sell trades executed.'
