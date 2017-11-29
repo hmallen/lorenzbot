@@ -15,7 +15,7 @@ import textwrap
 import time
 
 global coll_current
-global base_price
+global base_price, calc_base_initialized
 global trade_amount, trade_usdt_max, trade_usdt_remaining
 global trade_amount_start, trade_usdt_max_start
 
@@ -162,6 +162,8 @@ def get_balances():
 
 
 def calc_base():
+    global calc_base_initialized
+    
     logger.debug('Entering base_price calculation.')
     logger.debug('db[coll_current].count(): ' + str(db[coll_current].count()))
     
@@ -330,7 +332,9 @@ def calc_limit_price(amount, position, reverseLookup=None, withFees=None):
 
 
 # NEED TO FIX THE BUY/SELL FUNCTIONS
-def exec_trade(position, limit, amount):    
+def exec_trade(position, limit, amount):
+    global calc_base_initialized
+    
     if calc_base_initialized == True:
         base_price_initial = calc_base()
     else:
