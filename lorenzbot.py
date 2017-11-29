@@ -18,6 +18,7 @@ global coll_current
 global base_price, calc_base_initialized
 global trade_amount, trade_usdt_max, trade_usdt_remaining
 global trade_amount_start, trade_usdt_max_start
+global telegram_failures
 
 log_out = 'logs/' + datetime.datetime.now().strftime('%m%d%Y-%H%M%S') + '.log'
 log_file = 'logs/lorenzbot_log.csv'
@@ -549,7 +550,9 @@ def calc_profit_csv():
     return {'profit': profit}
 
 
-def telegram_connect(bot, update):    
+def telegram_connect(bot, update):
+    global telegram_failures
+    
     telegram_user = update.message.chat_id
 
     if connected_users.count(telegram_user) == 0:
@@ -573,7 +576,9 @@ def telegram_connect(bot, update):
         telegram_failures += 1
 
 
-def telegram_disconnect(bot, update):    
+def telegram_disconnect(bot, update):
+    global telegram_failures
+    
     telegram_user = update.message.chat_id
 
     if connected_users.count(telegram_user) > 0:
@@ -599,6 +604,7 @@ def telegram_disconnect(bot, update):
 
 def telegram_status(bot, update):
     global trade_usdt_remaining
+    global telegram_failures
     
     telegram_user = update.message.chat_id
     
@@ -634,6 +640,8 @@ def telegram_status(bot, update):
 
 
 def telegram_profit(bot, update):
+    global telegram_failures
+    
     telegram_user = update.message.chat_id
     
     logger.debug('[PROFIT] chat_id: ' + str(telegram_user))
@@ -674,12 +682,14 @@ def telegram_profit(bot, update):
 
 
 def telegram_send_message(bot, trade_message):
+    global telegram_failures
+    
     logger.debug('trade_message: ' + trade_message)
 
     if len(connected_users) > 0:
         for user in connected_users:
             try:
-                bot.send_message(chat_id=user, text=telegram_message)
+                bot.send_message(chat_id=user, text=trade_message)
                 logger.debug('Sent alert to user ' + str(user) + '.')
             except Exception as e:
                 logger.error('[SEND] Exception occurred while sending telegram message.')
