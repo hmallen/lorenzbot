@@ -2,6 +2,7 @@
 Poloniex exchange trading bot
 
 TO DO:
+- /profit Telegram functions, but always returns 'No sell trades executed.'
 - Fix sells always being triggered on start (incorrect total str bought amount)
 -- Collection retrieved on startup should be most recent but list returned not sorted
 - Make Telegram messages include more helpful information

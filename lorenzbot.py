@@ -87,7 +87,7 @@ parser.add_argument('-c', '--clean', action='store_true', default=False, help='A
 
 parser.add_argument('-a', '--amount', default=1.0, type=float, help='Set static base amount of quote product to trade. [Default = 1.0]')
 parser.add_argument('--dynamicamount', action='store_true', default=False, help='Add flag to dynamically set trade amount based on current conditions.')
-parser.add_argument('-i', '--initial', default=0.05, type=float, help='Set proportion of total funds to use for initial buy. [Default = 0.05]')
+parser.add_argument('-i', '--initial', default=0.01, type=float, help='Set proportion of total funds to use for initial buy. [Default = 0.05]')
 
 parser.add_argument('-m', '--max', default=1.0, type=float, help='Total amount of USDT to use for trading. [Default = 1.0]')
 parser.add_argument('-p', '--profit', default=0.05, type=float, help='Set profit threshold for sell triggering. [Default = 0.05]')
