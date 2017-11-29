@@ -2,6 +2,7 @@
 Poloniex exchange trading bot
 
 TO DO:
+- Make Telegram messages include more helpful information
 - Limit Telegram buy messages (by time?)
 - Make csv profit calc ignore last group of buys without a sell for calculation
 - Multi-line Telegram message formatting

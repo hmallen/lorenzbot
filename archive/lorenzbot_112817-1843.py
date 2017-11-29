@@ -15,9 +15,7 @@ import textwrap
 import time
 
 global coll_current
-global base_price, calc_base_initialized
-global trade_amount, trade_usdt_max, trade_usdt_remaining
-global trade_amount_start, trade_usdt_max_start
+global trade_amount, trade_usdt_max
 
 log_out = 'logs/' + datetime.datetime.now().strftime('%m%d%Y-%H%M%S') + '.log'
 log_file = 'logs/lorenzbot_log.csv'
@@ -68,7 +66,6 @@ sell_skips = 0
 sell_failures = 0
 mongo_failures = 0
 csv_failures = 0
-telegram_failures = 0
 
 # Handle argument parsing
 parser = argparse.ArgumentParser(
@@ -162,8 +159,6 @@ def get_balances():
 
 
 def calc_base():
-    global calc_base_initialized
-    
     logger.debug('Entering base_price calculation.')
     logger.debug('db[coll_current].count(): ' + str(db[coll_current].count()))
     
@@ -192,7 +187,6 @@ def calc_base():
                 sys.exit(1)
 
     calc_base_initialized = True
-    logger.debug('calc_base_initialized: ' + str(calc_base_initialized))
 
     total_spent = calc_trade_totals('spent')
     total_bought = calc_trade_totals('bought')
@@ -332,9 +326,7 @@ def calc_limit_price(amount, position, reverseLookup=None, withFees=None):
 
 
 # NEED TO FIX THE BUY/SELL FUNCTIONS
-def exec_trade(position, limit, amount):
-    global calc_base_initialized
-    
+def exec_trade(position, limit, amount):    
     if calc_base_initialized == True:
         base_price_initial = calc_base()
     else:
@@ -398,12 +390,6 @@ def exec_trade(position, limit, amount):
             
             else:
                 logger.debug('Sell completely filled. New collection starting empty.')
-
-                calc_base_initialized = False
-                logger.debug('calc_base_initialized: ' + str(calc_base_initialized))
-
-            # Reset trade amount/allotment to maximum for start of new buy phase
-            reset_trade_maxima()
 
         else:
             logger.error('Failed to execute sell order.')
@@ -564,13 +550,8 @@ def telegram_connect(bot, update):
     else:
         telegram_message = 'Already subscribed to Lorenzbot alerts.'
         
-    logger.debug('[CONNECT] telegram_message: ' + telegram_message)
-    try:
-        bot.send_message(chat_id=telegram_user, text=telegram_message)
-    except Exception as e:
-        logger.error('[CONNECT] Exception occurred while sending telegram message.')
-        logger.exception(e)
-        telegram_failures += 1
+    logger.debug('[CONNECT] telegram_message: ' + telegram_message)    
+    bot.send_message(chat_id=telegram_user, text=telegram_message)
 
 
 def telegram_disconnect(bot, update):    
@@ -589,12 +570,7 @@ def telegram_disconnect(bot, update):
         telegram_message = 'Not currently subscribed to Lorenzbot alerts.'
 
     logger.debug('[DISCONNECT] telegram_message: ' + telegram_message)
-    try:
-        bot.send_message(chat_id=telegram_user, text=telegram_message)
-    except Exception as e:
-        logger.error('[DISCONNECT] Exception occurred while sending telegram message.')
-        logger.exception(e)
-        telegram_failures += 1
+    bot.send_message(chat_id=telegram_user, text=telegram_message)
 
 
 def telegram_status(bot, update):
@@ -625,12 +601,7 @@ def telegram_status(bot, update):
         telegram_message = 'Not currently in list of connected users. Type \"/connect\" to subscribe to alerts.'
 
     logger.debug('[STATUS] telegram_message: ' + telegram_message)
-    try:
-        bot.send_message(chat_id=telegram_user, text=telegram_message)
-    except Exception as e:
-        logger.error('[STATUS] Exception occurred while sending telegram message.')
-        logger.exception(e)
-        telegram_failures += 1
+    bot.send_message(chat_id=telegram_user, text=telegram_message)
 
 
 def telegram_profit(bot, update):
@@ -665,12 +636,7 @@ def telegram_profit(bot, update):
         telegram_message = 'Not currently in list of connected users. Type \"/connect\" to connect to Lorenzbot.'
 
     logger.debug('[PROFIT] telegram_message: ' + telegram_message)
-    try:
-        bot.send_message(chat_id=telegram_user, text=telegram_message)
-    except Exception as e:
-        logger.error('[PROFIT] Exception occurred while sending telegram message.')
-        logger.exception(e)
-        telegram_failures += 1
+    bot.send_message(chat_id=telegram_user, text=telegram_message)
 
 
 def telegram_send_message(bot, trade_message):
@@ -678,14 +644,8 @@ def telegram_send_message(bot, trade_message):
 
     if len(connected_users) > 0:
         for user in connected_users:
-            try:
-                bot.send_message(chat_id=user, text=telegram_message)
-                logger.debug('Sent alert to user ' + str(user) + '.')
-            except Exception as e:
-                logger.error('[SEND] Exception occurred while sending telegram message.')
-                logger.exception(e)
-                telegram_failures += 1
-    
+            bot.send_message(chat_id=user, text=trade_message)
+            logger.debug('Sent alert to user ' + str(user) + '.')
     else:
         logger.debug('No Telegram users connected. Message not sent.')
 
@@ -761,10 +721,11 @@ def calc_dynamic(selection, base, limit):
 
 
 def verify_amounts():
-    global base_price
     global trade_amount, trade_usdt_max, trade_usdt_remaining
     
     verification = True
+
+    base_price = calc_base()
     
     # Get account balances
     account_balances = get_balances()
@@ -793,11 +754,7 @@ def verify_amounts():
         logger.warning('Creating new MongoDB database with available STR balance as total bought.')
         
         # Create new database and add available STR balance as buy trade
-        coll_current_prev = coll_current
-        modify_collections('create')    # Create new collection
-        if coll_current == coll_current_prev:
-            logger.exception('Failed to create new MongoDB database!')
-            sys.exit(1)
+        modify_collections('create')
 
         if float(balance_str) > 0:
             try:
@@ -840,24 +797,6 @@ def verify_amounts():
         verification = False
 
     return verification
-
-
-def reset_trade_maxima():
-    global trade_amount, trade_usdt_max, trade_usdt_remaining
-    global trade_amount_start, trade_usdt_max_start
-
-    logger.info('Resetting STR trade amount and USDT allotment to initial values.')
-
-    trade_usdt_max = trade_usdt_max_start
-    logger.debug('trade_usdt_max: ' + "{:.8f}".format(trade_usdt_max))
-    trade_usdt_remaining = trade_usdt_max - calc_trade_totals('spent')
-    logger.debug('trade_usdt_remaining: ' + "{:.8f}".format(trade_usdt_remaining))
-
-    if amount_dynamic == True:
-        trade_amount = (trade_usdt_max * trade_proportion_initial) / Decimal(polo.returnTicker()['USDT_STR']['lowestAsk'])
-    else:
-        trade_amount = trade_amount_start
-    logger.debug('trade_amount: ' + "{:.8f}".format(trade_amount))
 
 
 if __name__ == '__main__':
@@ -961,11 +900,7 @@ if __name__ == '__main__':
         except:
             # If none found, create new
             logger.info('No collections found in database. Creating new.')
-            coll_current_prev = coll_current
-            modify_collections('create')    # Create new collection
-            if coll_current == coll_current_prev:
-                logger.exception('Failed to create new MongoDB database!')
-                sys.exit(1)
+            modify_collections('create')
 
     # Get config file(s) and set program values from it/them
     poloniex_config_path = './.poloniex.ini'
@@ -1033,11 +968,6 @@ if __name__ == '__main__':
     # If dynamic amount calculation active, set the base trade amount using current conditions
     if amount_dynamic == True:
         trade_amount = (trade_usdt_max * trade_proportion_initial) / Decimal(polo.returnTicker()['USDT_STR']['lowestAsk'])
-    else:
-        trade_amount_start = trade_amount
-
-    # Store initial value to allow reset after sell if adjustment occurred
-    trade_usdt_max_start = trade_usdt_max
 
     # Get and set user maker/taker fees
     user_fees = polo.returnFeeInfo()
@@ -1046,22 +976,13 @@ if __name__ == '__main__':
     logger.info('Current Maker Fee: ' + "{:.4f}".format(maker_fee * Decimal(100)) + '%')
     logger.info('Current Taker Fee: ' + "{:.4f}".format(taker_fee * Decimal(100)) + '%')
 
-    # Calculate base price
-    base_price = calc_base()
-    logger.debug('base_price: ' + "{:.8f}".format(base_price))
-    logger.info('Base Price: ' + "{:.6f}".format(base_price))
-    #base_price_target = base_price - buy_threshold    # IS BUY_THRESHOLD NEEDED IF CALCULATING FEES TOO?
-    #base_price_target = base_price * (Decimal(1) - taker_fee)
-    #logger.debug('base_price_target: ' + "{:.8f}".format(base_price_target))
-    #logger.info('Base Price Target: ' + "{:.6f}".format(base_price_target))
-    
     verify_initial = verify_amounts()
     logger.debug('verify_initial: ' + str(verify_initial))
 
     if verify_initial == True:
-        logger.info('Initial balance/trade log amounts VERIFIED.')
+        logger.info('Initial balance/trade log amounts verified.')
     else:
-        logger.info('Initial balance/trade log amounts ADJUSTED.')
+        logger.info('Initial balance/trade log amounts adjusted.')
     
 
 # Functions Used/Arguments Required/Values Returned:
@@ -1164,7 +1085,6 @@ if __name__ == '__main__':
                 logger.info('CSV write errors: ' + str(csv_failures))
 
             if telegram_active == True:
-                logger.info('Telegram sends failed: ' + str(telegram_failures))
                 updater.stop()
             
             sys.exit(0)
