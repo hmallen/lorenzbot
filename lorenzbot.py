@@ -603,6 +603,7 @@ def telegram_disconnect(bot, update):
 
 
 def telegram_status(bot, update):
+    global base_price
     global trade_usdt_remaining
     global telegram_failures
     
@@ -619,11 +620,14 @@ def telegram_status(bot, update):
         spent = calc_trade_totals('spent')
         bought = calc_trade_totals('bought')
         rate = spent / bought
-        spent_msg = "{:.4f}".format(spent)
-        bought_msg = "{:.4f}".format(bought)
-        rate_msg = "{:.4f}".format(rate)
+        
+        spent_msg = 'USDT Spent: ' + "{:.4f}".format(spent) + '\n'
+        bought_msg = 'STR Bought: ' + "{:.4f}".format(bought) + '\n'
+        rate_msg = 'Avg. Rate: ' + "{:.4f}".format(rate) + '\n'
+        base_msg = 'Base Price: ' + "{:.4f}".format(base_price) + '\n'
+        market_msg = 'Mkt. Price: ' + "{:.4f}".format(polo.returnTicker()['USDT_STR']['last'])# + '\n'
 
-        telegram_message = 'Bought ' + bought_msg + ' STR for $' + spent_msg + ' at an average rate of $' + rate_msg + '.'
+        telegram_message = spent_msg + bought_msg + rate_msg + base_msg + market_msg
 
     else:
         logger.warning('Access denied for requesting user.')
