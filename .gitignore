@@ -1,6 +1,6 @@
 env/
 logs/
-analysis/
+#analysis/
 last_debug.log
 last_lorenzbot_log.csv
 *.DS_Store
