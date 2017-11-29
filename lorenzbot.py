@@ -961,11 +961,7 @@ if __name__ == '__main__':
         except:
             # If none found, create new
             logger.info('No collections found in database. Creating new.')
-            coll_current_prev = coll_current
             modify_collections('create')    # Create new collection
-            if coll_current == coll_current_prev:
-                logger.exception('Failed to create new MongoDB database!')
-                sys.exit(1)
 
     # Get config file(s) and set program values from it/them
     poloniex_config_path = './.poloniex.ini'
