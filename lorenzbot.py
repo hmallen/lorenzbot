@@ -9,6 +9,7 @@ import os
 import poloniex
 import psutil
 from pymongo import MongoClient
+import shutil
 import sys
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
 import textwrap
@@ -22,7 +23,9 @@ global telegram_time_last
 global mongo_failures, buy_failures, sell_failures, csv_failures, telegram_failures
 
 log_out = 'logs/' + datetime.datetime.now().strftime('%m%d%Y-%H%M%S') + '.log'
+log_out_last = './last_debug.log'
 log_file = 'logs/lorenzbot_log.csv'
+log_file_last = './last_lorenzbot_log.csv'
 
 logger = logging.getLogger(__name__)
 formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
@@ -1206,6 +1209,11 @@ if __name__ == '__main__':
 
         except KeyboardInterrupt:
             logger.info('Exit signal received.')
+
+            shutil.copy(log_out, log_out_last)
+            shutil.copy(log_file, log_file_last)
+            logger.info('Copied most recent log file and trade log to root directory.')
+            
             logger.info('Mongo write errors: ' + str(mongo_failures))
             logger.info('Buy trades skipped: ' + str(buy_skips))
             logger.info('Buy trades failed: ' + str(buy_failures))

@@ -7,8 +7,15 @@ TO DO:
 - Change diff to be relative to low ask actual ("Price Difference from Base")
 - /profit Telegram functions, but always returns 'No sell trades executed.'
 - Allow trade_usdt_max to be adjusted without stopping program
+- Make Telegram messages include more helpful information
+-- /status: trade_usdt_remaining, trade_usdt_max, etc.
+-- Trade alerts: trade_usdt_remaining
+- Add Telegram alerts when adjustments are made due to balance/trade amount issues
+- Add Telegram alerts when program exception occurs
+- Consider limiting buy amounts under certain circumstances
 
 LATER:
+- "Cash out" profits to BTC (or whatever else)
 - Implement more efficient handling for failure to create new MongoDB collection
 - Return weighted average from calc_limit_price()
 - Test if program functions without defining global variables
@@ -18,8 +25,6 @@ LATER:
 - Add "shutdown" function that can be called anywhere instead of updater.stop() each time
 - Add argument for minimum loop time (loop_time_min)
 - Add Poloniex coach?
-- Add Telegram alerts when adjustments are made due to balance/trade amount issues
-- Make Telegram messages include more helpful information
 - Make csv profit calc ignore last group of buys without a sell for calculation
 
 IF TIME:
