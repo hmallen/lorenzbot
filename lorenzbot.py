@@ -18,6 +18,7 @@ global coll_current
 global base_price, calc_base_initialized
 global trade_amount, trade_usdt_max, trade_usdt_remaining
 global trade_amount_start, trade_usdt_max_start
+global telegram_time_last
 global telegram_failures
 
 log_out = 'logs/' + datetime.datetime.now().strftime('%m%d%Y-%H%M%S') + '.log'
@@ -69,6 +70,7 @@ sell_skips = 0
 sell_failures = 0
 mongo_failures = 0
 csv_failures = 0
+telegram_time_last = time.time()
 telegram_failures = 0
 
 # Handle argument parsing
@@ -335,6 +337,7 @@ def calc_limit_price(amount, position, reverseLookup=None, withFees=None):
 # NEED TO FIX THE BUY/SELL FUNCTIONS
 def exec_trade(position, limit, amount):
     global calc_base_initialized
+    global telegram_time_last
     
     if calc_base_initialized == True:
         base_price_initial = calc_base()
@@ -427,9 +430,15 @@ def exec_trade(position, limit, amount):
                     pos_msg = 'Bought '
                 elif position == 'sell':
                     pos_msg = 'Sold '
-                    
+                
                 telegram_message = pos_msg + "{:.4f}".format(order_details['amount']) + ' @ ' + "{:.4f}".format(order_details['rate'])
                 logger.info('Sending Telegram alert.')
+
+                if position == 'buy' and (time.time() - telegram_time_last) < 300:  # If buying and last buy less than 5 min ago, don't send message
+                    return
+                elif position == 'buy':
+                    telegram_time_last = time.time()
+                
                 telegram_send_message(updater.bot, telegram_message)
 
             else:
