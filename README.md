@@ -9,6 +9,7 @@ TO DO:
 - Make csv profit calc ignore last group of buys without a sell for calculation
 - Multi-line Telegram message formatting
 - Telegram error/exception alerts
+- Change "for x in range(0, len(...))" to "for x in y" in all calls
 - Implement more efficient handling for failure to create new MongoDB collection
 - Return weighted average from calc_limit_price()
 - Test if program functions without defining global variables

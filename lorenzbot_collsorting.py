@@ -133,8 +133,7 @@ def modify_collections(action):
         global coll_current
 
         #coll_current = 'lorenzbot_collection'
-        #coll_current = datetime.datetime.now().strftime('%m%d%Y_%H%M%S')
-        coll_current = datetime.datetime.now().strftime('%m%d%Y%H%M%S')
+        coll_current = datetime.datetime.now().strftime('%m%d%Y_%H%M%S')
         
         db.create_collection(coll_current)
         
@@ -958,16 +957,15 @@ if __name__ == '__main__':
             # Try to retrieve latest collection
             coll_names = db.collection_names()
             logger.debug('coll_names: ' + str(coll_names))
-            coll_names_sorted = coll_names.sort()
-            logger.debug('coll_names_sorted: ' + str(coll_names_sorted))
-            #coll_current = coll_names[(len(coll_names) - 1)]
-            coll_current = coll_names[0]
+
+            coll_names.sort()   # Sort collection names so newest is on the end
+            
+            coll_current = coll_names[(len(coll_names) - 1)]    # Retrieve the last collection from the list
             logger.info('Found existing collection: ' + coll_current)
         except:
             # If none found, create new
             logger.info('No collections found in database. Creating new.')
             modify_collections('create')    # Create new collection
-        sys.exit()
 
     # Get config file(s) and set program values from it/them
     poloniex_config_path = './.poloniex.ini'
