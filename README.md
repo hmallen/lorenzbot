@@ -6,14 +6,9 @@ TO DO:
 - Allow verify_amounts() to increase trade_usdt_max
 - Change diff to be relative to low ask actual ("Price Difference from Base")
 - /profit Telegram functions, but always returns 'No sell trades executed.'
-- Fix sells always being triggered on start (incorrect total str bought amount)
--- Collection retrieved on startup should be most recent but list returned not sorted
-- Make Telegram messages include more helpful information
-- Limit Telegram buy messages (by time?)
-- Make csv profit calc ignore last group of buys without a sell for calculation
-- Multi-line Telegram message formatting
-- Telegram error/exception alerts
-- Change "for x in range(0, len(...))" to "for x in y" in all calls
+- Allow trade_usdt_max to be adjusted without stopping program
+
+LATER:
 - Implement more efficient handling for failure to create new MongoDB collection
 - Return weighted average from calc_limit_price()
 - Test if program functions without defining global variables
@@ -21,11 +16,11 @@ TO DO:
 - Make boolean arguments into human-readable format
 - Clean up arguments --> Make parent/child --> Make sure all conditions satisfied
 - Add "shutdown" function that can be called anywhere instead of updater.stop() each time
-
-LATER:
 - Add argument for minimum loop time (loop_time_min)
 - Add Poloniex coach?
 - Add Telegram alerts when adjustments are made due to balance/trade amount issues
+- Make Telegram messages include more helpful information
+- Make csv profit calc ignore last group of buys without a sell for calculation
 
 IF TIME:
 - Add argument for product selection
@@ -35,6 +30,7 @@ NEEDS TESTING:
 - Determine what is causing mismatch between calculated and executed order size
 - Handling of exception from Telegram send message timeout
 - On Poloniex internal error, buy (and possibly sell) trades are still logged as if they were successful
+- Multi-line Telegram message formatting (needs testing and improvement)
 
 DONE:
 - Add argument for trade amount
@@ -65,3 +61,7 @@ DONE:
 - Integrate telegram_failures counter
 - Fix failure to rebuy after sell due to lack of maximum trade value reset
 -- Create "reset maxima" function to reset trade maximum values which may have been reduced during buy phase
+- Telegram error/exception alerts
+- Limit Telegram buy messages (by time?)
+- Fix sells always being triggered on start (incorrect total str bought amount)
+-- Collection retrieved on startup should be most recent but list returned not sorted
