@@ -19,7 +19,7 @@ global base_price, calc_base_initialized
 global trade_amount, trade_usdt_max, trade_usdt_remaining
 global trade_amount_start, trade_usdt_max_start
 global telegram_time_last
-global telegram_failures
+global mongo_failures, buy_failures, sell_failures, csv_failures, telegram_failures
 
 log_out = 'logs/' + datetime.datetime.now().strftime('%m%d%Y-%H%M%S') + '.log'
 log_file = 'logs/lorenzbot_log.csv'
@@ -338,6 +338,7 @@ def calc_limit_price(amount, position, reverseLookup=None, withFees=None):
 def exec_trade(position, limit, amount):
     global calc_base_initialized
     global telegram_time_last
+    global mongo_failures, buy_failures, sell_failures
     
     if calc_base_initialized == True:
         base_price_initial = calc_base()
@@ -496,6 +497,8 @@ def process_trade_response(response, position):
 
 
 def log_trade_csv(csv_row): # Must pass list as argument
+    global csv_failures
+    
     logger.info('Logging trade details to csv file.')
     try:
         with open(log_file, 'a', newline='') as csv_file:
@@ -507,6 +510,8 @@ def log_trade_csv(csv_row): # Must pass list as argument
 
 
 def calc_profit_csv():
+    global csv_failures
+    
     trade_list = []
 
     logger.debug('Reading csv file.')
@@ -518,6 +523,7 @@ def calc_profit_csv():
                 trade_list.append(row)
         except csv.Error as e:
             logger.exception('Exception occurred while reading csv file.')
+            csv_failures += 1
 
     #logger.debug('len(trade_list): ' + str(len(trade_list)))
     logger.debug('Calculating profit from csv data.')
