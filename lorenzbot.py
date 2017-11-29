@@ -437,11 +437,11 @@ def exec_trade(position, limit, amount):
                 telegram_delay = time.time() - telegram_time_last
                 logger.debug('telegram_delay: ' + str(telegram_delay))
                 if position == 'buy' and telegram_delay < 300:  # If buying and last buy less than 5 min ago, don't send message
-                    logger.info('Telegram timeout has\'nt elapsed. Skipping trade update.')
+                    logger.info('Telegram buy message delay hasn\'t elapsed. Skipping trade update.')
                     return
                 elif position == 'buy':
                     telegram_time_last = time.time()
-                    logger.debug('Reset Telegram timeout.')
+                    logger.debug('Telegram buy message delay reset.')
                 
                 telegram_send_message(updater.bot, telegram_message)
 
