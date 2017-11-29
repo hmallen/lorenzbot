@@ -956,7 +956,9 @@ if __name__ == '__main__':
         try:
             # Try to retrieve latest collection
             coll_names = db.collection_names()
-            coll_current = coll_names[(len(coll_names) - 1)]
+            logger.debug('coll_names: ' + str(coll_names))
+            #coll_current = coll_names[(len(coll_names) - 1)]
+            coll_current = coll_names[0]
             logger.info('Found existing collection: ' + str(coll_current))
         except:
             # If none found, create new
