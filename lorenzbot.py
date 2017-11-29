@@ -657,15 +657,15 @@ def telegram_status(bot, update):
         logger.debug('Access confirmed for requesting user.')
                 
         spent_msg = 'USDT Spent:  ' + "{:.4f}".format(calc_trade_totals('spent')) + '\n'
-        bought_msg = 'STR Bought: ' + "{:.4f}".format(calc_trade_totals('bought')) + '\n'
+        bought_msg = 'STR Bought:  ' + "{:.4f}".format(calc_trade_totals('bought')) + '\n'
         
         base_current = calc_base()
         logger.debug('base_current: ' + "{:.8f}".format(base_current))
-        base_msg = 'Base Price:   ' + "{:.4f}".format(base_current) + '\n'
+        base_msg = 'Base Price:    ' + "{:.4f}".format(base_current) + '\n'
         
         market_current = Decimal(polo.returnTicker()['USDT_STR']['last'])
         logger.debug('market_current: ' + "{:.8f}".format(market_current))
-        market_msg = 'Mkt. Price: ' + "{:.4f}".format(market_current)# + '\n'
+        market_msg = 'Mkt. Price:    ' + "{:.4f}".format(market_current)# + '\n'
 
         telegram_message = spent_msg + bought_msg + base_msg + market_msg
         logger.debug('telegram_message: ' + telegram_message)
