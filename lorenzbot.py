@@ -627,7 +627,8 @@ def telegram_connect(bot, update):
     else:
         telegram_message = 'Already subscribed to Lorenzbot alerts.'
         
-    logger.debug('[CONNECT] telegram_message: ' + telegram_message)
+    logger.debug('[CONNECT] telegram_message:\n' + telegram_message)
+    
     try:
         bot.send_message(chat_id=telegram_user, text=telegram_message)
     except Exception as e:
@@ -653,7 +654,8 @@ def telegram_disconnect(bot, update):
     else:
         telegram_message = 'Not currently subscribed to Lorenzbot alerts.'
 
-    logger.debug('[DISCONNECT] telegram_message: ' + telegram_message)
+    logger.debug('[DISCONNECT] telegram_message:\n' + telegram_message)
+    
     try:
         bot.send_message(chat_id=telegram_user, text=telegram_message)
     except Exception as e:
@@ -686,14 +688,13 @@ def telegram_status(bot, update):
         market_msg = 'Mkt. Price:    ' + "{:.6f}".format(market_current)# + '\n'
 
         telegram_message = spent_msg + bought_msg + base_msg + market_msg
-        logger.debug('telegram_message: ' + telegram_message)
 
     else:
         logger.warning('Access denied for requesting user.')
-        
         telegram_message = 'Not currently in list of connected users. Type \"/connect\" to subscribe to alerts.'
 
-    logger.debug('[STATUS] telegram_message: ' + telegram_message)
+    logger.debug('[STATUS] telegram_message:\n' + telegram_message)
+    
     try:
         bot.send_message(chat_id=telegram_user, text=telegram_message)
     except Exception as e:
@@ -731,11 +732,11 @@ def telegram_profit(bot, update):
             telegram_message = 'CSV logging not active. Cannot calculate profit.'
     
     else:
-        logger.warning('Access denied for requesting user.')
-        
+        logger.warning('Access denied for requesting user.')        
         telegram_message = 'Not currently in list of connected users. Type \"/connect\" to connect to Lorenzbot.'
 
-    logger.debug('[PROFIT] telegram_message: ' + telegram_message)
+    logger.debug('[PROFIT] telegram_message:\n' + telegram_message)
+    
     try:
         bot.send_message(chat_id=telegram_user, text=telegram_message)
     except Exception as e:
@@ -747,7 +748,7 @@ def telegram_profit(bot, update):
 def telegram_send_message(bot, trade_message):
     global telegram_failures
     
-    logger.debug('trade_message: ' + trade_message)
+    logger.debug('[SEND] trade_message:\n' + trade_message)
 
     if len(connected_users) > 0:
         for user in connected_users:
@@ -788,7 +789,6 @@ def calc_dynamic(selection, base, limit):
         
         else:
             logger.debug('Using static loop time.')
-            
             lt = loop_time
 
         logger.debug('lt: ' + "{:.2f}".format(lt))
