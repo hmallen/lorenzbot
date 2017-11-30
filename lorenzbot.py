@@ -22,6 +22,11 @@ global trade_amount_start, trade_usdt_max_start
 global telegram_time_last
 global mongo_failures, buy_failures, sell_failures, csv_failures, telegram_failures
 
+log_out = 'logs/' + datetime.datetime.now().strftime('%m%d%Y-%H%M%S') + '.log'
+log_out_last = './last_debug.log'
+log_file = 'logs/lorenzbot_log.csv'
+log_file_last = './last_lorenzbot_log.csv'
+
 logger = logging.getLogger(__name__)
 formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
 logger.setLevel(logging.DEBUG)
@@ -37,11 +42,6 @@ file_handler = logging.FileHandler(log_out)
 file_handler.setLevel(logging.DEBUG)
 file_handler.setFormatter(formatter)
 logger.addHandler(file_handler)
-
-log_out = 'logs/' + datetime.datetime.now().strftime('%m%d%Y-%H%M%S') + '.log'
-log_out_last = './last_debug.log'
-log_file = 'logs/lorenzbot_log.csv'
-log_file_last = './last_lorenzbot_log.csv'
 
 trade_market = 'USDT_STR'
 #cashout_market = 'USDT_BTC'
