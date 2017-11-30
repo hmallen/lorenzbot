@@ -791,7 +791,8 @@ def calc_dynamic(selection, base, limit):
             if diff > Decimal(0):
                 logger.debug('diff > 0')
                 
-                trade_proportion_low = trade_proportion_initial # Default = 0.01
+                #trade_proportion_low = trade_proportion_initial # Default = 0.01
+                trade_proportion_low = Decimal(0.005)
                 logger.debug('trade_proportion_low: ' + "{:.2f}".format(trade_proportion_low))
                 trade_proportion_high = Decimal(0.25)    # If limit price 100% less than base price, trade with this proportion of available USDT remaining
                 logger.debug('trade_proportion_high: ' + "{:.2f}".format(trade_proportion_high))
