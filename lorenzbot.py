@@ -1290,6 +1290,8 @@ if __name__ == '__main__':
         except KeyboardInterrupt:
             logger.info('Exit signal received.')
 
+            logger.info('Loop Count: ' + str(loop_count))
+
             shutil.copy(log_out, log_out_last)
             shutil.copy(log_file, log_file_last)
             logger.info('Copied most recent log file and trade log to root directory.')
