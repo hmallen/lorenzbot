@@ -27,6 +27,9 @@ log_out_last = './last_debug.log'
 log_file = 'logs/lorenzbot_log.csv'
 log_file_last = './last_lorenzbot_log.csv'
 
+trade_market = 'USDT_STR'
+#cashout_market = 'USDT_BTC'
+
 logger = logging.getLogger(__name__)
 formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
 logger.setLevel(logging.DEBUG)
@@ -59,7 +62,7 @@ file_handler.setFormatter(formatter)
 logger.addHandler(file_handler)
 
 # Variable modifiers
-product = 'USDT_STR'
+product = trade_market
 loop_time_min = Decimal(6)  # Minimum allowed loop time with dynamic adjustment (seconds)
 
 buy_threshold = Decimal(0.000105)
@@ -101,6 +104,7 @@ parser.add_argument('-l', '--loop', default=60, type=float, help='Main program l
 parser.add_argument('--dynamicloop', action='store_true', default=False, help='Add flag to dynamically set loop time based on current conditions.')
 
 parser.add_argument('--live', action='store_true', default=False, help='Add flag to enable live trading API keys.')
+#parser.add_argument('--cashout', action='store_true', default=False, help='Add flag to enable \"cash out\" of profits to alternate currency (ex. BTC)')
 parser.add_argument('--nocsv', action='store_false', default=True, help='Add flag to disable csv logging.')
 parser.add_argument('--telegram', action='store_true', default=False, help='Add flag to enable Telegram alerts.')
 parser.add_argument('--mongoalt', action='store_true', default=False, help='Add flag to use alternative database for use of multiple instances concurrently.')
@@ -129,6 +133,7 @@ loop_time = Decimal(args.loop); logger.debug('loop_time: ' + str(loop_time))
 loop_dynamic = args.dynamicloop; logger.debug('loop_dynamic: ' + str(loop_dynamic))
 
 live_trading = args.live; logger.debug('live_trading: ' + str(live_trading))
+#cashout_active = args.cashout; logger.debug('cashout_active: ' + str(cashout_active))
 csv_logging = args.nocsv; logger.debug('csv_logging: ' + str(csv_logging))
 telegram_active = args.telegram; logger.debug('telegram_active: ' + str(telegram_active))
 mongo_alt = args.mongoalt; logger.debug('mongo_alt: ' + str(mongo_alt))
@@ -265,7 +270,7 @@ def calc_limit_price(amount, position, reverseLookup=None, withFees=None):
 
     book_depth = 40  # Double the default value
     while (True):
-        book = polo.returnOrderBook('USDT_STR', depth=book_depth)
+        book = polo.returnOrderBook(trade_market, depth=book_depth)
 
         # Lookup amount based on price
         if reverseLookup == True:
@@ -350,7 +355,7 @@ def exec_trade(position, limit, amount):
         
     if position == 'buy':
         try:
-            trade_response = polo.buy('USDT_STR', limit, amount, 'immediateOrCancel')
+            trade_response = polo.buy(trade_market, limit, amount, 'immediateOrCancel')
             logger.debug('[BUY] trade_response: ' + str(trade_response))
         except:
             logger.exception('Exception occurred while executing buy trade.')
@@ -374,7 +379,7 @@ def exec_trade(position, limit, amount):
         
     elif position == 'sell':
         try:
-            trade_response = polo.sell('USDT_STR', limit, amount, 'immediateOrCancel')  # CHANGE TO REGULAR LIMIT ORDER?
+            trade_response = polo.sell(trade_market, limit, amount, 'immediateOrCancel')  # CHANGE TO REGULAR LIMIT ORDER?
             logger.debug('[SELL] trade_response: ' + str(trade_response))
         except:
             logger.exception('Exception occurred while executing sell trade.')
@@ -663,7 +668,7 @@ def telegram_status(bot, update):
         logger.debug('base_current: ' + "{:.8f}".format(base_current))
         base_msg = 'Base Price:    ' + "{:.4f}".format(base_current) + '\n'
         
-        market_current = Decimal(polo.returnTicker()['USDT_STR']['last'])
+        market_current = Decimal(polo.returnTicker()[trade_market]['last'])
         logger.debug('market_current: ' + "{:.8f}".format(market_current))
         market_msg = 'Mkt. Price:    ' + "{:.4f}".format(market_current)# + '\n'
 
@@ -912,7 +917,7 @@ def reset_trade_maxima():
     logger.debug('trade_usdt_remaining: ' + "{:.8f}".format(trade_usdt_remaining))
 
     if amount_dynamic == True:
-        trade_amount = (trade_usdt_max * trade_proportion_initial) / Decimal(polo.returnTicker()['USDT_STR']['lowestAsk'])
+        trade_amount = (trade_usdt_max * trade_proportion_initial) / Decimal(polo.returnTicker()[trade_market]['lowestAsk'])
     else:
         trade_amount = trade_amount_start
     logger.debug('trade_amount: ' + "{:.8f}".format(trade_amount))
@@ -1090,7 +1095,7 @@ if __name__ == '__main__':
 
     # If dynamic amount calculation active, set the base trade amount using current conditions
     if amount_dynamic == True:
-        trade_amount = (trade_usdt_max * trade_proportion_initial) / Decimal(polo.returnTicker()['USDT_STR']['lowestAsk'])
+        trade_amount = (trade_usdt_max * trade_proportion_initial) / Decimal(polo.returnTicker()[trade_market]['lowestAsk'])
     else:
         trade_amount_start = trade_amount
 

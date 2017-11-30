@@ -2,7 +2,6 @@
 Poloniex exchange trading bot
 
 TO DO:
-- Average trade_amount per buy
 - Consider limiting buy amounts under certain circumstances
 - /profit Telegram functions, but always returns 'No sell trades executed.'
 - Make Telegram messages include more helpful information
@@ -14,6 +13,7 @@ TO DO:
 
 LATER:
 - "Cash out" profits to BTC (or whatever else)
+- USDT balance minus remaining trade allotment (trigger increase of max?)
 - Allow verify_amounts() to increase trade_usdt_max
 - Change diff to be relative to low ask actual ("Price Difference from Base")
 - Implement more efficient handling for failure to create new MongoDB collection
@@ -72,3 +72,4 @@ DONE:
 - Fix sells always being triggered on start (incorrect total str bought amount)
 -- Collection retrieved on startup should be most recent but list returned not sorted
 - Copy/rename most recent log files on program exit for easy access
+- Average trade_amount per buy
