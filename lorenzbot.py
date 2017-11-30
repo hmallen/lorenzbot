@@ -231,7 +231,7 @@ def calc_trade_totals(position):
                     }
                 }]
             agg = db.command('aggregate', coll_current, pipeline=pipeline)['result']
-            logger.debug('agg: ' + str(agg))
+            #logger.debug('agg: ' + str(agg))
 
             trade_total = Decimal(agg[0]['total_bought'])
             #trade_total = trade_total * sell_padding # Not necessarily needed, but gives some padding
@@ -244,7 +244,7 @@ def calc_trade_totals(position):
                     }
                 }]
             agg = db.command('aggregate', coll_current, pipeline=pipeline)['result']
-            logger.debug('agg: ' + str(agg))
+            #logger.debug('agg: ' + str(agg))
             
             trade_total = Decimal(0)
             for x in range(0, len(agg)):
