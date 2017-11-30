@@ -839,7 +839,10 @@ def verify_amounts():
             updater.stop()
         sys.exit(1)
 
-    logger.info('Total Buy Count: ' + str(db[coll_current].count()))
+    coll_count = db[coll_current].count()
+    logger.info('Total Buy Count: ' + str(coll_count))
+    trade_amount_avg = calc_trade_totals('bought') / Decimal(coll_count)
+    logger.info('Avg. Trade Amount: ' + "{:.4f}".format(trade_amount_avg))
 
     # Verify STR balance with recorded amount bought
     if float(balance_str) < float(calc_trade_totals('bought')):
