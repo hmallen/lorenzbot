@@ -2,6 +2,7 @@
 Poloniex exchange trading bot
 
 TO DO:
+- Average trade_amount per buy
 - Consider limiting buy amounts under certain circumstances
 - /profit Telegram functions, but always returns 'No sell trades executed.'
 - Make Telegram messages include more helpful information

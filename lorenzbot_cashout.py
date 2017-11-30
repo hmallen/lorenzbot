@@ -65,7 +65,7 @@ logger.addHandler(file_handler)
 product = trade_market
 loop_time_min = Decimal(6)  # Minimum allowed loop time with dynamic adjustment (seconds)
 
-buy_threshold = Decimal(0.000105)
+buy_threshold = Decimal(0.000105)   # Extra padding beyond base price + fees for buy triggering
 sell_padding = Decimal(0.9975)  # Proportion of total amount bought to sell when triggered
 
 # System variables (Do not change)
@@ -104,6 +104,7 @@ parser.add_argument('-l', '--loop', default=60, type=float, help='Main program l
 parser.add_argument('--dynamicloop', action='store_true', default=False, help='Add flag to dynamically set loop time based on current conditions.')
 
 parser.add_argument('--live', action='store_true', default=False, help='Add flag to enable live trading API keys.')
+parser.add_argument('--cashout', action='store_true', default=False, help='Add flag to enable \"cash out\" of profits to alternate currency (ex. BTC)')
 parser.add_argument('--nocsv', action='store_false', default=True, help='Add flag to disable csv logging.')
 parser.add_argument('--telegram', action='store_true', default=False, help='Add flag to enable Telegram alerts.')
 parser.add_argument('--mongoalt', action='store_true', default=False, help='Add flag to use alternative database for use of multiple instances concurrently.')
@@ -132,6 +133,7 @@ loop_time = Decimal(args.loop); logger.debug('loop_time: ' + str(loop_time))
 loop_dynamic = args.dynamicloop; logger.debug('loop_dynamic: ' + str(loop_dynamic))
 
 live_trading = args.live; logger.debug('live_trading: ' + str(live_trading))
+cashout_active = args.cashout; logger.debug('cashout_active: ' + str(cashout_active))
 csv_logging = args.nocsv; logger.debug('csv_logging: ' + str(csv_logging))
 telegram_active = args.telegram; logger.debug('telegram_active: ' + str(telegram_active))
 mongo_alt = args.mongoalt; logger.debug('mongo_alt: ' + str(mongo_alt))
