@@ -3,6 +3,7 @@ Poloniex exchange trading bot
 
 TO DO:
 - Simplify Telegram messages for clarity
+- Telegram command to retrieve most recent exception (from recent exception log)
 - Major error with sell processing (when available str < calc_trade_totals('bought') [following manual withdraw]) ****
 - Determine what causes trade_usdt_remaining to be adjusted to negative value on startup
 -- Has to do with resetting amount to 98% of total when insufficient balance encountered?

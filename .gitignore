@@ -3,6 +3,8 @@ logs/
 analysis/
 last_debug.log
 last_lorenzbot_log.csv
+exception_last.txt
+exception_log.log
 *.DS_Store
 *.ini
 *aws*

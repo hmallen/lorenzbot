@@ -14,11 +14,6 @@ test_file = './test.txt'
 exception_last_file = './exception_last.txt'
 
 
-def telegram_test(bot, update):
-    bot.send_message(chat_id=update.message.chat_id, text='New file!')
-    bot.send_document(chat_id=update.message.chat_id, document=open(ex_path, 'rb'))
-
-
 def telegram_send_exception(bot):
     user = '382606465'
 
@@ -44,9 +39,6 @@ if __name__ == '__main__':
 
     updater = Updater(token=telegram_token)
     dispatcher = updater.dispatcher
-
-    test_handler = CommandHandler('test', telegram_test)
-    dispatcher.add_handler(test_handler)
     
     updater.start_polling()
 
@@ -58,8 +50,8 @@ if __name__ == '__main__':
         a = float(1)
         b = float(0)
 
-        #c = a / b
-        c = b / a
+        c = a / b
+        #c = b / a
         
     except Exception as e:
         logger.debug('[Exception]')
