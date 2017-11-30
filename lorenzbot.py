@@ -978,17 +978,6 @@ def reset_trade_maxima():
     logger.debug('trade_amount: ' + "{:.8f}".format(trade_amount))
 
 
-def force_exception():
-    a = float(1)
-    b = float(0)
-    try:
-        c = a / b
-    except Exception as e:
-        logger.debug('FORCED EXCEPTION')
-        logger.debug(e)
-        raise
-
-
 if __name__ == '__main__':
     # Check if MongoDB is running before beginning
     mongo_running = False
@@ -1184,9 +1173,6 @@ if __name__ == '__main__':
     logger.debug('base_price: ' + "{:.8f}".format(base_price))
     logger.info('Base Price: ' + "{:.6f}".format(base_price))
     #base_price_target = base_price - buy_threshold    # IS BUY_THRESHOLD NEEDED IF CALCULATING FEES TOO?
-    #base_price_target = base_price * (Decimal(1) - taker_fee)
-    #logger.debug('base_price_target: ' + "{:.8f}".format(base_price_target))
-    #logger.info('Base Price Target: ' + "{:.6f}".format(base_price_target))
     
     verify_initial = verify_amounts()
     logger.debug('verify_initial: ' + str(verify_initial))
@@ -1215,8 +1201,9 @@ if __name__ == '__main__':
             base_price = calc_base()
             logger.debug('base_price: ' + "{:.8f}".format(base_price))
             logger.info('Base Price: ' + "{:.6f}".format(base_price))
-            #base_price_target = base_price - buy_threshold    # IS BUY_THRESHOLD NEEDED IF CALCULATING FEES TOO?
+
             base_price_target = base_price * (Decimal(1) - taker_fee)
+            #base_price_target = base_price - buy_threshold    # IS BUY_THRESHOLD NEEDED IF CALCULATING FEES TOO?
             logger.debug('base_price_target: ' + "{:.8f}".format(base_price_target))
             logger.info('Base Price Target: ' + "{:.6f}".format(base_price_target))
 
@@ -1225,8 +1212,6 @@ if __name__ == '__main__':
 
             # If balances and trade logs agree, proceed with check for trade conditions
             if trade_check_ready == True:
-                loop_count += 1
-                
                 # Calculate buy amount based on current conditions
                 buy_amount_current = calc_dynamic('amount', base_price_target, calc_limit_price(trade_amount, 'buy', withFees=True))
                 logger.debug('buy_amount_current: ' + "{:.8f}".format(buy_amount_current))
@@ -1272,11 +1257,6 @@ if __name__ == '__main__':
                         logger.info('TRADE CONDITIONS MET --> BUYING')
                         exec_trade('buy', base_price_target, buy_amount_current)
 
-                # FORCE EXCEPTION FOR TESTING
-                if loop_count == 3:
-                    logger.debug('Forcing exception.')
-                    force_exception()
-
                 # Calculate loop time based on current conditions
                 loop_time_dynamic = calc_dynamic('loop', base_price, low_ask_actual)
 
@@ -1287,6 +1267,7 @@ if __name__ == '__main__':
             logger.info('Trade loop complete. Sleeping for ' + "{:.2f}".format(loop_time_dynamic) + ' seconds.')
 
             logger.info('----[LOOP END]----')
+            loop_count += 1
             logger.debug('loop_count: ' + str(loop_count))
             
             time.sleep(loop_time_dynamic)
