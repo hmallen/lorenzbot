@@ -22,14 +22,6 @@ global trade_amount_start, trade_usdt_max_start
 global telegram_time_last
 global mongo_failures, buy_failures, sell_failures, csv_failures, telegram_failures
 
-log_out = 'logs/' + datetime.datetime.now().strftime('%m%d%Y-%H%M%S') + '.log'
-log_out_last = './last_debug.log'
-log_file = 'logs/lorenzbot_log.csv'
-log_file_last = './last_lorenzbot_log.csv'
-
-trade_market = 'USDT_STR'
-#cashout_market = 'USDT_BTC'
-
 logger = logging.getLogger(__name__)
 formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
 logger.setLevel(logging.DEBUG)
@@ -40,26 +32,36 @@ console_handler.setLevel(logging.INFO)
 console_handler.setFormatter(formatter)
 logger.addHandler(console_handler)
 
-if not os.path.exists('logs'):
-    logger.info('Log directory not found. Creating.')
-    try:
-        os.makedirs('logs')
-    except:
-        logger.exception('Failed to create log directory. Exiting.')
-        sys.exit(1)
-if not os.path.exists('logs/old'):
-    logger.info('Log archive directory not found. Creating.')
-    try:
-        os.makedirs('logs/old')
-    except:
-        logger.exception('Failed to create log archive directory. Exiting.')
-        sys.exit(1)
-
 # Add handler to write log messages to file
 file_handler = logging.FileHandler(log_out)
 file_handler.setLevel(logging.DEBUG)
 file_handler.setFormatter(formatter)
 logger.addHandler(file_handler)
+
+log_out = 'logs/' + datetime.datetime.now().strftime('%m%d%Y-%H%M%S') + '.log'
+log_out_last = './last_debug.log'
+log_file = 'logs/lorenzbot_log.csv'
+log_file_last = './last_lorenzbot_log.csv'
+
+trade_market = 'USDT_STR'
+#cashout_market = 'USDT_BTC'
+
+if not os.path.exists('logs'):
+    logger.info('Log directory not found. Creating.')
+    try:
+        os.makedirs('logs')
+    except Exception as e:
+        logger.exception('Failed to create log directory. Exiting.')
+        logger.exception(e)
+        sys.exit(1)
+if not os.path.exists('logs/old'):
+    logger.info('Log archive directory not found. Creating.')
+    try:
+        os.makedirs('logs/old')
+    except Exception as e:
+        logger.exception('Failed to create log archive directory. Exiting.')
+        logger.exception(e)
+        sys.exit(1)
 
 # Variable modifiers
 product = trade_market
@@ -198,8 +200,9 @@ def calc_base():
                 logger.debug('trade_price_initial: ' + "{:.8f}".format(trade_price_initial))
                 exec_trade('buy', trade_price_initial, trade_amount)
                 break
-            except:
+            except Exception as e:
                 logger.exception('Entry buy failed. Exiting.')
+                logger.exception(e)
                 sys.exit(1)
 
     calc_base_initialized = True
@@ -318,7 +321,7 @@ def calc_limit_price(amount, position, reverseLookup=None, withFees=None):
             if book_depth >= 200:
                 #logger.exception('Failed to set price_actual in calc_limit_price().')
                 #break
-                logger.exception('Failed to set price_actual in calc_limit_price(). Exiting.')
+                logger.error('Failed to set price_actual in calc_limit_price(). Exiting.')
                 sys.exit(1)
 
             else:
@@ -358,8 +361,9 @@ def exec_trade(position, limit, amount):
         try:
             trade_response = polo.buy(trade_market, limit, amount, 'immediateOrCancel')
             logger.debug('[BUY] trade_response: ' + str(trade_response))
-        except:
+        except Exception as e:
             logger.exception('Exception occurred while executing buy trade.')
+            logger.exception(e)
             buy_failures += 1
             return -1
 
@@ -371,8 +375,9 @@ def exec_trade(position, limit, amount):
                 mongo_response = db[coll_current].insert_one({'amount': float(order_details['amount']), 'price': float(order_details['rate']), 'side': position, 'date': order_details['date']})
                 logger.debug('[BUY] mongo_response: ' + str(mongo_response))
                 logger.info('Buy logged to MongoDB database collection ' + coll_current)
-            except:
+            except Exception as e:
                 logger.exception('[BUY] Failed to write to MongoDB log!')
+                logger.exception(e)
                 mongo_failures += 1
 
         else:
@@ -382,8 +387,9 @@ def exec_trade(position, limit, amount):
         try:
             trade_response = polo.sell(trade_market, limit, amount, 'immediateOrCancel')  # CHANGE TO REGULAR LIMIT ORDER?
             logger.debug('[SELL] trade_response: ' + str(trade_response))
-        except:
+        except Exception as e:
             logger.exception('Exception occurred while executing sell trade.')
+            logger.exception(e)
             sell_failures += 1
             return -1
 
@@ -398,14 +404,15 @@ def exec_trade(position, limit, amount):
                 mongo_response = db[coll_current].insert_one({'amount': float(order_details['amount']), 'price': float(order_details['rate']), 'side': position, 'date': order_details['date']})
                 logger.debug('[SELL] mongo_response: ' + str(mongo_response))
                 logger.info('Sell logged to MongoDB database collection ' + coll_current)
-            except:
+            except Exception as e:
                 logger.exception('[SELL] Failed to write to MongoDB log!')
+                logger.exception(e)
                 mongo_failures += 1
 
             coll_current_prev = coll_current
             modify_collections('create')    # Create new collection
             if coll_current == coll_current_prev:
-                logger.exception('Failed to create new MongoDB database!')
+                logger.error('Failed to create new MongoDB database!')
                 sys.exit(1)
             
             # If order not completely filled, handle unfilled amount
@@ -415,8 +422,9 @@ def exec_trade(position, limit, amount):
                     mongo_response = db[coll_current].insert_one({'amount': float(amount_unfilled), 'price': float(base_price_initial), 'side': 'buy', 'date': order_details['date']})
                     logger.debug('[UNFILLED/NEW] mongo_response: ' + str(mongo_response))
                     logger.info('Added unfilled trade amount to new MongoDB collection ' + coll_current)
-                except:
+                except Exception as e:
                     logger.exception('[UNFILLED/NEW] Failed to write to MongoDB log!')
+                    logger.exception(e)
                     mongo_failures += 1
             
             else:
@@ -533,8 +541,10 @@ def log_trade_csv(csv_row): # Must pass list as argument
         with open(log_file, 'a', newline='') as csv_file:
             csv_writer = csv.writer(csv_file, delimiter=',', quotechar='|', quoting=csv.QUOTE_MINIMAL)
             csv_writer.writerow(csv_row)
-    except csv.Error as e:
+    #except csv.Error as e:
+    except Exception as e:
         logger.error('Exception occurred while writing to csv file.')
+        logger.exception(e)
         csv_failures += 1
 
 
@@ -550,8 +560,10 @@ def calc_profit_csv():
             for row in csv_reader:
                 #logger.debug(row)
                 trade_list.append(row)
-        except csv.Error as e:
-            logger.exception('Exception occurred while reading csv file.')
+        #except csv.Error as e:
+        except Exception as e:
+            logger.error('Exception occurred while writing to csv file.')
+            logger.exception(e)
             csv_failures += 1
 
     #logger.debug('len(trade_list): ' + str(len(trade_list)))
@@ -667,11 +679,11 @@ def telegram_status(bot, update):
         
         base_current = calc_base()
         logger.debug('base_current: ' + "{:.8f}".format(base_current))
-        base_msg = 'Base Price:    ' + "{:.4f}".format(base_current) + '\n'
+        base_msg = 'Base Price:    ' + "{:.6f}".format(base_current) + '\n'
         
         market_current = Decimal(polo.returnTicker()[trade_market]['last'])
         logger.debug('market_current: ' + "{:.8f}".format(market_current))
-        market_msg = 'Mkt. Price:    ' + "{:.4f}".format(market_current)# + '\n'
+        market_msg = 'Mkt. Price:    ' + "{:.6f}".format(market_current)# + '\n'
 
         telegram_message = spent_msg + bought_msg + base_msg + market_msg
         logger.debug('telegram_message: ' + telegram_message)
@@ -861,7 +873,7 @@ def verify_amounts():
         coll_current_prev = coll_current
         modify_collections('create')    # Create new collection
         if coll_current == coll_current_prev:
-            logger.exception('Failed to create new MongoDB database!')
+            logger.error('Failed to create new MongoDB database!')
             sys.exit(1)
 
         if float(balance_str) > 0:
@@ -869,8 +881,9 @@ def verify_amounts():
                 mongo_response = db[coll_current].insert_one({'amount': float(balance_str), 'price': float(base_price), 'side': 'buy', 'date': datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')})
                 logger.debug('[BALANCE ADJUSTMENT] mongo_response: ' + str(mongo_response))
                 logger.info('Adjustment logged to new MongoDB database collection ' + coll_current)
-            except:
+            except Exception as e:
                 logger.exception('[BALANCE ADJUSTMENT] Failed to write to MongoDB log!')
+                logger.exception(e)
                 mongo_failures += 1
 
         else:
@@ -1164,7 +1177,7 @@ if __name__ == '__main__':
                 # Calculate true low ask (sufficient volume for buy)
                 low_ask_actual = calc_limit_price(buy_amount_current, 'buy', withFees=True)
                 logger.debug('low_ask_actual: ' + "{:.8f}".format(low_ask_actual))
-                logger.info('Low Ask (Actual): ' + "{:.4f}".format(low_ask_actual))
+                logger.info('Low Ask (Actual): ' + "{:.6f}".format(low_ask_actual))
 
                 # Set sell amount based on total amount bought
                 sell_amount_current = calc_trade_totals('bought')
@@ -1174,12 +1187,12 @@ if __name__ == '__main__':
                 # Calculate true high bid (sufficient volume for sell)
                 high_bid_actual = calc_limit_price(sell_amount_current, 'sell', withFees=True)
                 logger.debug('high_bid_actual: ' + "{:.8f}".format(high_bid_actual))
-                logger.info('High Bid (Actual): ' + "{:.4f}".format(high_bid_actual))
+                logger.info('High Bid (Actual): ' + "{:.6f}".format(high_bid_actual))
 
                 # Calculate target sell price
                 sell_price_target = base_price * (Decimal(1) + profit_threshold + taker_fee)  # Add fee in calc_limit_price()
                 logger.debug('sell_price_target: ' + "{:.8f}".format(sell_price_target))
-                logger.info('Sell Target: ' + "{:.4f}".format(sell_price_target))
+                logger.info('Sell Target: ' + "{:.6f}".format(sell_price_target))
 
                 # Check for sell conditions
                 if float(high_bid_actual) >= float(sell_price_target):
