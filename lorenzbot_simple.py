@@ -380,7 +380,7 @@ def exec_trade(position, limit, amount):
             try:
                 mongo_response = db[coll_current].insert_one({'amount': float(order_details['amount']), 'price': float(order_details['rate']), 'side': position, 'date': order_details['date']})
                 logger.debug('[BUY] mongo_response: ' + str(mongo_response))
-                logger.info('Buy logged to MongoDB database collection ' + coll_current)
+                #logger.info('Buy logged to MongoDB database collection ' + coll_current)
             except Exception as e:
                 logger.exception('[BUY] Failed to write to MongoDB log!')
                 logger.exception(e)
@@ -409,7 +409,7 @@ def exec_trade(position, limit, amount):
             try:
                 mongo_response = db[coll_current].insert_one({'amount': float(order_details['amount']), 'price': float(order_details['rate']), 'side': position, 'date': order_details['date']})
                 logger.debug('[SELL] mongo_response: ' + str(mongo_response))
-                logger.info('Sell logged to MongoDB database collection ' + coll_current)
+                #logger.info('Sell logged to MongoDB database collection ' + coll_current)
             except Exception as e:
                 logger.exception('[SELL] Failed to write to MongoDB log!')
                 logger.exception(e)
@@ -476,12 +476,12 @@ def exec_trade(position, limit, amount):
                 telegram_message = trade_details_msg + base_msg + spent_msg + bought_msg
                 logger.debug('telegram_message: ' + telegram_message)
                 
-                logger.info('Sending Telegram alert.')
+                #logger.info('Sending Telegram alert.')
 
                 telegram_delay = time.time() - telegram_time_last
                 logger.debug('telegram_delay: ' + str(telegram_delay))
                 if position == 'buy' and telegram_delay < 300:  # If buying and last buy less than 5 min ago, don't send message
-                    logger.info('Telegram buy message delay hasn\'t elapsed. Skipping trade update.')
+                    #logger.info('Telegram buy message delay hasn\'t elapsed. Skipping trade update.')
                     return
                 elif position == 'buy':
                     telegram_time_last = time.time()
@@ -490,7 +490,8 @@ def exec_trade(position, limit, amount):
                 telegram_send_message(updater.bot, telegram_message)
 
             else:
-                logger.info('No users connected to Telegram. Skipping alert.')
+                #logger.info('No users connected to Telegram. Skipping alert.')
+                pass
 
 
 def process_trade_response(response, position):
@@ -542,7 +543,7 @@ def process_trade_response(response, position):
 def log_trade_csv(csv_row): # Must pass list as argument
     global csv_failures
     
-    logger.info('Logging trade details to csv file.')
+    #logger.info('Logging trade details to csv file.')
     try:
         with open(log_file, 'a', newline='') as csv_file:
             csv_writer = csv.writer(csv_file, delimiter=',', quotechar='|', quoting=csv.QUOTE_MINIMAL)
@@ -775,7 +776,7 @@ def calc_dynamic(selection, base, limit):
     
     diff = (base - limit) / base
     logger.debug('diff: ' + "{:.8f}".format(diff))
-    logger.info('Price Difference from Base: ' + "{:.4f}".format(diff * Decimal(100) * Decimal(-1)) + '%')
+1    logger.info('Price Difference from Base: ' + "{:.4f}".format(diff * Decimal(100) * Decimal(-1)) + '%')
 
     # Map magnitude of difference b/w base price and buy price to loop time
     if selection == 'loop':

@@ -2,11 +2,11 @@
 Poloniex exchange trading bot
 
 TO DO:
+- Simplify Telegram messages for clarity
 - Major error with sell processing (when available str < calc_trade_totals('bought') [following manual withdraw]) ****
-- Handle Telegram timeout exception
--- Add clean shutdown/exit procedure?
 - Determine what causes trade_usdt_remaining to be adjusted to negative value on startup
 -- Has to do with resetting amount to 98% of total when insufficient balance encountered?
+-- Also, mismatch between calculated and executed order size?
 - Consider limiting buy amounts under certain circumstances (?)
 - /profit Telegram functions, but always returns 'No sell trades executed.'
 - Make Telegram messages include more helpful information
@@ -15,9 +15,13 @@ TO DO:
 - Clean up unnecessary logging output, especially for INFO level
 
 LATER:
+- Sometimes trades < 0.0001USDT total are still attempted, but exception is handled properly
 - "Cash out" profits to BTC (or whatever else)
 - Add Telegram alerts when adjustments are made due to balance/trade amount issues
-- Add Telegram alerts when program exception occurs
+- Use Telegram chat rather than individual user alerts?
+- Add Telegram chat to output all exceptions, errors, etc.?
+- Add Telegram inline buttons to increase functionality and user choice in data retrieved
+- Use Telegram built-in restricted access for users (https://github.com/python-telegram-bot/python-telegram-bot/wiki/Code-snippets#restrict-access-to-a-handler-decorator)
 - Allow verify_amounts() to increase trade_usdt_max
 -- USDT balance minus remaining trade allotment (trigger increase of max?)
 - Change diff to be relative to low ask actual ("Price Difference from Base")
@@ -34,16 +38,16 @@ LATER:
 - Make csv profit calc ignore last group of buys without a sell for calculation
 
 IF TIME:
+- Move major functions to library in object-oriented setup
 - Add argument for product selection
 - Add MongoDB collection to store Telegram users
 - Python emoji module with Telegram messages
 
 NEEDS TESTING:
 - Catch ALL exceptions with logger...some going completely uncaught/unhandled ****
-- Determine what is causing mismatch between calculated and executed order size
-- Handling of exception from Telegram send message timeout
 - On Poloniex internal error, buy (and possibly sell) trades are still logged as if they were successful
 - Multi-line Telegram message formatting (needs testing and improvement)
+- Handle Telegram timeout exception
 
 DONE:
 - Add argument for trade amount
@@ -80,3 +84,7 @@ DONE:
 -- Collection retrieved on startup should be most recent but list returned not sorted
 - Copy/rename most recent log files on program exit for easy access
 - Average trade_amount per buy
+
+RESOURCES:
+- Exception Handling:
+https://stackoverflow.com/questions/2052390/manually-raising-throwing-an-exception-in-python
