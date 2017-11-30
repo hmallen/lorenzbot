@@ -71,6 +71,8 @@ Traceback (most recent call last):
     raise TimedOut()
 telegram.error.TimedOut: Timed out
 
+----
+
 2) Error when placing new entry buy after sell
 
 2017-11-28 10:02:41,379 - DEBUG - [SELL] mongo_response: <pymongo.results.InsertOneResult object at 0x7f4d9c1609c8>
@@ -106,7 +108,9 @@ Traceback (most recent call last):
     raise PoloniexError(out['error'])
 poloniex.PoloniexError: Total must be at least 0.0001.
 
-2) Program running --> Withdrew STR --> STR balance < Total bought
+----
+
+3) Program running --> Withdrew STR --> (STR balance < Total bought)
 
 (env) [ec2-user@ip-172-31-54-26 lorenzbot]$ python lorenzbot.py --dynamicamount -m 270 -l 30 --dynamicloop --live --telegram
 2017-11-29 23:34:15,486 - INFO - MongoDB running.
@@ -154,3 +158,85 @@ Traceback (most recent call last):
   File "/usr/lib64/python3.6/threading.py", line 1072, in _wait_for_tstate_lock
     elif lock.acquire(block, timeout):
 KeyboardInterrupt
+
+----
+
+4) Telegram error after startup, resume of previous trade cycle, buy, attempt to send buy alert
+
+2017-11-30 01:49:09,388 - INFO - TRADE CONDITIONS MET --> BUYING
+2017-11-30 01:49:09,855 - INFO - Buy logged to MongoDB database collection 11292017_042028
+2017-11-30 01:49:09,872 - INFO - Logging trade details to csv file.
+2017-11-30 01:49:09,872 - INFO - No users connected to Telegram. Skipping alert.
+2017-11-30 01:49:09,873 - INFO - Price Difference from Base: -10.9125%
+2017-11-30 01:49:09,873 - INFO - Trade loop complete. Sleeping for 27.38 seconds.
+2017-11-30 01:49:09,873 - INFO - ----[LOOP END]----
+Exception in thread updater:
+Traceback (most recent call last):
+  File "/home/ec2-user/lorenzbot/env/local/lib/python3.6/site-packages/telegram/vendor/ptb_urllib3/urllib3/connectionpool.py", line 402, in _make_request
+    six.raise_from(e, None)
+  File "<string>", line 2, in raise_from
+  File "/home/ec2-user/lorenzbot/env/local/lib/python3.6/site-packages/telegram/vendor/ptb_urllib3/urllib3/connectionpool.py", line 398, in _make_request
+    httplib_response = conn.getresponse()
+  File "/usr/lib64/python3.6/http/client.py", line 1331, in getresponse
+    response.begin()
+  File "/usr/lib64/python3.6/http/client.py", line 297, in begin
+    version, status, reason = self._read_status()
+  File "/usr/lib64/python3.6/http/client.py", line 258, in _read_status
+    line = str(self.fp.readline(_MAXLINE + 1), "iso-8859-1")
+  File "/usr/lib64/python3.6/socket.py", line 586, in readinto
+    return self._sock.recv_into(b)
+  File "/usr/lib64/python3.6/ssl.py", line 1002, in recv_into
+    return self.read(nbytes, buffer)
+  File "/usr/lib64/python3.6/ssl.py", line 865, in read
+    return self._sslobj.read(len, buffer)
+  File "/usr/lib64/python3.6/ssl.py", line 625, in read
+    v = self._sslobj.read(len, buffer)
+socket.timeout: The read operation timed out
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/ec2-user/lorenzbot/env/local/lib/python3.6/site-packages/telegram/utils/request.py", line 190, in _request_wrapper
+    resp = self._con_pool.request(*args, **kwargs)
+  File "/home/ec2-user/lorenzbot/env/local/lib/python3.6/site-packages/telegram/vendor/ptb_urllib3/urllib3/request.py", line 70, in request
+    **urlopen_kw)
+  File "/home/ec2-user/lorenzbot/env/local/lib/python3.6/site-packages/telegram/vendor/ptb_urllib3/urllib3/request.py", line 148, in request_encode_body
+    return self.urlopen(method, url, **extra_kw)
+  File "/home/ec2-user/lorenzbot/env/local/lib/python3.6/site-packages/telegram/vendor/ptb_urllib3/urllib3/poolmanager.py", line 244, in urlopen
+    response = conn.urlopen(method, u.request_uri, **kw)
+  File "/home/ec2-user/lorenzbot/env/local/lib/python3.6/site-packages/telegram/vendor/ptb_urllib3/urllib3/connectionpool.py", line 666, in urlopen
+    _stacktrace=sys.exc_info()[2])
+  File "/home/ec2-user/lorenzbot/env/local/lib/python3.6/site-packages/telegram/vendor/ptb_urllib3/urllib3/util/retry.py", line 347, in increment
+    raise six.reraise(type(error), error, _stacktrace)
+  File "/home/ec2-user/lorenzbot/env/local/lib/python3.6/site-packages/telegram/vendor/ptb_urllib3/urllib3/packages/six.py", line 686, in reraise
+    raise value
+  File "/home/ec2-user/lorenzbot/env/local/lib/python3.6/site-packages/telegram/vendor/ptb_urllib3/urllib3/connectionpool.py", line 617, in urlopen
+    chunked=chunked)
+  File "/home/ec2-user/lorenzbot/env/local/lib/python3.6/site-packages/telegram/vendor/ptb_urllib3/urllib3/connectionpool.py", line 405, in _make_request
+    exc_cls=ReadTimeoutError)
+  File "/home/ec2-user/lorenzbot/env/local/lib/python3.6/site-packages/telegram/vendor/ptb_urllib3/urllib3/connectionpool.py", line 321, in _raise_timeout
+    raise exc_cls(*args)
+telegram.vendor.ptb_urllib3.urllib3.exceptions.ReadTimeoutError: HTTPSConnectionPool(host='api.telegram.org', port=443): Read timed out. (read timeout=5.0)
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/usr/lib64/python3.6/threading.py", line 916, in _bootstrap_inner
+    self.run()
+  File "/usr/lib64/python3.6/threading.py", line 864, in run
+    self._target(*self._args, **self._kwargs)
+  File "/home/ec2-user/lorenzbot/env/local/lib/python3.6/site-packages/telegram/ext/updater.py", line 149, in _thread_wrapper
+    target(*args, **kwargs)
+  File "/home/ec2-user/lorenzbot/env/local/lib/python3.6/site-packages/telegram/ext/updater.py", line 275, in _start_polling
+    self._bootstrap(bootstrap_retries, clean=clean, webhook_url='', allowed_updates=None)
+  File "/home/ec2-user/lorenzbot/env/local/lib/python3.6/site-packages/telegram/ext/updater.py", line 387, in _bootstrap
+    url=webhook_url, certificate=cert, allowed_updates=allowed_updates)
+  File "/home/ec2-user/lorenzbot/env/local/lib/python3.6/site-packages/telegram/bot.py", line 57, in decorator
+    result = func(self, *args, **kwargs)
+  File "/home/ec2-user/lorenzbot/env/local/lib/python3.6/site-packages/telegram/bot.py", line 1765, in set_webhook
+    result = self._request.post(url_, data, timeout=timeout)
+  File "/home/ec2-user/lorenzbot/env/local/lib/python3.6/site-packages/telegram/utils/request.py", line 272, in post
+    **urlopen_kwargs)
+  File "/home/ec2-user/lorenzbot/env/local/lib/python3.6/site-packages/telegram/utils/request.py", line 192, in _request_wrapper
+    raise TimedOut()
+telegram.error.TimedOut: Timed out

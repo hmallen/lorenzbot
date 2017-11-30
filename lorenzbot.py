@@ -1,4 +1,6 @@
-#!/usr/env python3
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
 import argparse
 import configparser
 import csv
@@ -854,8 +856,6 @@ def verify_amounts():
     # If USDT and STR balances both ~0, then exit
     if balance_usdt < Decimal(0.0001) and float(balance_str) == 0:
         logger.error('USDT and STR balances both 0. Exiting.')
-        if telegram_active == True:
-            updater.stop()
         sys.exit(1)
 
     coll_count = db[coll_current].count()
@@ -1250,4 +1250,4 @@ if __name__ == '__main__':
                 logger.info('Telegram sends failed: ' + str(telegram_failures))
                 updater.stop()
             
-            sys.exit(0)
+            sys.exit()

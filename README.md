@@ -3,20 +3,23 @@ Poloniex exchange trading bot
 
 TO DO:
 - Major error with sell processing (when available str < calc_trade_totals('bought') [following manual withdraw]) ****
-- Catch ALL exceptions with logger...some going completely uncaught/unhandled ****
+- Handle Telegram timeout exception
+-- Add clean shutdown/exit procedure?
+- Determine what causes trade_usdt_remaining to be adjusted to negative value on startup
+-- Has to do with resetting amount to 98% of total when insufficient balance encountered?
 - Consider limiting buy amounts under certain circumstances (?)
 - /profit Telegram functions, but always returns 'No sell trades executed.'
 - Make Telegram messages include more helpful information
 -- /status: trade_usdt_remaining, trade_usdt_max, etc.
 -- Trade alerts: trade_usdt_remaining
-- Add Telegram alerts when adjustments are made due to balance/trade amount issues
-- Add Telegram alerts when program exception occurs
 - Clean up unnecessary logging output, especially for INFO level
 
 LATER:
 - "Cash out" profits to BTC (or whatever else)
-- USDT balance minus remaining trade allotment (trigger increase of max?)
+- Add Telegram alerts when adjustments are made due to balance/trade amount issues
+- Add Telegram alerts when program exception occurs
 - Allow verify_amounts() to increase trade_usdt_max
+-- USDT balance minus remaining trade allotment (trigger increase of max?)
 - Change diff to be relative to low ask actual ("Price Difference from Base")
 - Implement more efficient handling for failure to create new MongoDB collection
 - Return weighted average from calc_limit_price()
@@ -33,8 +36,10 @@ LATER:
 IF TIME:
 - Add argument for product selection
 - Add MongoDB collection to store Telegram users
+- Python emoji module with Telegram messages
 
 NEEDS TESTING:
+- Catch ALL exceptions with logger...some going completely uncaught/unhandled ****
 - Determine what is causing mismatch between calculated and executed order size
 - Handling of exception from Telegram send message timeout
 - On Poloniex internal error, buy (and possibly sell) trades are still logged as if they were successful
