@@ -2,6 +2,8 @@
 Poloniex exchange trading bot
 
 TO DO:
+- Major error with sell processing
+- Catch ALL exceptions with logger...some going completely uncaught/unhandled
 - Consider limiting buy amounts under certain circumstances
 - /profit Telegram functions, but always returns 'No sell trades executed.'
 - Make Telegram messages include more helpful information

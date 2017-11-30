@@ -244,6 +244,7 @@ def calc_trade_totals(position):
                     }
                 }]
             agg = db.command('aggregate', coll_current, pipeline=pipeline)['result']
+            logger.debug('agg: ' + str(agg))
             
             trade_total = Decimal(0)
             for x in range(0, len(agg)):
@@ -1182,7 +1183,7 @@ if __name__ == '__main__':
                 # Check for sell conditions
                 if float(high_bid_actual) >= float(sell_price_target):
                     # Check if sell total greater than minimum allowed
-                    if (sell_amount_current * sell_price_target) < Decimal(0.0001):
+                    if float(sell_amount_current * sell_price_target) < 0.0001:
                         logger.warning('Trade total must be >= $0.0001. Skipping Trade.')
                         sell_skips += 1
                     else:
@@ -1192,7 +1193,7 @@ if __name__ == '__main__':
                 # Check for buy conditions
                 elif float(low_ask_actual) <= float(base_price):
                     # Check if buy total greater than minimum allowed
-                    if (buy_amount_current * low_ask_actual) < Decimal(0.0001):
+                    if float(buy_amount_current * low_ask_actual) < 0.0001:
                         logger.warning('Trade total must be >= $0.0001. Skipping Trade.')
                         buy_skips += 1
                     else:

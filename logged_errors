@@ -105,3 +105,52 @@ Traceback (most recent call last):
   File "/home/ec2-user/lorenzbot/env/local/lib/python3.6/site-packages/poloniex/__init__.py", line 270, in handleReturned
     raise PoloniexError(out['error'])
 poloniex.PoloniexError: Total must be at least 0.0001.
+
+2) Program running --> Withdrew STR --> STR balance < Total bought
+
+(env) [ec2-user@ip-172-31-54-26 lorenzbot]$ python lorenzbot.py --dynamicamount -m 270 -l 30 --dynamicloop --live --telegram
+2017-11-29 23:34:15,486 - INFO - MongoDB running.
+2017-11-29 23:34:15,488 - INFO - Using default MongoDB database "lorenzbot".
+2017-11-29 23:34:15,488 - WARNING - Total USDT trade amount is set to $270.00.
+Is this correct? (y/n): y
+2017-11-29 23:34:16,500 - INFO - USDT trade amount confirmed.
+2017-11-29 23:34:16,500 - INFO - Dynamic trade amount calculation activated.
+2017-11-29 23:34:16,500 - INFO - Dynamic loop time calculation activated. Base loop time set to 30 seconds.
+2017-11-29 23:34:16,500 - INFO - CSV logging activated.
+2017-11-29 23:34:16,500 - INFO - Telegram logging active. Send "/connect" to @lorenzbot_bot to receive alerts.
+2017-11-29 23:34:16,502 - INFO - Found existing collection: 11292017_230456
+2017-11-29 23:34:16,502 - INFO - Found Telegram config file.
+2017-11-29 23:34:16,503 - INFO - Found Poloniex config file.
+2017-11-29 23:34:16,504 - WARNING - Live trading ENABLED.
+2017-11-29 23:34:16,814 - INFO - Current Maker Fee: 0.1500%
+2017-11-29 23:34:16,814 - INFO - Current Taker Fee: 0.2500%
+2017-11-29 23:34:16,818 - INFO - Base Price: 0.075486
+2017-11-29 23:34:17,003 - INFO - Balance STR:  3584.3527
+2017-11-29 23:34:17,003 - INFO - Balance USDT: 1.8778
+2017-11-29 23:34:17,004 - INFO - Total STR Bought: 2464.3527
+2017-11-29 23:34:17,005 - INFO - Total USDT Spent: 186.0247
+2017-11-29 23:34:17,006 - INFO - Total Buy Count: 1
+2017-11-29 23:34:17,007 - INFO - Avg. Trade Amount: 2464.3527
+2017-11-29 23:34:17,008 - WARNING - USDT balance less than remaining USDT amount allotted for trading. Adjusting allotment to available balance.
+2017-11-29 23:34:17,010 - INFO - Remaining Tradable USDT Balance Adjusted: -1.8802
+2017-11-29 23:34:17,010 - INFO - Tradable USDT Remaining: -1.8802
+2017-11-29 23:34:17,077 - WARNING - Volume not satisfied at default order book depth=40. Retrying with depth = 80.
+2017-11-29 23:34:18,145 - WARNING - Volume not satisfied at default order book depth=80. Retrying with depth = 120.
+2017-11-29 23:34:19,221 - WARNING - Volume not satisfied at default order book depth=120. Retrying with depth = 160.
+^CTraceback (most recent call last):
+  File "lorenzbot.py", line 1121, in <module>
+    verify_initial = verify_amounts()
+  File "lorenzbot.py", line 895, in verify_amounts
+    buy_amount_max = calc_limit_price(trade_usdt_remaining, 'buy', reverseLookup=True, withFees=True)
+  File "lorenzbot.py", line 327, in calc_limit_price
+    time.sleep(1)
+KeyboardInterrupt
+^CException ignored in: <module 'threading' from '/usr/lib64/python3.6/threading.py'>
+Traceback (most recent call last):
+  File "/usr/lib64/python3.6/threading.py", line 1294, in _shutdown
+    t.join()
+  File "/usr/lib64/python3.6/threading.py", line 1056, in join
+    self._wait_for_tstate_lock()
+  File "/usr/lib64/python3.6/threading.py", line 1072, in _wait_for_tstate_lock
+    elif lock.acquire(block, timeout):
+KeyboardInterrupt
