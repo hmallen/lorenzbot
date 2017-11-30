@@ -2,7 +2,7 @@
 Poloniex exchange trading bot
 
 TO DO:
-- Simplify Telegram messages for clarity
+- Move config files to new directory and create example files
 - Telegram command to retrieve most recent exception (from recent exception log)
 - Major error with sell processing (when available str < calc_trade_totals('bought') [following manual withdraw]) ****
 - Determine what causes trade_usdt_remaining to be adjusted to negative value on startup
@@ -12,6 +12,7 @@ TO DO:
 - /profit Telegram functions, but always returns 'No sell trades executed.'
 - Make Telegram messages include more helpful information
 -- /status: trade_usdt_remaining, trade_usdt_max, etc.
+-- Simplify Telegram messages for clarity
 -- Trade alerts: trade_usdt_remaining
 - Clean up unnecessary logging output, especially for INFO level
 
@@ -49,6 +50,7 @@ NEEDS TESTING:
 - On Poloniex internal error, buy (and possibly sell) trades are still logged as if they were successful
 - Multi-line Telegram message formatting (needs testing and improvement)
 - Handle Telegram timeout exception
+- Telegram error/exception alerts
 
 DONE:
 - Add argument for trade amount
@@ -73,13 +75,12 @@ DONE:
 -- Buy = 0.0001USDT
 -- Sell = 0.0001USDT
 - Base csv name and renaming on collection cleaning
-- Check is csv logging true before activating Telegram profit calculation
+- Check if csv logging true before activating Telegram profit calculation
 - Move balance/trade log verification to isolated function
 - Fix Telegram-triggered csv profit calculator
 - Integrate telegram_failures counter
 - Fix failure to rebuy after sell due to lack of maximum trade value reset
 -- Create "reset maxima" function to reset trade maximum values which may have been reduced during buy phase
-- Telegram error/exception alerts
 - Limit Telegram buy messages (by time?)
 - Fix sells always being triggered on start (incorrect total str bought amount)
 -- Collection retrieved on startup should be most recent but list returned not sorted

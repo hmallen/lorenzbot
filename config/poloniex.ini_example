@@ -1,0 +1,9 @@
+# Poloniex API key/secret with TRADING ENABLED
+[live]
+key = 'Poloniex API Key'
+secret = 'Poloniex API Secret'
+
+# Poloniex API key/secret with TRADING DISABLED
+[view]
+key = 'Poloniex API Key'
+secret = 'Poloniex API Secret'

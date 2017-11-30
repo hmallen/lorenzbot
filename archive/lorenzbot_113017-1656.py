@@ -24,14 +24,10 @@ global trade_amount_start, trade_usdt_max_start
 global telegram_time_last
 global mongo_failures, buy_failures, sell_failures, csv_failures, telegram_failures
 
-poloniex_config_path = 'config/poloniex.ini'
-telegram_config_path = 'config/telegram.ini'
-
 log_out = 'logs/' + datetime.datetime.now().strftime('%m%d%Y-%H%M%S') + '.log'
 log_out_last = './last_debug.log'
 log_file = 'logs/lorenzbot_log.csv'
 log_file_last = './last_lorenzbot_log.csv'
-exception_log_file = './exception_log.log'
 exception_last_file = './exception_last.txt'
 
 logger = logging.getLogger(__name__)
@@ -116,12 +112,11 @@ parser.add_argument('--live', action='store_true', default=False, help='Add flag
 #parser.add_argument('--cashout', action='store_true', default=False, help='Add flag to enable \"cash out\" of profits to alternate currency (ex. BTC)')
 
 parser.add_argument('--telegram', action='store_true', default=False, help='Add flag to enable Telegram alerts.')
-#parser.add_argument('--telegramexceptions', action='store_true', default=False, help='Add flag to save exceptions to file then send it connected users')
 
 parser.add_argument('--nocsv', action='store_false', default=True, help='Add flag to disable csv logging.')
 parser.add_argument('--mongoalt', action='store_true', default=False, help='Add flag to use alternative database for use of multiple instances concurrently.')
 parser.add_argument('--debug', action='store_true', default=False, help='Add flag to include debug level output to console.')
-
+parser.add_argument('--telegramexceptions', action='store_true', default=False, help='Add flagt save exceptions to file then send it connected users')
 # Parse arguments passed to program
 logger.debug('Parsing arguments.')
 args = parser.parse_args()
@@ -215,8 +210,7 @@ def calc_base():
             except Exception as e:
                 logger.exception('Entry buy failed. Exiting.')
                 logger.exception(e)
-                
-                sys.exit(1) # REMOVE TO PREVENT EXIT ON REBUY AND HANDLE DIFFERENTLY?
+                sys.exit(1)
 
     calc_base_initialized = True
     logger.debug('calc_base_initialized: ' + str(calc_base_initialized))
@@ -378,7 +372,12 @@ def exec_trade(position, limit, amount):
             logger.exception('Exception occurred while executing buy trade.')
             logger.exception(e)
             buy_failures += 1
-            raise
+            if telegram_active == True:
+                with open(exception_last_file, 'w') as ex_file:
+                    ex_file.write(str(e))
+                logger.debug('Wrote to file.')
+                telegram_send_exception(updater.bot)
+            return -1
 
         if len(trade_response['resultingTrades']) > 0:
             order_details = process_trade_response(trade_response, position)
@@ -392,7 +391,11 @@ def exec_trade(position, limit, amount):
                 logger.exception('[BUY] Failed to write to MongoDB log!')
                 logger.exception(e)
                 mongo_failures += 1
-                raise
+                if telegram_active == True:
+                    with open(exception_last_file, 'w') as ex_file:
+                        ex_file.write(str(e))
+                    logger.debug('Wrote to file.')
+                    telegram_send_exception(updater.bot)
 
         else:
             logger.warning('No trades were executed on buy attempt.')
@@ -405,7 +408,12 @@ def exec_trade(position, limit, amount):
             logger.exception('Exception occurred while executing sell trade.')
             logger.exception(e)
             sell_failures += 1
-            raise
+            if telegram_active == True:
+                with open(exception_last_file, 'w') as ex_file:
+                    ex_file.write(str(e))
+                logger.debug('Wrote to file.')
+                telegram_send_exception(updater.bot)
+            return -1
 
         if len(trade_response['resultingTrades']) > 0:
             amount_unfilled = Decimal(trade_response['amountUnfilled'])
@@ -422,7 +430,11 @@ def exec_trade(position, limit, amount):
                 logger.exception('[SELL] Failed to write to MongoDB log!')
                 logger.exception(e)
                 mongo_failures += 1
-                raise
+                if telegram_active == True:
+                    with open(exception_last_file, 'w') as ex_file:
+                        ex_file.write(str(e))
+                    logger.debug('Wrote to file.')
+                    telegram_send_exception(updater.bot)
 
             coll_current_prev = coll_current
             modify_collections('create')    # Create new collection
@@ -441,7 +453,11 @@ def exec_trade(position, limit, amount):
                     logger.exception('[UNFILLED/NEW] Failed to write to MongoDB log!')
                     logger.exception(e)
                     mongo_failures += 1
-                    raise
+                    if telegram_active == True:
+                        with open(exception_last_file, 'w') as ex_file:
+                            ex_file.write(str(e))
+                        logger.debug('Wrote to file.')
+                        telegram_send_exception(updater.bot)
             
             else:
                 logger.debug('Sell completely filled. New collection starting empty.')
@@ -559,10 +575,14 @@ def log_trade_csv(csv_row): # Must pass list as argument
             csv_writer.writerow(csv_row)
     #except csv.Error as e:
     except Exception as e:
-        logger.exception('Exception occurred while writing to csv file.')
+        logger.error('Exception occurred while writing to csv file.')
         logger.exception(e)
         csv_failures += 1
-        raise
+        if telegram_active == True:
+            with open(exception_last_file, 'w') as ex_file:
+                ex_file.write(str(e))
+            logger.debug('Wrote to file.')
+            telegram_send_exception(updater.bot)
 
 
 def calc_profit_csv():
@@ -579,10 +599,14 @@ def calc_profit_csv():
                 trade_list.append(row)
         #except csv.Error as e:
         except Exception as e:
-            logger.exception('Exception occurred while writing to csv file.')
+            logger.error('Exception occurred while writing to csv file.')
             logger.exception(e)
             csv_failures += 1
-            raise
+            if telegram_active == True:
+                with open(exception_last_file, 'w') as ex_file:
+                    ex_file.write(str(e))
+                logger.debug('Wrote to file.')
+                telegram_send_exception(updater.bot)
 
     #logger.debug('len(trade_list): ' + str(len(trade_list)))
     logger.debug('Calculating profit from csv data.')
@@ -650,10 +674,14 @@ def telegram_connect(bot, update):
     try:
         bot.send_message(chat_id=telegram_user, text=telegram_message)  # Do I really need more random comments? Yep.
     except Exception as e:
-        logger.exception('[CONNECT] Exception occurred while sending telegram message.')
+        logger.error('[CONNECT] Exception occurred while sending telegram message.')
         logger.exception(e)
         telegram_failures += 1
-        raise
+        if telegram_active == True:
+            with open(exception_last_file, 'w') as ex_file:
+                ex_file.write(str(e))
+            logger.debug('Wrote to file.')
+            telegram_send_exception(updater.bot)
 
 
 def telegram_disconnect(bot, update):
@@ -678,10 +706,14 @@ def telegram_disconnect(bot, update):
     try:
         bot.send_message(chat_id=telegram_user, text=telegram_message)
     except Exception as e:
-        logger.exception('[DISCONNECT] Exception occurred while sending telegram message.')
+        logger.error('[DISCONNECT] Exception occurred while sending telegram message.')
         logger.exception(e)
         telegram_failures += 1
-        raise
+        if telegram_active == True:
+            with open(exception_last_file, 'w') as ex_file:
+                ex_file.write(str(e))
+            logger.debug('Wrote to file.')
+            telegram_send_exception(updater.bot)
 
 
 def telegram_status(bot, update):
@@ -718,10 +750,14 @@ def telegram_status(bot, update):
     try:
         bot.send_message(chat_id=telegram_user, text=telegram_message)
     except Exception as e:
-        logger.exception('[STATUS] Exception occurred while sending telegram message.')
+        logger.error('[STATUS] Exception occurred while sending telegram message.')
         logger.exception(e)
         telegram_failures += 1
-        raise
+        if telegram_active == True:
+            with open(exception_last_file, 'w') as ex_file:
+                ex_file.write(str(e))
+            logger.debug('Wrote to file.')
+            telegram_send_exception(updater.bot)
 
 
 def telegram_profit(bot, update):
@@ -761,10 +797,14 @@ def telegram_profit(bot, update):
     try:
         bot.send_message(chat_id=telegram_user, text=telegram_message)
     except Exception as e:
-        logger.exception('[PROFIT] Exception occurred while sending telegram message.')
+        logger.error('[PROFIT] Exception occurred while sending telegram message.')
         logger.exception(e)
         telegram_failures += 1
-        raise
+        if telegram_active == True:
+            with open(exception_last_file, 'w') as ex_file:
+                ex_file.write(str(e))
+            logger.debug('Wrote to file.')
+            telegram_send_exception(updater.bot)
 
 
 def telegram_send_message(bot, trade_message):
@@ -778,31 +818,14 @@ def telegram_send_message(bot, trade_message):
                 bot.send_message(chat_id=user, text=trade_message)
                 logger.debug('Sent alert to user ' + str(user) + '.')
             except Exception as e:
-                logger.exception('[SEND] Exception occurred while sending telegram message.')
+                logger.error('[SEND] Exception occurred while sending telegram message.')
                 logger.exception(e)
                 telegram_failures += 1
-                raise
-    
-    else:
-        logger.debug('No Telegram users connected. Message not sent.')
-
-
-def telegram_send_exception(bot):
-    global telegram_failures
-    
-    exception_msg = datetime.datetime.now().strftime('%m-%d-%Y, %H:%M:%S') + ' - Exception'
-
-    if len(connected_users) > 0:
-        for user in connected_users:
-            try:
-                bot.send_message(chat_id=user, text=exception_msg)
-                bot.send_document(chat_id=user, document=open(exception_last_file, 'rb'))
-            except Exception as e:
-                logger.exception('[SEND] Exception occurred while sending telegram message.')
-                logger.exception(e)
-                telegram_failures += 1
-                # IF RAISED, WILL LOOP INFINITELY IF TELEGRAM ISSUE NOT RESOLVED
-                #raise
+                if telegram_active == True:
+                    with open(exception_last_file, 'w') as ex_file:
+                        ex_file.write(str(e))
+                    logger.debug('Wrote to file.')
+                    telegram_send_exception(updater.bot)
     
     else:
         logger.debug('No Telegram users connected. Message not sent.')
@@ -927,7 +950,11 @@ def verify_amounts():
                 logger.exception('[BALANCE ADJUSTMENT] Failed to write to MongoDB log!')
                 logger.exception(e)
                 mongo_failures += 1
-                raise
+                if telegram_active == True:
+                    with open(exception_last_file, 'w') as ex_file:
+                        ex_file.write(str(e))
+                    logger.debug('Wrote to file.')
+                    telegram_send_exception(updater.bot)
 
         else:
             logger.warning('STR balance is 0. Leaving new collection empty.')
@@ -1089,6 +1116,9 @@ if __name__ == '__main__':
             modify_collections('create')    # Create new collection
 
     # Get config file(s) and set program values from it/them
+    poloniex_config_path = './.poloniex.ini'
+    telegram_config_path = './.telegram.ini'
+
     config = configparser.ConfigParser()
 
     if telegram_active == True:
@@ -1144,11 +1174,10 @@ if __name__ == '__main__':
     # Connect to Poloniex API
     try:
         polo = poloniex.Poloniex(api_key, api_secret)
-    except Exception as e:
+    except:
         logger.exception('Poloniex API key and/or secret incorrect. Exiting.')
-        logger.exception(e)
-        #if connected_users.count(telegram_user) > 0:
-            #connected_users.remove(telegram_user)
+        if connected_users.count(telegram_user) > 0:
+            connected_users.remove(telegram_user)
         
         sys.exit(1)
 
@@ -1173,6 +1202,9 @@ if __name__ == '__main__':
     logger.debug('base_price: ' + "{:.8f}".format(base_price))
     logger.info('Base Price: ' + "{:.6f}".format(base_price))
     #base_price_target = base_price - buy_threshold    # IS BUY_THRESHOLD NEEDED IF CALCULATING FEES TOO?
+    #base_price_target = base_price * (Decimal(1) - taker_fee)
+    #logger.debug('base_price_target: ' + "{:.8f}".format(base_price_target))
+    #logger.info('Base Price Target: ' + "{:.6f}".format(base_price_target))
     
     verify_initial = verify_amounts()
     logger.debug('verify_initial: ' + str(verify_initial))
@@ -1192,7 +1224,6 @@ if __name__ == '__main__':
 # get_balances() --> {'str': Decimal(bal_str), 'usdt': Decimal(bal_usdt)}
 # loop_time_dynamic(base, amt, book) --> Decimal(lt)
 
-    loop_count = 0
     while (True):
         try:
             logger.info('----[LOOP START]----')
@@ -1201,9 +1232,8 @@ if __name__ == '__main__':
             base_price = calc_base()
             logger.debug('base_price: ' + "{:.8f}".format(base_price))
             logger.info('Base Price: ' + "{:.6f}".format(base_price))
-
-            base_price_target = base_price * (Decimal(1) - taker_fee)
             #base_price_target = base_price - buy_threshold    # IS BUY_THRESHOLD NEEDED IF CALCULATING FEES TOO?
+            base_price_target = base_price * (Decimal(1) - taker_fee)
             logger.debug('base_price_target: ' + "{:.8f}".format(base_price_target))
             logger.info('Base Price Target: ' + "{:.6f}".format(base_price_target))
 
@@ -1267,24 +1297,15 @@ if __name__ == '__main__':
             logger.info('Trade loop complete. Sleeping for ' + "{:.2f}".format(loop_time_dynamic) + ' seconds.')
 
             logger.info('----[LOOP END]----')
-            loop_count += 1
-            logger.debug('loop_count: ' + str(loop_count))
             
             time.sleep(loop_time_dynamic)
 
         except Exception as e:
-            logger.exception('Exception raised and caught in main loop.')
             logger.exception(e)
-            
-            with open(exception_log_file, 'w') as ex_file:
-                ex_file.write(str(e))
-                logger.debug('Wrote exception to exception log file.')
-
-            with open(exception_last_file, 'a') as ex_file:
-                ex_file.write(str(e))
-                logger.debug('Wrote exception to recent exception file.')
-
             if telegram_active == True:
+                with open(exception_last_file, 'w') as ex_file:
+                    ex_file.write(str(e))
+                logger.debug('Wrote to file.')
                 telegram_send_exception(updater.bot)
 
         except KeyboardInterrupt:
