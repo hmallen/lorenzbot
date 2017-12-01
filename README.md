@@ -2,6 +2,12 @@
 Poloniex exchange trading bot
 
 TO DO:
+- Remove redundant logging output (ex. DEBUG when INFO already present)
+- Consider reimplementing buy_threshold to ensure base price usefully reduced
+- Move "Price Difference from Base" so that it's only called once on INFO level
+- Add "Price Difference from Target"
+- Standardize Telegram message string creation (consolidate?)
+- Change Telegram message to use list/dict of variables and loop to create string or send multiple lines
 - Delete all API keys, generate new, and make Github repository public
 - Move config files to new directory and create example files
 - Telegram command to retrieve most recent exception (from recent exception log)
@@ -18,8 +24,9 @@ TO DO:
 - Clean up unnecessary logging output, especially for INFO level
 
 LATER:
-- Sometimes trades < 0.0001USDT total are still attempted, but exception is handled properly
+- Very rarely, trades < 0.0001USDT total are still attempted, but exception is handled properly
 - "Cash out" profits to BTC (or whatever else)
+-- OR add max sell amount that is ~5%? less than total bought to "accumulate" trade currency
 - Add Telegram alerts when adjustments are made due to balance/trade amount issues
 - Use Telegram chat rather than individual user alerts?
 - Add Telegram chat to output all exceptions, errors, etc.?
@@ -41,12 +48,15 @@ LATER:
 - Make csv profit calc ignore last group of buys without a sell for calculation
 
 IF TIME:
+- Test on other markets (ex. 'BTC_STR')
 - Move major functions to library in object-oriented setup
 - Add argument for product selection
 - Add MongoDB collection to store Telegram users
 - Python emoji module with Telegram messages
+- Remove loop delay almost entirely, replacing with constant monitoring of real-time websocket order book
 
 NEEDS TESTING:
+- Add price difference from target to Telegram messages
 - Catch ALL exceptions with logger...some going completely uncaught/unhandled ****
 - On Poloniex internal error, buy (and possibly sell) trades are still logged as if they were successful
 - Multi-line Telegram message formatting (needs testing and improvement)

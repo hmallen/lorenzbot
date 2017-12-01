@@ -477,10 +477,10 @@ def exec_trade(position, limit, amount):
                 
                 base_current = calc_base()
                 logger.debug('base_current: ' + "{:.8f}".format(base_current))
-                base_msg = 'Base Price:   ' + "{:.4f}".format(base_current) + '\n'
+                base_msg = 'Base Price:   ' + "{:.6f}".format(base_current) + '\n'
 
                 spent_msg = 'USDT Spent: ' + "{:.4f}".format(calc_trade_totals('spent')) + '\n'
-                bought_msg = 'STR Bought: ' + "{:.4f}".format(calc_trade_totals('bought')) + '\n'
+                bought_msg = 'STR Bought: ' + "{:.4f}".format(calc_trade_totals('bought'))# + '\n'
             
                 
                 telegram_message = trade_details_msg + base_msg + spent_msg + bought_msg
@@ -696,18 +696,25 @@ def telegram_status(bot, update):
     if connected_users.count(telegram_user) > 0:
         logger.debug('Access confirmed for requesting user.')
                 
-        spent_msg = 'USDT Spent:  ' + "{:.4f}".format(calc_trade_totals('spent')) + '\n'
-        bought_msg = 'STR Bought:  ' + "{:.4f}".format(calc_trade_totals('bought')) + '\n'
+        spent_msg = 'Tot. Spent:  ' + "{:.4f}".format(calc_trade_totals('spent')) + ' (USDT)\n'
+        bought_msg = 'Tot. Bought:  ' + "{:.4f}".format(calc_trade_totals('bought')) + ' (STR)\n'
         
         base_current = calc_base()
         logger.debug('base_current: ' + "{:.8f}".format(base_current))
-        base_msg = 'Base Price:    ' + "{:.6f}".format(base_current) + '\n'
+        base_msg = 'Base Price:    ' + "{:.6f}".format(base_current) + ' (USDT)\n'
+
+        logger.debug('sell_price_target: ' + "{:.8f}".format(sell_price_target))
+        sell_target_msg = 'Sell Target: ' + "{:.6f}".format(sell_price_target) + ' (USDT)\n'
         
         market_current = Decimal(polo.returnTicker()[trade_market]['last'])
         logger.debug('market_current: ' + "{:.8f}".format(market_current))
-        market_msg = 'Mkt. Price:    ' + "{:.6f}".format(market_current)# + '\n'
+        market_msg = 'Mkt. Price:    ' + "{:.6f}".format(market_current) + '\n'
 
-        telegram_message = spent_msg + bought_msg + base_msg + market_msg
+        price_diff = (market_current - sell_price_target) / sell_price_target
+        logger.debug('price_diff: ' + "{:.8f}".format(price_diff))
+        price_diff_msg = '% Difference: ' + "{:.2f}".format(price_diff * Decimal(100))
+
+        telegram_message = spent_msg + bought_msg + base_msg + sell_target_msg + market_msg + price_diff_msg
 
     else:
         logger.warning('Access denied for requesting user.')
@@ -801,7 +808,7 @@ def telegram_send_exception(bot):
                 logger.exception('[SEND] Exception occurred while sending telegram message.')
                 logger.exception(e)
                 telegram_failures += 1
-                # IF RAISED, WILL LOOP INFINITELY IF TELEGRAM ISSUE NOT RESOLVED
+                # IF RAISED AND TELEGRAM ISSUE NOT RESOLVED, WILL LOOP FOREVER
                 #raise
     
     else:
@@ -812,8 +819,8 @@ def calc_dynamic(selection, base, limit):
     global trade_usdt_remaining
     
     diff = (base - limit) / base
-    logger.debug('diff: ' + "{:.8f}".format(diff))
-    logger.info('Price Difference from Base: ' + "{:.4f}".format(diff * Decimal(100) * Decimal(-1)) + '%')
+    logger.debug('diff: ' + "{:.8f}".format(diff) + ' [' + selection + ']')
+    #logger.info('Price Difference from Base: ' + "{:.4f}".format(diff * Decimal(100) * Decimal(-1)) + '%')
 
     # Map magnitude of difference b/w base price and buy price to loop time
     if selection == 'loop':
@@ -1236,6 +1243,15 @@ if __name__ == '__main__':
                 sell_price_target = base_price * (Decimal(1) + profit_threshold + taker_fee)  # Add fee in calc_limit_price()
                 logger.debug('sell_price_target: ' + "{:.8f}".format(sell_price_target))
                 logger.info('Sell Target: ' + "{:.6f}".format(sell_price_target))
+
+                # Display % differences from base and sell targets
+                bt_diff = (low_ask_actual - base_price_target) / base_price_target
+                logger.debug('bt_diff: ' + "{:.8f}".format(bt_diff))
+                logger.info('Base/Ask Target Difference: ' + "{:.2f}".format(bt_diff * Decimal(100)) + '%')
+                
+                st_diff = (high_bid_actual - sell_price_target) / sell_price_target
+                logger.debug('st_diff: ' + "{:.8f}".format(st_diff))
+                logger.info('Sell/Bid Target Difference: ' + "{:.2f}".format(st_diff * Decimal(100)) + '%')
 
                 # Check for sell conditions
                 if float(high_bid_actual) >= float(sell_price_target):
