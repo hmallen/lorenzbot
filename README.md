@@ -2,6 +2,7 @@
 Poloniex exchange trading bot
 
 TO DO:
+- Delete all API keys, generate new, and make Github repository public
 - Move config files to new directory and create example files
 - Telegram command to retrieve most recent exception (from recent exception log)
 - Major error with sell processing (when available str < calc_trade_totals('bought') [following manual withdraw]) ****
