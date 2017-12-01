@@ -712,7 +712,7 @@ def telegram_status(bot, update):
 
         price_diff = (market_current - sell_price_target) / sell_price_target
         logger.debug('price_diff: ' + "{:.8f}".format(price_diff))
-        price_diff_msg = 'Difference: ' + "{:.2f}".format(price_diff * Decimal(100) + '%'
+        price_diff_msg = 'Difference: ' + "{:.2f}".format(price_diff * Decimal(100)) + '%'
 
         telegram_message = spent_msg + bought_msg + base_msg + sell_target_msg + market_msg + price_diff_msg
 
