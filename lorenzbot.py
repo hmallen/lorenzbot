@@ -1253,7 +1253,7 @@ if __name__ == '__main__':
             base_price_target = base_price * (Decimal(1) - taker_fee)
             #base_price_target = base_price - buy_threshold    # IS BUY_THRESHOLD NEEDED IF CALCULATING FEES TOO?
             logger.debug('base_price_target: ' + "{:.8f}".format(base_price_target))
-            logger.info('Base Price Target: ' + "{:.6f}".format(base_price_target))
+            logger.info('Base Target: ' + "{:.6f}".format(base_price_target))
 
             # Calculate target sell price
             sell_price_target = base_price * (Decimal(1) + profit_threshold + taker_fee)  # Add fee in calc_limit_price()

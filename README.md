@@ -2,20 +2,14 @@
 Poloniex exchange trading bot
 
 TO DO:
-- Fix csv profit calculation to work with "accumulate" mode
 - Make exception log include more information (traceback, time, etc.)
-- Remove redundant logging output (ex. DEBUG when INFO already present)
+-- /status: trade_usdt_remaining, trade_usdt_max, etc.
+-- Trade alerts: trade_usdt_remaining
+- Telegram command to retrieve most recent exception (from recent exception log)
+- Test if program functions without defining global variables
 - Consider reimplementing buy_threshold to ensure base price usefully reduced
-- Standardize Telegram message string creation (consolidate?)
 - Change Telegram message to use list/dict of variables and loop to create string or send multiple lines
 - Delete all API keys, generate new, and make Github repository public
-- Telegram command to retrieve most recent exception (from recent exception log)
-- Consider limiting buy amounts under certain circumstances (?)
-- /profit Telegram functions, but always returns 'No sell trades executed.'
-- Make Telegram messages include more helpful information
--- /status: trade_usdt_remaining, trade_usdt_max, etc.
--- Simplify Telegram messages for clarity
--- Trade alerts: trade_usdt_remaining
 - Clean up unnecessary logging output, especially for INFO level
 
 LATER:
@@ -32,7 +26,6 @@ LATER:
 - Implement more efficient handling for failure to create new MongoDB collection
 - Return weighted average from calc_limit_price()
 - Allow trade_usdt_max to be adjusted without stopping program
-- Test if program functions without defining global variables
 - List out all variables used and formalize to clean up program
 - Make boolean arguments into human-readable format
 - Clean up arguments --> Make parent/child --> Make sure all conditions satisfied
@@ -51,16 +44,13 @@ IF TIME:
 - Remove loop delay almost entirely, replacing with constant monitoring of real-time websocket order book
 
 NEEDS TESTING:
+- Fix csv profit calculation to work with "accumulate" mode
 - Add max sell amount that is ~5%? less than total bought to "accumulate" trade currency
-- Add price difference from target to Telegram messages
 - Catch ALL exceptions with logger...some going completely uncaught/unhandled ****
 - On Poloniex internal error, buy (and possibly sell) trades are still logged as if they were successful
 - Multi-line Telegram message formatting (needs testing and improvement)
 - Handle Telegram timeout exception
 - Telegram error/exception alerts
-- Determine what causes trade_usdt_remaining to be adjusted to negative value on startup
--- Has to do with resetting amount to 98% of total when insufficient balance encountered?
--- Also, mismatch between calculated and executed order size?
 
 DONE:
 - Add argument for trade amount
@@ -100,6 +90,11 @@ DONE:
 - Add more data to csv profit calculation return dictionary
 - Move "Price Difference from Base" so that it's only called once on INFO level
 - Add "Price Difference from Target"
+- Add price difference from target to Telegram messages
+- Determine what causes trade_usdt_remaining to be adjusted to negative value on startup
+-- Has to do with resetting amount to 98% of total when insufficient balance encountered?
+-- Also, mismatch between calculated and executed order size?
+- /profit Telegram functions, but always returns 'No sell trades executed.'
 
 RESOURCES:
 - Exception Handling:
