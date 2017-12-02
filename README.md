@@ -2,6 +2,8 @@
 Poloniex exchange trading bot
 
 TO DO:
+- Make sure no conflict between accumulate and withdraw mode (and that they work together)
+- Merge config file into unified config
 - Make exception log include more information (traceback, time, etc.)
 -- /status: trade_usdt_remaining, trade_usdt_max, etc.
 -- Trade alerts: trade_usdt_remaining
@@ -41,6 +43,8 @@ IF TIME:
 - Add Telegram chat to output all exceptions, errors, etc.?
 
 NEEDS TESTING:
+- No profit message sent
+- Withdraw profit to STR address
 - Fix csv profit calculation to work with "accumulate" mode
 - Add max sell amount that is ~5%? less than total bought to "accumulate" trade currency
 - Catch ALL exceptions with logger...some going completely uncaught/unhandled ****
