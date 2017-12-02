@@ -746,11 +746,11 @@ def telegram_profit(bot, update):
             trade_profit_return = calc_profit_csv()
             logger.debug('trade_profit_return: ' + str(trade_profit_return))
 
-            trade_spent = trade_profit_return['spent']
-            logger.debug('[CSVPROFIT] trade_spent: ' + "{:.8f}".format(trade_spent))
-
             trade_gain = trade_profit_return['gain']
             logger.debug('[CSVPROFIT] trade_gain: ' + "{:.8f}".format(trade_gain))
+
+            trade_spent = trade_profit_return['spent']
+            logger.debug('[CSVPROFIT] trade_spent: ' + "{:.8f}".format(trade_spent))
 
             trade_profit = trade_profit_return['profit']
             logger.debug('[CSVPROFIT] trade_profit: ' + "{:.8f}".format(trade_profit))
@@ -760,8 +760,8 @@ def telegram_profit(bot, update):
                 logger.debug('No sell trades executed.')
 
             else:
-                trade_spent_msg = 'Tot. Spent: ' + "{:.4f}".format(trade_spent) + ' (USDT)\n'
                 trade_gain_msg = 'Tot. Gained: ' + "{:.4f}".format(trade_gain) + ' (USDT)\n'
+                trade_spent_msg = 'Tot. Spent: ' + "{:.4f}".format(trade_spent) + ' (USDT)\n'
                 trade_profit_msg = 'Tot. Profit: ' + "{:.4f}".format(trade_profit) + ' (USDT)'
                 telegram_message = trade_spent_msg + trade_gain_msg + trade_profit_msg
                 
