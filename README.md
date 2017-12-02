@@ -17,15 +17,11 @@ LATER:
 - Very rarely, trades < 0.0001USDT total are still attempted, but exception is handled properly
 - Add Telegram alerts when adjustments are made due to balance/trade amount issues
 - Use Telegram chat rather than individual user alerts?
-- Add Telegram chat to output all exceptions, errors, etc.?
 - Add Telegram inline buttons to increase functionality and user choice in data retrieved
 - Use Telegram built-in restricted access for users (https://github.com/python-telegram-bot/python-telegram-bot/wiki/Code-snippets#restrict-access-to-a-handler-decorator)
-- Allow verify_amounts() to increase trade_usdt_max
 -- USDT balance minus remaining trade allotment (trigger increase of max?)
-- Change diff to be relative to low ask actual ("Price Difference from Base")
 - Implement more efficient handling for failure to create new MongoDB collection
 - Return weighted average from calc_limit_price()
-- Allow trade_usdt_max to be adjusted without stopping program
 - List out all variables used and formalize to clean up program
 - Make boolean arguments into human-readable format
 - Clean up arguments --> Make parent/child --> Make sure all conditions satisfied
@@ -42,6 +38,7 @@ IF TIME:
 - Add MongoDB collection to store Telegram users
 - Python emoji module with Telegram messages
 - Remove loop delay almost entirely, replacing with constant monitoring of real-time websocket order book
+- Add Telegram chat to output all exceptions, errors, etc.?
 
 NEEDS TESTING:
 - Fix csv profit calculation to work with "accumulate" mode
