@@ -754,7 +754,7 @@ def telegram_profit(bot, update):
                 logger.debug('No sell trades executed.')
 
             else:
-                telegram_message = 'Total Profit: ' + "{:.4f}".format(profit)   # CSV PROFIT CALCULATION
+                telegram_message = 'Total Profit: ' + "{:.4f}".format(trade_profit)   # CSV PROFIT CALCULATION
 
         else:
             telegram_message = 'CSV logging not active. Cannot calculate profit.'

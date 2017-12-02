@@ -2,6 +2,7 @@
 Poloniex exchange trading bot
 
 TO DO:
+- Make exception log include more information (traceback, time, etc.)
 - Remove redundant logging output (ex. DEBUG when INFO already present)
 - Consider reimplementing buy_threshold to ensure base price usefully reduced
 - Move "Price Difference from Base" so that it's only called once on INFO level
