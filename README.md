@@ -2,6 +2,7 @@
 Poloniex exchange trading bot
 
 TO DO:
+- Add date/time and anything else useful to exception log
 - Verify calculation of profit (seems wrong)
 - Tradable USDT balance is slightly below expected (noticed in accumulate mode)
 - Determine minimum withdraw amount and make sure check is implemented before attempt
@@ -12,7 +13,6 @@ TO DO:
 -- Trade alerts: trade_usdt_remaining
 - Telegram command to retrieve most recent exception (from recent exception log)
 - Test if program functions without defining global variables
-- Consider reimplementing buy_threshold to ensure base price usefully reduced
 - Change Telegram message to use list/dict of variables and loop to create string or send multiple lines
 - Delete all API keys, generate new, and make Github repository public
 - Clean up unnecessary logging output, especially for INFO level
@@ -44,6 +44,7 @@ IF TIME:
 - Python emoji module with Telegram messages
 - Remove loop delay almost entirely, replacing with constant monitoring of real-time websocket order book
 - Add Telegram chat to output all exceptions, errors, etc.?
+- Consider reimplementing buy_threshold to ensure base price usefully reduced
 
 NEEDS TESTING:
 - No profit message sent
