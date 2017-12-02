@@ -113,7 +113,7 @@ parser.add_argument('-l', '--loop', default=60, type=float, help='Main program l
 parser.add_argument('--dynamicloop', action='store_true', default=False, help='Add flag to dynamically set loop time based on current conditions.')
 
 parser.add_argument('--live', action='store_true', default=False, help='Add flag to enable live trading API keys.')
-parser.add_argument('--accumulate', action='store_true', default=False, help='Add flag to limit sell amount to get back exact USDT spent and \"accumulate\" trade currency as profit.')
+parser.add_argument('--accumulate', action='store_true', default=False, help='Add flag to limit sell amount so total equals exact amount spent, \"accumulating\" trade currency as profit.')
 #parser.add_argument('--cashout', action='store_true', default=False, help='Add flag to enable \"cash out\" of profits to alternate currency (ex. BTC)')
 
 parser.add_argument('--telegram', action='store_true', default=False, help='Add flag to enable Telegram alerts.')
@@ -1226,6 +1226,11 @@ if __name__ == '__main__':
             logger.debug('base_price_target: ' + "{:.8f}".format(base_price_target))
             logger.info('Base Price Target: ' + "{:.6f}".format(base_price_target))
 
+            # Calculate target sell price
+            sell_price_target = base_price * (Decimal(1) + profit_threshold + taker_fee)  # Add fee in calc_limit_price()
+            logger.debug('sell_price_target: ' + "{:.8f}".format(sell_price_target))
+            logger.info('Sell Target: ' + "{:.6f}".format(sell_price_target))
+
             trade_check_ready = verify_amounts()
             logger.debug('trade_check_ready: ' + str(trade_check_ready))
 
@@ -1242,19 +1247,20 @@ if __name__ == '__main__':
                 logger.info('Low Ask (Actual): ' + "{:.6f}".format(low_ask_actual))
 
                 # Set sell amount based on total amount bought
-                sell_amount_current = calc_trade_totals('bought')
-                logger.debug('sell_amount_current: ' + "{:.8f}".format(sell_amount_current))
+                if accumulate_active == False:
+                    sell_amount_current = calc_trade_totals('bought')
+                    logger.debug('[FULL] sell_amount_current: ' + "{:.8f}".format(sell_amount_current))
+                else:
+                    sell_amount_current = calc_trade_totals('spent') / sell_price_target
+                    logger.debug('[ACCUM] sell_amount_current: ' + "{:.8f}".format(sell_amount_current))
+                    
+                #logger.debug('sell_amount_current: ' + "{:.8f}".format(sell_amount_current))
                 logger.info('Current Sell Amount: ' + "{:.4f}".format(sell_amount_current))
 
                 # Calculate true high bid (sufficient volume for sell)
                 high_bid_actual = calc_limit_price(sell_amount_current, 'sell', withFees=True)
                 logger.debug('high_bid_actual: ' + "{:.8f}".format(high_bid_actual))
                 logger.info('High Bid (Actual): ' + "{:.6f}".format(high_bid_actual))
-
-                # Calculate target sell price
-                sell_price_target = base_price * (Decimal(1) + profit_threshold + taker_fee)  # Add fee in calc_limit_price()
-                logger.debug('sell_price_target: ' + "{:.8f}".format(sell_price_target))
-                logger.info('Sell Target: ' + "{:.6f}".format(sell_price_target))
 
                 # Display % differences from base and sell targets
                 bt_diff = (low_ask_actual - base_price_target) / base_price_target
