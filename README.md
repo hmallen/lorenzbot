@@ -2,21 +2,15 @@
 Poloniex exchange trading bot
 
 TO DO:
-- Add more data to csv profit calculation return dictionary
+- "Cash out" profits to BTC (or whatever else)
+-- OR add max sell amount that is ~5%? less than total bought to "accumulate" trade currency
 - Make exception log include more information (traceback, time, etc.)
 - Remove redundant logging output (ex. DEBUG when INFO already present)
 - Consider reimplementing buy_threshold to ensure base price usefully reduced
-- Move "Price Difference from Base" so that it's only called once on INFO level
-- Add "Price Difference from Target"
 - Standardize Telegram message string creation (consolidate?)
 - Change Telegram message to use list/dict of variables and loop to create string or send multiple lines
 - Delete all API keys, generate new, and make Github repository public
-- Move config files to new directory and create example files
 - Telegram command to retrieve most recent exception (from recent exception log)
-- Major error with sell processing (when available str < calc_trade_totals('bought') [following manual withdraw]) ****
-- Determine what causes trade_usdt_remaining to be adjusted to negative value on startup
--- Has to do with resetting amount to 98% of total when insufficient balance encountered?
--- Also, mismatch between calculated and executed order size?
 - Consider limiting buy amounts under certain circumstances (?)
 - /profit Telegram functions, but always returns 'No sell trades executed.'
 - Make Telegram messages include more helpful information
@@ -26,9 +20,8 @@ TO DO:
 - Clean up unnecessary logging output, especially for INFO level
 
 LATER:
+- Major error with sell processing (when available str < calc_trade_totals('bought') [following manual withdraw]) ****
 - Very rarely, trades < 0.0001USDT total are still attempted, but exception is handled properly
-- "Cash out" profits to BTC (or whatever else)
--- OR add max sell amount that is ~5%? less than total bought to "accumulate" trade currency
 - Add Telegram alerts when adjustments are made due to balance/trade amount issues
 - Use Telegram chat rather than individual user alerts?
 - Add Telegram chat to output all exceptions, errors, etc.?
@@ -64,6 +57,9 @@ NEEDS TESTING:
 - Multi-line Telegram message formatting (needs testing and improvement)
 - Handle Telegram timeout exception
 - Telegram error/exception alerts
+- Determine what causes trade_usdt_remaining to be adjusted to negative value on startup
+-- Has to do with resetting amount to 98% of total when insufficient balance encountered?
+-- Also, mismatch between calculated and executed order size?
 
 DONE:
 - Add argument for trade amount
@@ -99,6 +95,10 @@ DONE:
 -- Collection retrieved on startup should be most recent but list returned not sorted
 - Copy/rename most recent log files on program exit for easy access
 - Average trade_amount per buy
+- Move config files to new directory and create example files
+- Add more data to csv profit calculation return dictionary
+- Move "Price Difference from Base" so that it's only called once on INFO level
+- Add "Price Difference from Target"
 
 RESOURCES:
 - Exception Handling:
