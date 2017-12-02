@@ -27,6 +27,8 @@ global mongo_failures, buy_failures, sell_failures, csv_failures, telegram_failu
 poloniex_config_path = 'config/poloniex.ini'
 telegram_config_path = 'config/telegram.ini'
 
+withdraw_address = 'GBHB5IEQA7YMIGQ6J4B2S7T7AN5RJXRQZUTMUOFRP2OJBP3NBX67DDOC'
+
 log_out = 'logs/' + datetime.datetime.now().strftime('%m%d%Y-%H%M%S') + '.log'
 log_out_last = './last_debug.log'
 log_file = 'logs/lorenzbot_log.csv'
@@ -114,6 +116,7 @@ parser.add_argument('--dynamicloop', action='store_true', default=False, help='A
 
 parser.add_argument('--live', action='store_true', default=False, help='Add flag to enable live trading API keys.')
 parser.add_argument('--accumulate', action='store_true', default=False, help='Add flag to limit sell amount so total equals exact amount spent, \"accumulating\" trade currency as profit.')
+parser.add_argument('--withdraw', action='store_true', default=False, help='Add flag to withdraw STR profits to external address.')
 #parser.add_argument('--cashout', action='store_true', default=False, help='Add flag to enable \"cash out\" of profits to alternate currency (ex. BTC)')
 
 parser.add_argument('--telegram', action='store_true', default=False, help='Add flag to enable Telegram alerts.')
@@ -147,6 +150,7 @@ loop_dynamic = args.dynamicloop; logger.debug('loop_dynamic: ' + str(loop_dynami
 
 live_trading = args.live; logger.debug('live_trading: ' + str(live_trading))
 accumulate_active = args.accumulate; logger.debug('accumulate_active: ' + str(accumulate_active))
+withdraw_active = args.withdraw; logger.debug('withdraw_active: ' + str(withdraw_active))
 #cashout_active = args.cashout; logger.debug('cashout_active: ' + str(cashout_active))
 
 telegram_active = args.telegram; logger.debug('telegram_active: ' + str(telegram_active))
@@ -400,6 +404,8 @@ def exec_trade(position, limit, amount):
             logger.warning('No trades were executed on buy attempt.')
         
     elif position == 'sell':
+        bought_initial = calc_trade_totals('bought')    # Used later to calculate profit amount to withdraw, if active
+        
         try:
             trade_response = polo.sell(trade_market, limit, amount, 'immediateOrCancel')  # CHANGE TO REGULAR LIMIT ORDER?
             logger.debug('[SELL] trade_response: ' + str(trade_response))
@@ -503,6 +509,33 @@ def exec_trade(position, limit, amount):
 
             else:
                 logger.info('No users connected to Telegram. Skipping alert.')
+
+        if withdraw_active == True and position == 'sell' and float(amount_unfilled) == 0:
+            withdraw_total = bought_initial - amount
+            logger.debug('bought_initial: ' + "{:.8f}".format(bought_initial))
+            logger.debug('amount: ' + "{:.8f}".format(amount))
+            logger.debug('withdraw_total: ' + "{:.8f}".format(withdraw_total))
+
+            logger.info('Withdrawing STR profit of ' + "{:.4f}".format(withdraw_total) + ' to address: ' + withdraw_address + '.')
+            try:
+                withdraw_response = polo.withdraw('STR', withdraw_amount, withdraw_address)
+                logger.debug('withdraw_response: ' + str(withdraw_response))
+                # Should be --> {'response': 'Withdrew 1.00000000 STR.'}
+                logger.info('Withdraw successful.')
+                logger.debug('Response: ' + str(withdraw_response['response']))
+            except Exception as e:
+                logger.exception('Exception occurred while attempting withdraw of STR profit.')
+                logger.exception(e)
+                raise
+
+            try:
+                withdraw_message = withdraw_response['response']
+                logger.info('Sending Telegram profit withdraw alert.')
+
+                telgram_message = 'Withdrew STR profit of ' + "{:.4f}".format(withdraw_total) + ' to address ' + withdraw_address + '.'
+                telegram_send_message(updater.bot, telegram_message)
+            except:
+                logger.debug('Withdraw failed. No Telegram message to send.')
 
 
 def process_trade_response(response, position):
