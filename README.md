@@ -2,6 +2,7 @@
 Poloniex exchange trading bot
 
 TO DO:
+- Determine minimum withdraw amount and make sure check is implemented before attempt
 - Make sure no conflict between accumulate and withdraw mode (and that they work together)
 - Merge config file into unified config
 - Make exception log include more information (traceback, time, etc.)
