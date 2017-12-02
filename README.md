@@ -2,8 +2,7 @@
 Poloniex exchange trading bot
 
 TO DO:
-- "Cash out" profits to BTC (or whatever else)
--- OR add max sell amount that is ~5%? less than total bought to "accumulate" trade currency
+- Fix csv profit calculation to work with "accumulate" mode
 - Make exception log include more information (traceback, time, etc.)
 - Remove redundant logging output (ex. DEBUG when INFO already present)
 - Consider reimplementing buy_threshold to ensure base price usefully reduced
@@ -43,6 +42,7 @@ LATER:
 - Make csv profit calc ignore last group of buys without a sell for calculation
 
 IF TIME:
+- "Cash out" profits to BTC (or whatever else)
 - Test on other markets (ex. 'BTC_STR')
 - Move major functions to library in object-oriented setup
 - Add argument for product selection
@@ -51,6 +51,7 @@ IF TIME:
 - Remove loop delay almost entirely, replacing with constant monitoring of real-time websocket order book
 
 NEEDS TESTING:
+- Add max sell amount that is ~5%? less than total bought to "accumulate" trade currency
 - Add price difference from target to Telegram messages
 - Catch ALL exceptions with logger...some going completely uncaught/unhandled ****
 - On Poloniex internal error, buy (and possibly sell) trades are still logged as if they were successful
