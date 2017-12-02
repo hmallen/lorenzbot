@@ -113,7 +113,6 @@ parser.add_argument('-l', '--loop', default=60, type=float, help='Main program l
 parser.add_argument('--dynamicloop', action='store_true', default=False, help='Add flag to dynamically set loop time based on current conditions.')
 
 parser.add_argument('--live', action='store_true', default=False, help='Add flag to enable live trading API keys.')
-parser.add_argument('--accumulate', action='store_true', default=False, help='Add flag to limit sell amount so total equals exact amount spent, \"accumulating\" trade currency as profit.')
 #parser.add_argument('--cashout', action='store_true', default=False, help='Add flag to enable \"cash out\" of profits to alternate currency (ex. BTC)')
 
 parser.add_argument('--telegram', action='store_true', default=False, help='Add flag to enable Telegram alerts.')
@@ -146,7 +145,6 @@ loop_time = Decimal(args.loop); logger.debug('loop_time: ' + str(loop_time))
 loop_dynamic = args.dynamicloop; logger.debug('loop_dynamic: ' + str(loop_dynamic))
 
 live_trading = args.live; logger.debug('live_trading: ' + str(live_trading))
-accumulate_active = args.accumulate; logger.debug('accumulate_active: ' + str(accumulate_active))
 #cashout_active = args.cashout; logger.debug('cashout_active: ' + str(cashout_active))
 
 telegram_active = args.telegram; logger.debug('telegram_active: ' + str(telegram_active))
@@ -619,16 +617,15 @@ def calc_profit_csv():
     logger.debug('sell_count: ' + str(sell_count))
     logger.debug('rate_avg: ' + "{:.8f}".format(rate_avg))
 
-    #if gain_amount > 0:
-       # profit = gain_amount - spent_amount
+    if gain_amount > 0:
+        profit = gain_amount - spent_amount
         
-    #else:
-        #profit = Decimal(-1)
+    else:
+        profit = Decimal(-1)
 
-    #logger.debug('profit: ' + "{:.8f}".format(profit))
+    logger.debug('profit: ' + "{:.8f}".format(profit))
 
-    #return {'profit': profit, 'bought': bought_amount, 'sold': sold_amount, 'spent': spent_amount, 'gain': gain_amount, 'rate': rate_avg, 'buy_count': buy_count, 'sell_count': sell_count}
-    return {'bought': bought_amount, 'sold': sold_amount, 'gain': gain_amount, 'spent': spent_amount, 'rate': rate_avg, 'buy_count': buy_count, 'sell_count': sell_count}
+    return {'profit': profit, 'spent': spent_amount, 'gain': gain_amount}
 
 
 def telegram_connect(bot, update):
@@ -749,53 +746,25 @@ def telegram_profit(bot, update):
             trade_profit_return = calc_profit_csv()
             logger.debug('trade_profit_return: ' + str(trade_profit_return))
 
-            trade_bought = trade_profit_return['bought']
-            logger.debug('[CSVPROFIT] trade_bought: ' + "{:.8f}".format(trade_bought))
-
-            trade_sold = trade_profit_return['sold']
-            logger.debug('[CSVPROFIT] trade_sold: ' + "{:.8f}".format(trade_sold))
-
             trade_gain = trade_profit_return['gain']
             logger.debug('[CSVPROFIT] trade_gain: ' + "{:.8f}".format(trade_gain))
 
             trade_spent = trade_profit_return['spent']
             logger.debug('[CSVPROFIT] trade_spent: ' + "{:.8f}".format(trade_spent))
 
-            trade_rate = trade_profit_return['rate']
-            logger.debug('[CSVPROFIT] trade_rate: ' + "{:.8f}".format(trade_rate))
-
-            trade_buy_count = trade_profit_return['buy_count']
-            logger.debug('[CSVPROFIT] trade_buy_count: ' +  "{:.8f}".format(trade_buy_count))
-
-            trade_sell_count = trade_profit_return['sell_count']
-            logger.debug('[CSVPROFIT] trade_sell_count: ' +  "{:.8f}".format(trade_sell_count))
-
-            if accumulate_active == False:
-                profit_currency = 'USDT'
-                
-                if float(trade_gain) > 0:
-                    trade_profit = trade_gain - trade_spent
-                else:
-                    trade_profit = -1
-            else:
-                profit_currency = 'STR'
-                
-                if float(trade_sold) > 0:
-                    trade_profit = trade_bought - trade_sold
-
-            logger.debug('[PROFIT] trade_profit: ' + "{:.8f}".format(trade_profit))
-            logger.debug('[PROFIT] profit_currency: ' + str(profit_currency))
+            trade_profit = trade_profit_return['profit']
+            logger.debug('[CSVPROFIT] trade_profit: ' + "{:.8f}".format(trade_profit))
     
             if float(trade_profit) < 0:
                 telegram_message = 'No sell trades executed.'
+                logger.debug('No sell trades executed.')
 
             else:
-                trade_sold_msg = 'Tot. Sold: ' + "{:.4f}".format(trade_sold) + ' (STR)\n'
-                trade_bought_msg = 'Tot. Bought: ' + "{:.4f}".format(trade_bought) + ' (STR)\n'
                 trade_gain_msg = 'Tot. Gained: ' + "{:.4f}".format(trade_gain) + ' (USDT)\n'
                 trade_spent_msg = 'Tot. Spent: ' + "{:.4f}".format(trade_spent) + ' (USDT)\n'
-                trade_profit_msg = 'Tot. Profit: ' + "{:.4f}".format(trade_profit) + ' (' + profit_currency + ')'
-                telegram_message = trade_sold_msg + trade_bought_msg + trade_spent_msg + trade_gain_msg + trade_profit_msg
+                trade_profit_msg = 'Tot. Profit: ' + "{:.4f}".format(trade_profit) + ' (USDT)'
+                telegram_message = trade_spent_msg + trade_gain_msg + trade_profit_msg
+                
 
         else:
             telegram_message = 'CSV logging not active. Cannot calculate profit.'
@@ -1231,14 +1200,14 @@ if __name__ == '__main__':
         logger.info('Initial balance/trade log amounts ADJUSTED.')
     
 
-    # Functions Used/Arguments Required/Values Returned:
-    #
-    # calc_base() --> Decimal(base_price)
-    # calc_limit_price(book, amt, position, book_depth=20) --> Decimal(price_actual)
-    # calc_trade_totals(position = 'bought' or 'spent') --> Decimal(trade_total)
-    # exec_trade(position, price_limit=None, trade_amount=None) --> None
-    # get_balances() --> {'str': Decimal(bal_str), 'usdt': Decimal(bal_usdt)}
-    # loop_time_dynamic(base, amt, book) --> Decimal(lt)
+# Functions Used/Arguments Required/Values Returned:
+#
+# calc_base() --> Decimal(base_price)
+# calc_limit_price(book, amt, position, book_depth=20) --> Decimal(price_actual)
+# calc_trade_totals(position = 'bought' or 'spent') --> Decimal(trade_total)
+# exec_trade(position, price_limit=None, trade_amount=None) --> None
+# get_balances() --> {'str': Decimal(bal_str), 'usdt': Decimal(bal_usdt)}
+# loop_time_dynamic(base, amt, book) --> Decimal(lt)
 
     loop_count = 0
     while (True):
@@ -1254,11 +1223,6 @@ if __name__ == '__main__':
             #base_price_target = base_price - buy_threshold    # IS BUY_THRESHOLD NEEDED IF CALCULATING FEES TOO?
             logger.debug('base_price_target: ' + "{:.8f}".format(base_price_target))
             logger.info('Base Price Target: ' + "{:.6f}".format(base_price_target))
-
-            # Calculate target sell price
-            sell_price_target = base_price * (Decimal(1) + profit_threshold + taker_fee)  # Add fee in calc_limit_price()
-            logger.debug('sell_price_target: ' + "{:.8f}".format(sell_price_target))
-            logger.info('Sell Target: ' + "{:.6f}".format(sell_price_target))
 
             trade_check_ready = verify_amounts()
             logger.debug('trade_check_ready: ' + str(trade_check_ready))
@@ -1276,20 +1240,19 @@ if __name__ == '__main__':
                 logger.info('Low Ask (Actual): ' + "{:.6f}".format(low_ask_actual))
 
                 # Set sell amount based on total amount bought
-                if accumulate_active == False:
-                    sell_amount_current = calc_trade_totals('bought')
-                    logger.debug('[FULL] sell_amount_current: ' + "{:.8f}".format(sell_amount_current))
-                else:
-                    sell_amount_current = calc_trade_totals('spent') / sell_price_target
-                    logger.debug('[ACCUM] sell_amount_current: ' + "{:.8f}".format(sell_amount_current))
-                    
-                #logger.debug('sell_amount_current: ' + "{:.8f}".format(sell_amount_current))
+                sell_amount_current = calc_trade_totals('bought')
+                logger.debug('sell_amount_current: ' + "{:.8f}".format(sell_amount_current))
                 logger.info('Current Sell Amount: ' + "{:.4f}".format(sell_amount_current))
 
                 # Calculate true high bid (sufficient volume for sell)
                 high_bid_actual = calc_limit_price(sell_amount_current, 'sell', withFees=True)
                 logger.debug('high_bid_actual: ' + "{:.8f}".format(high_bid_actual))
                 logger.info('High Bid (Actual): ' + "{:.6f}".format(high_bid_actual))
+
+                # Calculate target sell price
+                sell_price_target = base_price * (Decimal(1) + profit_threshold + taker_fee)  # Add fee in calc_limit_price()
+                logger.debug('sell_price_target: ' + "{:.8f}".format(sell_price_target))
+                logger.info('Sell Target: ' + "{:.6f}".format(sell_price_target))
 
                 # Display % differences from base and sell targets
                 bt_diff = (low_ask_actual - base_price_target) / base_price_target
