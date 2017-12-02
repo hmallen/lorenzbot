@@ -782,6 +782,8 @@ def telegram_profit(bot, update):
                 
                 if float(trade_sold) > 0:
                     trade_profit = trade_bought - trade_sold
+                else:
+                    trade_profit = -1
 
             logger.debug('[PROFIT] trade_profit: ' + "{:.8f}".format(trade_profit))
             logger.debug('[PROFIT] profit_currency: ' + str(profit_currency))
