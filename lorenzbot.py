@@ -1375,11 +1375,11 @@ if __name__ == '__main__':
             logger.exception(e)
             
             with open(exception_log_file, 'w') as ex_file:
-                ex_file.write(str(e))
+                ex_file.write(datetime.datetime.now().strftime('%m%d%Y-%H%M%S') + ': ' + str(e))
                 logger.debug('Wrote exception to exception log file.')
 
             with open(exception_last_file, 'a') as ex_file:
-                ex_file.write(str(e))
+                ex_file.write(datetime.datetime.now().strftime('%m%d%Y-%H%M%S') + ': ' + str(e))
                 logger.debug('Wrote exception to recent exception file.')
 
             if telegram_active == True:

@@ -2,7 +2,6 @@
 Poloniex exchange trading bot
 
 TO DO:
-- Add date/time and anything else useful to exception log
 - Verify calculation of profit (seems wrong)
 - Tradable USDT balance is slightly below expected (noticed in accumulate mode)
 - Determine minimum withdraw amount and make sure check is implemented before attempt
@@ -19,7 +18,6 @@ TO DO:
 
 LATER:
 - Major error with sell processing (when available str < calc_trade_totals('bought') [following manual withdraw]) ****
-- Very rarely, trades < 0.0001USDT total are still attempted, but exception is handled properly
 - Add Telegram alerts when adjustments are made due to balance/trade amount issues
 - Use Telegram chat rather than individual user alerts?
 - Add Telegram inline buttons to increase functionality and user choice in data retrieved
@@ -31,8 +29,6 @@ LATER:
 - Make boolean arguments into human-readable format
 - Clean up arguments --> Make parent/child --> Make sure all conditions satisfied
 - Add "shutdown" function that can be called anywhere instead of updater.stop() each time
-- Add argument for minimum loop time (loop_time_min)
-- Add Poloniex coach?
 - Make csv profit calc ignore last group of buys without a sell for calculation
 
 IF TIME:
@@ -45,17 +41,20 @@ IF TIME:
 - Remove loop delay almost entirely, replacing with constant monitoring of real-time websocket order book
 - Add Telegram chat to output all exceptions, errors, etc.?
 - Consider reimplementing buy_threshold to ensure base price usefully reduced
+- Add argument for minimum loop time (loop_time_min)?
+- Add Poloniex coach?
 
 NEEDS TESTING:
-- No profit message sent
+- Add date/time and anything else useful to exception log
 - Withdraw profit to STR address
 - Fix csv profit calculation to work with "accumulate" mode
 - Add max sell amount that is ~5%? less than total bought to "accumulate" trade currency
 - Catch ALL exceptions with logger...some going completely uncaught/unhandled ****
 - On Poloniex internal error, buy (and possibly sell) trades are still logged as if they were successful
-- Multi-line Telegram message formatting (needs testing and improvement)
+- Multi-line Telegram message formatting (needs improvement)
 - Handle Telegram timeout exception
 - Telegram error/exception alerts
+- Very rarely, trades < 0.0001USDT total are still attempted, but exception is handled properly
 
 DONE:
 - Add argument for trade amount
@@ -100,6 +99,7 @@ DONE:
 -- Has to do with resetting amount to 98% of total when insufficient balance encountered?
 -- Also, mismatch between calculated and executed order size?
 - /profit Telegram functions, but always returns 'No sell trades executed.'
+- No profit message sent
 
 RESOURCES:
 - Exception Handling:
