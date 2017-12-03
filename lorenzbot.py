@@ -285,7 +285,7 @@ def calc_trade_totals(position):
 # Improve this function by returning weighted average of exec price based on trade amount!!!!
 ####
 def calc_limit_price(amount, position, reverseLookup=None, withFees=None):
-    # NEED HANDLING FOR IMPOSSIBLE SITUATIONS
+    # NEED HANDLING FOR IMPOSSIBLE SITUATIONS?
     if position == 'buy':
         book_pos = 'asks'
     elif position == 'sell':
@@ -336,7 +336,7 @@ def calc_limit_price(amount, position, reverseLookup=None, withFees=None):
         logger.debug('book_tot: ' + "{:.2f}".format(book_tot))
         
         if float(actual) <= 0:
-            # NEED TO FIGURE OUT HOW TO HANDLE THIS!!!!
+            # NEED TO FIGURE OUT HOW TO HANDLE THIS!!!! (OR DO I?)
             if book_depth >= 200:
                 #logger.exception('Failed to set price_actual in calc_limit_price().')
                 #break
@@ -365,7 +365,6 @@ def calc_limit_price(amount, position, reverseLookup=None, withFees=None):
     return actual
 
 
-# NEED TO FIX THE BUY/SELL FUNCTIONS
 def exec_trade(position, limit, amount):
     global calc_base_initialized
     global telegram_time_last
@@ -504,8 +503,13 @@ def exec_trade(position, limit, amount):
                 elif position == 'buy':
                     telegram_time_last = time.time()
                     logger.debug('Telegram buy message delay reset.')
-                
-                telegram_send_message(updater.bot, telegram_message)
+
+                try:
+                    telegram_send_message(updater.bot, telegram_message)
+                except Exception as e:
+                    logger.debug('Exception occurred while sending Telegram trade alert.')
+                    logger.debug(e)
+                    raise
 
             else:
                 logger.info('No users connected to Telegram. Skipping alert.')
