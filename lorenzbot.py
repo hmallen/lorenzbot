@@ -522,13 +522,13 @@ def exec_trade(position, limit, amount):
 
             logger.info('Withdrawing STR profit of ' + "{:.4f}".format(withdraw_total) + ' to address: ' + withdraw_address + '.')
             try:
-                #withdraw_response = polo.withdraw('STR', withdraw_amount, withdraw_address)
+                withdraw_response = polo.withdraw('STR', withdraw_amount, withdraw_address)
 
-                logger.info('Writing intended withdraw info to file.')
-                with open('withdraw_log.txt', 'a') as withdraw_file:
-                    withdraw_file.write(datetime.datetime.now().strftime('%m%d%Y-%H%M%S') + ': ' + str(bought_initial) + ',' + str(amount) + ',' + str(withdraw_total) + ',' + withdraw_address)
-                    logger.debug('Wrote withdraw to log file.')
-                logger.info('Write complete.')
+                #logger.info('Writing intended withdraw info to file.')
+                #with open('withdraw_log.txt', 'a') as withdraw_file:
+                    #withdraw_file.write(datetime.datetime.now().strftime('%m%d%Y-%H%M%S') + ': ' + str(bought_initial) + ',' + str(amount) + ',' + str(withdraw_total) + ',' + withdraw_address)
+                    #logger.debug('Wrote withdraw to log file.')
+                #logger.info('Write complete.')
                 
                 logger.debug('withdraw_response: ' + str(withdraw_response))
                 # Should be --> {'response': 'Withdrew 1.00000000 STR.'}
