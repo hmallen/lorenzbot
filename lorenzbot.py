@@ -522,7 +522,14 @@ def exec_trade(position, limit, amount):
 
             logger.info('Withdrawing STR profit of ' + "{:.4f}".format(withdraw_total) + ' to address: ' + withdraw_address + '.')
             try:
-                withdraw_response = polo.withdraw('STR', withdraw_amount, withdraw_address)
+                #withdraw_response = polo.withdraw('STR', withdraw_amount, withdraw_address)
+
+                logger.info('Writing intended withdraw info to file.')
+                with open('withdraw_log.txt', 'a') as withdraw_file:
+                    withdraw_file.write(datetime.datetime.now().strftime('%m%d%Y-%H%M%S') + ': ' + str(bought_initial) + ',' + str(amount) + ',' + str(withdraw_total))
+                    logger.debug('Wrote withdraw to log file.')
+                logger.info('Write complete.')
+                
                 logger.debug('withdraw_response: ' + str(withdraw_response))
                 # Should be --> {'response': 'Withdrew 1.00000000 STR.'}
                 logger.info('Withdraw successful.')
@@ -1026,7 +1033,7 @@ def verify_amounts():
     logger.debug('trade_usdt_remaining: ' + "{:.8f}".format(trade_usdt_remaining))
     if float(balance_usdt) < float(trade_usdt_remaining):
         logger.warning('USDT balance less than remaining USDT amount allotted for trading. Adjusting allotment to available balance.')
-        trade_usdt_max = (balance_usdt + calc_trade_totals('spent')) * Decimal(0.98)
+        trade_usdt_max = (balance_usdt + calc_trade_totals('spent')) * Decimal(0.98)    # FIX THIS????
         trade_usdt_remaining = trade_usdt_max - calc_trade_totals('spent')
         logger.debug('[ADJUSTED]trade_usdt_remaining: ' + "{:.8f}".format(trade_usdt_remaining))
         logger.info('Remaining Tradable USDT Balance Adjusted: ' + "{:.4f}".format(trade_usdt_remaining))

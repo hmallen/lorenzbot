@@ -240,3 +240,21 @@ Traceback (most recent call last):
   File "/home/ec2-user/lorenzbot/env/local/lib/python3.6/site-packages/telegram/utils/request.py", line 192, in _request_wrapper
     raise TimedOut()
 telegram.error.TimedOut: Timed out
+
+----
+
+5) Received a string of Telegram of exceptions rapidly
+
+017-12-03 01:47:33,903 - INFO - Loop Count: 1179
+2017-12-03 01:47:33,916 - INFO - Copied most recent log file and trade log to root directory.
+2017-12-03 01:47:33,916 - INFO - Mongo write errors: 0
+2017-12-03 01:47:33,916 - INFO - Buy trades skipped: 147
+2017-12-03 01:47:33,916 - INFO - Buy trades failed: 194
+2017-12-03 01:47:33,917 - INFO - Sell trades skipped: 0
+2017-12-03 01:47:33,917 - INFO - Sell trades failed: 0
+2017-12-03 01:47:33,917 - INFO - CSV write errors: 0
+2017-12-03 01:47:33,917 - INFO - Telegram sends failed: 0
+
+----
+
+6) On restart of program

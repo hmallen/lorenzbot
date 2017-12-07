@@ -2,6 +2,10 @@
 Poloniex exchange trading bot
 
 TO DO:
+- Add projected STR profit if in accumulate mode
+- Program went INSANE when API IP restrictions enabled from site
+-- Fixed by adding AWS elastic ip to whitelist on site
+- Removed view-only API keys and must restore if required
 - Verify calculation of profit (seems wrong)
 - Tradable USDT balance is slightly below expected (noticed in accumulate mode)
 - Determine minimum withdraw amount and make sure check is implemented before attempt
@@ -15,6 +19,7 @@ TO DO:
 - Change Telegram message to use list/dict of variables and loop to create string or send multiple lines
 - Delete all API keys, generate new, and make Github repository public
 - Clean up unnecessary logging output, especially for INFO level
+-- Move INFO level to bottom of main loop and improve order
 
 LATER:
 - Major error with sell processing (when available str < calc_trade_totals('bought') [following manual withdraw]) ****
