@@ -526,7 +526,7 @@ def exec_trade(position, limit, amount):
 
                 logger.info('Writing intended withdraw info to file.')
                 with open('withdraw_log.txt', 'a') as withdraw_file:
-                    withdraw_file.write(datetime.datetime.now().strftime('%m%d%Y-%H%M%S') + ': ' + str(bought_initial) + ',' + str(amount) + ',' + str(withdraw_total))
+                    withdraw_file.write(datetime.datetime.now().strftime('%m%d%Y-%H%M%S') + ': ' + str(bought_initial) + ',' + str(amount) + ',' + str(withdraw_total) + ',' + withdraw_address)
                     logger.debug('Wrote withdraw to log file.')
                 logger.info('Write complete.')
                 
