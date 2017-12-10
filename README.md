@@ -2,7 +2,6 @@
 Poloniex exchange trading bot
 
 TO DO:
-- Fix trade execution to work with increased trade minimum of $0.50
 - Fix trade amount calculation to work with increased trade minimum of $0.50
 - Add projected STR profit if in accumulate mode
 - Program went INSANE when API IP restrictions enabled from site
@@ -62,6 +61,7 @@ NEEDS TESTING:
 - Handle Telegram timeout exception
 - Telegram error/exception alerts
 - Very rarely, trades < 0.0001USDT total are still attempted, but exception is handled properly
+- Fix trade execution to work with increased trade minimum of $0.50
 
 DONE:
 - Add argument for trade amount
