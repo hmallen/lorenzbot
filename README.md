@@ -23,6 +23,7 @@ TO DO:
 -- Move INFO level to bottom of main loop and improve order
 
 LATER:
+- Gather info on minimum trade total automatically somehow?
 - Major error with sell processing (when available str < calc_trade_totals('bought') [following manual withdraw]) ****
 - Add Telegram alerts when adjustments are made due to balance/trade amount issues
 - Use Telegram chat rather than individual user alerts?

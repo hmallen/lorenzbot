@@ -74,6 +74,7 @@ if not os.path.exists('logs/old'):
 
 # Variable modifiers
 product = trade_market
+trade_minimum_allowed = Decimal(0.5)
 loop_time_min = Decimal(6)  # Minimum allowed loop time with dynamic adjustment (seconds)
 
 buy_threshold = Decimal(0.000105)
@@ -1354,8 +1355,9 @@ if __name__ == '__main__':
                 if float(high_bid_actual) >= float(sell_price_target):
                     # Check if sell total greater than minimum allowed
                     #if float(sell_amount_current * sell_price_target) <= 0.0001:
-                    if float(sell_amount_current * sell_price_target) <= 0.5:
-                        logger.warning('Trade total must be >= $0.0001. Skipping Trade.')
+                    if float(sell_amount_current * sell_price_target) <= float(trade_minimum_allowed):
+                        #logger.warning('Trade total must be >= $0.0001. Skipping Trade.')
+                        logger.warning('Trade total must be >= $' + "{:.2f}".format(trade_minimum_allowed)  + '. Skipping Trade.')
                         sell_skips += 1
                     else:
                         logger.info('TRADE CONDITIONS MET --> SELLING')
@@ -1365,8 +1367,9 @@ if __name__ == '__main__':
                 elif float(low_ask_actual) <= float(base_price):
                     # Check if buy total greater than minimum allowed
                     #if float(buy_amount_current * low_ask_actual) <= 0.0001:
-                    if float(buy_amount_current * low_ask_actual) <= 0.5:
-                        logger.warning('Trade total must be >= $0.0001. Skipping Trade.')
+                    if float(buy_amount_current * low_ask_actual) <= float(trade_minimum_allowed):
+                        #logger.warning('Trade total must be >= $0.0001. Skipping Trade.')
+                        logger.warning('Trade total must be >= $' + "{:.2f}".format(trade_minimum_allowed)  + '. Skipping Trade.')
                         buy_skips += 1
                     else:
                         logger.info('TRADE CONDITIONS MET --> BUYING')
