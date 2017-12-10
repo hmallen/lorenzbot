@@ -23,6 +23,7 @@ TO DO:
 -- Move INFO level to bottom of main loop and improve order
 
 LATER:
+- For dynamic loop, reduce if either below buy target or approaching sell target
 - Gather info on minimum trade total automatically somehow?
 - Major error with sell processing (when available str < calc_trade_totals('bought') [following manual withdraw]) ****
 - Add Telegram alerts when adjustments are made due to balance/trade amount issues

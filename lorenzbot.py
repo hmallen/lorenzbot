@@ -112,7 +112,7 @@ parser.add_argument('-i', '--initial', default=0.01, type=float, help='Set propo
 parser.add_argument('-m', '--max', default=1.0, type=float, help='Total amount of USDT to use for trading. [Default = 1.0]')
 parser.add_argument('-p', '--profit', default=0.05, type=float, help='Set profit threshold for sell triggering. [Default = 0.05]')
 
-parser.add_argument('-l', '--loop', default=60, type=float, help='Main program loop time (seconds). [Default = 60]')
+parser.add_argument('-l', '--loop', default=120, type=float, help='Main program loop time (seconds). [Default = 120]')
 parser.add_argument('--dynamicloop', action='store_true', default=False, help='Add flag to dynamically set loop time based on current conditions.')
 
 parser.add_argument('--live', action='store_true', default=False, help='Add flag to enable live trading API keys.')
@@ -947,7 +947,7 @@ def calc_dynamic(selection, base, limit):
                 logger.debug('diff > 0')
                 
                 #trade_proportion_low = trade_proportion_initial # Default = 0.01
-                trade_proportion_low = Decimal(0.005)
+                trade_proportion_low = Decimal(0.01)
                 logger.debug('trade_proportion_low: ' + "{:.2f}".format(trade_proportion_low))
                 trade_proportion_high = Decimal(0.20)    # If limit price 100% less than base price, trade with this proportion of available USDT remaining
                 logger.debug('trade_proportion_high: ' + "{:.2f}".format(trade_proportion_high))
