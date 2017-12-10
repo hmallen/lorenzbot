@@ -400,7 +400,7 @@ def exec_trade(position, limit, amount):
                 raise
 
         else:
-            logger.warning('No trades were executed on buy attempt.')
+            logger.warning('No buy trades were executed on attempt.')
         
     elif position == 'sell':
         bought_initial = calc_trade_totals('bought')    # Used later to calculate profit amount to withdraw, if active
@@ -460,7 +460,7 @@ def exec_trade(position, limit, amount):
             reset_trade_maxima()
 
         else:
-            logger.warning('No trades were executed on sell attempt.')
+            logger.warning('No sell trades were executed on attempt.')
 
     if len(trade_response['resultingTrades']) > 0:
         if csv_logging == True:
@@ -653,6 +653,9 @@ def calc_profit_csv():
             sold_amount += amount
             gain_amount += amount * rate
             sell_count += 1
+    logger.debug('[Pre-sub] bought_amount: ' + "{:.8f}".format(bought_amount))
+
+    bought_amount -= calc_trade_totals('bought')
     
     rate_avg = spent_amount / bought_amount
 
