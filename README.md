@@ -2,6 +2,8 @@
 Poloniex exchange trading bot
 
 TO DO:
+- Fix trade execution to work with increased trade minimum of $0.50
+- Fix trade amount calculation to work with increased trade minimum of $0.50
 - Add projected STR profit if in accumulate mode
 - Program went INSANE when API IP restrictions enabled from site
 -- Fixed by adding AWS elastic ip to whitelist on site
