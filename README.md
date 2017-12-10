@@ -2,6 +2,7 @@
 Poloniex exchange trading bot
 
 TO DO:
+- Set initial trade amount to trade total of ~$0.50 based on current conditions
 - Fix trade amount calculation to work with increased trade minimum of $0.50
 - Add projected STR profit if in accumulate mode
 - Program went INSANE when API IP restrictions enabled from site
