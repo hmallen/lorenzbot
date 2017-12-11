@@ -1057,10 +1057,10 @@ def verify_amounts():
     logger.info('Tradable USDT Remaining: ' + "{:.4f}".format(trade_usdt_remaining))
 
     # Verify that base trade amount can be covered by current USDT balance and adjust if necessary
-    buy_amount_max = calc_limit_price(trade_usdt_remaining, 'buy', reverseLookup=True, withFees=True) * trade_usdt_remaining
+    buy_amount_max = calc_limit_price(trade_usdt_remaining, 'buy', reverseLookup=True, withFees=True)
     logger.debug('buy_amount_max: ' + "{:.8f}".format(buy_amount_max))
 
-    buy_amount_min = calc_limit_price(trade_minimum_allowed, 'buy', reverseLookup=True, withFees=True) * trade_minimum_allowed
+    buy_amount_min = calc_limit_price(trade_minimum_allowed, 'buy', reverseLookup=True, withFees=True)
     logger.debug('buy_amount_min: ' + "{:.8f}".format(buy_amount_min))
 
     if float(buy_amount_max) < float(buy_amount_min):
@@ -1070,17 +1070,13 @@ def verify_amounts():
     
     #if float(trade_amount) > float(buy_amount_max * Decimal(0.5)):
     if float(trade_amount) > float(buy_amount_max):
-        trade_amount_temp = buy_amount_max * Decimal(0.05)   # NEED TO DETERMINE PROPER PROPORTION TO USE WHEN ADJUSTED
-        if float(trade_amount_temp) >= float(buy_amount_min):
-            trade_amount = trade_amount_temp
-            logger.debug('[ADJ]trade_amount: ' + "{:.8f}".format(trade_amount))
-            logger.warning('USDT balance low. Adjusting trade amount to ' + "{:.4f}".format(trade_amount))
-        else:
-            logger.warning('Adjusted buy amount does not satisfy minimum trade amount. Skipping trade checks.')
+        trade_amount = buy_amount_max * Decimal(0.05)   # NEED TO DETERMINE PROPER PROPORTION TO USE WHEN ADJUSTED
+        logger.debug('[ADJ]trade_amount: ' + "{:.8f}".format(trade_amount))
+        logger.warning('USDT balance low. Adjusting trade amount to ' + "{:.4f}".format(trade_amount))
 
         verification = False
 
-    if float(trade_amount) < float(buy_amount_min) and verification == True:
+    if float(trade_amount) < float(buy_amount_min):
         trade_amount = buy_amount_min
         logger.debug('[ADJ]trade_amount: ' + "{:.8f}".format(trade_amount))
         logger.info('Trade amount too low to satisfy exchange minimum. Adjusting trade amount to ' + "{:.4f}".format(trade_amount))
