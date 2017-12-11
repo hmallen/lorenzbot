@@ -1321,6 +1321,11 @@ if __name__ == '__main__':
                 logger.debug('buy_amount_current: ' + "{:.8f}".format(buy_amount_current))
                 logger.info('Current Buy Amount: ' + "{:.4f}".format(buy_amount_current))
 
+                # Display estimated trade total
+                trade_tot_estimated = buy_amount_current * Decimal(polo.returnTicker()[trade_market]['last'])
+                logger.debug('trade_tot_estimated: ' + "{:.8f}".format(trade_tot_estimated))
+                logger.info('Est. Trade Total: ' + "{:.4f}".format(trade_tot_estimated))
+
                 # Calculate true low ask (sufficient volume for buy)
                 low_ask_actual = calc_limit_price(buy_amount_current, 'buy', withFees=True)
                 logger.debug('low_ask_actual: ' + "{:.8f}".format(low_ask_actual))
