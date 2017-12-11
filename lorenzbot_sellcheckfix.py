@@ -1064,7 +1064,7 @@ def verify_amounts():
     logger.debug('buy_amount_min: ' + "{:.8f}".format(buy_amount_min))
 
     if float(buy_amount_max) < float(buy_amount_min):
-        logger.warning('Tradable USDT balance too low to satisfy minimum buy amount. Skipping trade checks.')
+        logger.warning('Tradable USDT balance too low to satisfy minimum buy amount. Skipping buy trade check.')
 
         verification = False
     
@@ -1076,7 +1076,7 @@ def verify_amounts():
             logger.debug('[ADJ]trade_amount: ' + "{:.8f}".format(trade_amount))
             logger.warning('USDT balance low. Adjusting trade amount to ' + "{:.4f}".format(trade_amount))
         else:
-            logger.warning('Adjusted buy amount does not satisfy minimum trade amount. Skipping trade checks.')
+            logger.warning('Adjusted buy amount does not satisfy minimum trade amount. Skipping buy trade check.')
 
         verification = False
 
