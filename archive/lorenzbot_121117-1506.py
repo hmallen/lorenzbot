@@ -195,7 +195,6 @@ def get_balances():
 
 def calc_base():
     global calc_base_initialized
-    global trade_amount
     
     logger.debug('Entering base_price calculation.')
     logger.debug('db[coll_current].count(): ' + str(db[coll_current].count()))
@@ -214,13 +213,6 @@ def calc_base():
                 
                 trade_price_initial = calc_limit_price(trade_amount, 'buy')
                 logger.debug('trade_price_initial[STATIC]: ' + "{:.2f}".format(trade_price_initial))
-
-            buy_amount_min = calc_limit_price(trade_minimum_allowed, 'buy', reverseLookup=True, withFees=True)
-            logger.debug('buy_amount_min: ' + "{:.8f}".format(buy_amount_min))
-
-            if float(trade_amount) < float(buy_amount_min):
-                logger.warning('Adjusting buy amount to satisfy minimum.')
-                trade_amount = buy_amount_min
             
             logger.info('Entry trade amount: ' + "{:.4f}".format(trade_amount))
             try:
@@ -291,7 +283,7 @@ def calc_trade_totals(position):
 
 
 ####
-# Improve this function by returning weighted average of exec price based on trade amount!
+# Improve this function by returning weighted average of exec price based on trade amount!!!!
 ####
 def calc_limit_price(amount, position, reverseLookup=None, withFees=None):
     # NEED HANDLING FOR IMPOSSIBLE SITUATIONS?
@@ -364,7 +356,7 @@ def calc_limit_price(amount, position, reverseLookup=None, withFees=None):
             if withFees:
                 logger.debug('Adding fees to calc_limit_price() return value.')
                 if position == 'buy':
-                    actual = actual * (Decimal(1) + taker_fee)  # Need to consider logic behind returning this info
+                    actual = actual * (Decimal(1) + taker_fee)
                 elif position == 'sell':
                     actual = actual * (Decimal(1) - taker_fee)
                 logger.debug('[' + position + ']price_actual[+FEES]: ' + "{:.8f}".format(actual))
@@ -768,7 +760,7 @@ def telegram_status(bot, update):
         
         market_current = Decimal(polo.returnTicker()[trade_market]['last'])
         logger.debug('market_current: ' + "{:.8f}".format(market_current))
-        market_msg = 'Mkt. Price:    ' + "{:.6f}".format(market_current) + ' (USDT)\n'
+        market_msg = 'Mkt. Price:    ' + "{:.6f}".format(market_current) + '\n'
 
         price_diff = (market_current - sell_price_target) / sell_price_target
         logger.debug('price_diff: ' + "{:.8f}".format(price_diff))
@@ -1059,27 +1051,11 @@ def verify_amounts():
     # Verify that base trade amount can be covered by current USDT balance and adjust if necessary
     buy_amount_max = calc_limit_price(trade_usdt_remaining, 'buy', reverseLookup=True, withFees=True)
     logger.debug('buy_amount_max: ' + "{:.8f}".format(buy_amount_max))
-
-    buy_amount_min = calc_limit_price(trade_minimum_allowed, 'buy', reverseLookup=True, withFees=True)
-    logger.debug('buy_amount_min: ' + "{:.8f}".format(buy_amount_min))
-
-    if float(buy_amount_max) < float(buy_amount_min):
-        logger.warning('USDT balance too low to satisfy minimum buy amount. Skipping trade checks.')
-
-        verification = False
-    
     #if float(trade_amount) > float(buy_amount_max * Decimal(0.5)):
     if float(trade_amount) > float(buy_amount_max):
         trade_amount = buy_amount_max * Decimal(0.05)   # NEED TO DETERMINE PROPER PROPORTION TO USE WHEN ADJUSTED
-        logger.debug('[ADJ]trade_amount: ' + "{:.8f}".format(trade_amount))
-        logger.warning('USDT balance low. Adjusting trade amount to ' + "{:.4f}".format(trade_amount))
-
-        verification = False
-
-    if float(trade_amount) < float(buy_amount_min):
-        trade_amount = buy_amount_min
-        logger.debug('[ADJ]trade_amount: ' + "{:.8f}".format(trade_amount))
-        logger.info('Trade amount too low to satisfy exchange minimum. Adjusting trade amount to ' + "{:.4f}".format(trade_amount))
+        logger.debug('[ADJUSTED]trade_amount: ' + "{:.8f}".format(trade_amount))
+        logger.info('USDT balance low. Adjusting base trade amount to ' + "{:.4f}".format(trade_amount))
 
         verification = False
 
@@ -1098,8 +1074,7 @@ def reset_trade_maxima():
     logger.debug('trade_usdt_remaining: ' + "{:.8f}".format(trade_usdt_remaining))
 
     if amount_dynamic == True:
-        #trade_amount = (trade_usdt_max * trade_proportion_initial) / Decimal(polo.returnTicker()[trade_market]['lowestAsk'])
-        trade_amount = (trade_usdt_max * trade_proportion_initial) / calc_limit_price((trade_usdt_max * trade_proportion_initial), 'buy', reverseLookup=True, withFees=True)
+        trade_amount = (trade_usdt_max * trade_proportion_initial) / Decimal(polo.returnTicker()[trade_market]['lowestAsk'])
     else:
         trade_amount = trade_amount_start
     logger.debug('trade_amount: ' + "{:.8f}".format(trade_amount))
@@ -1276,21 +1251,21 @@ if __name__ == '__main__':
         
         sys.exit(1)
 
+    # If dynamic amount calculation active, set the base trade amount using current conditions
+    if amount_dynamic == True:
+        trade_amount = (trade_usdt_max * trade_proportion_initial) / Decimal(polo.returnTicker()[trade_market]['lowestAsk'])
+    else:
+        trade_amount_start = trade_amount
+
+    # Store initial value to allow reset after sell if adjustment occurred
+    trade_usdt_max_start = trade_usdt_max
+
     # Get and set user maker/taker fees
     user_fees = polo.returnFeeInfo()
     maker_fee = Decimal(user_fees['makerFee'])
     taker_fee = Decimal(user_fees['takerFee'])
     logger.info('Current Maker Fee: ' + "{:.4f}".format(maker_fee * Decimal(100)) + '%')
     logger.info('Current Taker Fee: ' + "{:.4f}".format(taker_fee * Decimal(100)) + '%')
-
-    # If dynamic amount calculation active, set the base trade amount using current conditions
-    if amount_dynamic == True:
-        #trade_amount = (trade_usdt_max * trade_proportion_initial) / Decimal(polo.returnTicker()[trade_market]['lowestAsk'])
-        trade_amount = (trade_usdt_max * trade_proportion_initial) / calc_limit_price((trade_usdt_max * trade_proportion_initial), 'buy', reverseLookup=True, withFees=True)
-
-    # Store initial values to allow reset after sell if adjustment occurred
-    trade_amount_start = trade_amount
-    trade_usdt_max_start = trade_usdt_max
 
     # Calculate base price
     base_price = calc_base()
@@ -1341,11 +1316,6 @@ if __name__ == '__main__':
 
             # If balances and trade logs agree, proceed with check for trade conditions
             if trade_check_ready == True:
-                # Calculate minimum allowed buy amount based on current conditions
-                buy_amount_min = calc_limit_price(trade_minimum_allowed, 'buy', reverseLookup=True, withFees=True)
-                logger.debug('buy_amount_min: ' + "{:.8f}".format(buy_amount_min))
-                logger.info('Min. Buy Amount: ' + "{:.4f}".format(buy_amount_min))
-                
                 # Calculate buy amount based on current conditions
                 buy_amount_current = calc_dynamic('amount', base_price_target, calc_limit_price(trade_amount, 'buy', withFees=True))
                 logger.debug('buy_amount_current: ' + "{:.8f}".format(buy_amount_current))
