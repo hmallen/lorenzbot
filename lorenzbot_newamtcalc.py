@@ -291,7 +291,7 @@ def calc_trade_totals(position):
 
 
 ####
-# Improve this function by returning weighted average of exec price based on trade amount!!!!
+# Improve this function by returning weighted average of exec price based on trade amount!
 ####
 def calc_limit_price(amount, position, reverseLookup=None, withFees=None):
     # NEED HANDLING FOR IMPOSSIBLE SITUATIONS?
@@ -768,7 +768,7 @@ def telegram_status(bot, update):
         
         market_current = Decimal(polo.returnTicker()[trade_market]['last'])
         logger.debug('market_current: ' + "{:.8f}".format(market_current))
-        market_msg = 'Mkt. Price:    ' + "{:.6f}".format(market_current) + '\n'
+        market_msg = 'Mkt. Price:    ' + "{:.6f}".format(market_current) + ' (USDT)\n'
 
         price_diff = (market_current - sell_price_target) / sell_price_target
         logger.debug('price_diff: ' + "{:.8f}".format(price_diff))
@@ -1062,12 +1062,17 @@ def verify_amounts():
 
     buy_amount_min = calc_limit_price(trade_minimum_allowed, 'buy', reverseLookup=True, withFees=True)
     logger.debug('buy_amount_min: ' + "{:.8f}".format(buy_amount_min))
+
+    if float(buy_amount_max) < float(buy_amount_min):
+        logger.warning('USDT balance too low to satisfy minimum buy amount. Skipping trade checks.')
+
+        verification = False
     
     #if float(trade_amount) > float(buy_amount_max * Decimal(0.5)):
     if float(trade_amount) > float(buy_amount_max):
         trade_amount = buy_amount_max * Decimal(0.05)   # NEED TO DETERMINE PROPER PROPORTION TO USE WHEN ADJUSTED
         logger.debug('[ADJ]trade_amount: ' + "{:.8f}".format(trade_amount))
-        logger.info('USDT balance low. Adjusting trade amount to ' + "{:.4f}".format(trade_amount))
+        logger.warning('USDT balance low. Adjusting trade amount to ' + "{:.4f}".format(trade_amount))
 
         verification = False
 
@@ -1093,7 +1098,8 @@ def reset_trade_maxima():
     logger.debug('trade_usdt_remaining: ' + "{:.8f}".format(trade_usdt_remaining))
 
     if amount_dynamic == True:
-        trade_amount = (trade_usdt_max * trade_proportion_initial) / Decimal(polo.returnTicker()[trade_market]['lowestAsk'])
+        #trade_amount = (trade_usdt_max * trade_proportion_initial) / Decimal(polo.returnTicker()[trade_market]['lowestAsk'])
+        trade_amount = (trade_usdt_max * trade_proportion_initial) / calc_limit_price((trade_usdt_max * trade_proportion_initial), 'buy', reverseLookup=True, withFees=True)
     else:
         trade_amount = trade_amount_start
     logger.debug('trade_amount: ' + "{:.8f}".format(trade_amount))
@@ -1270,21 +1276,21 @@ if __name__ == '__main__':
         
         sys.exit(1)
 
-    # If dynamic amount calculation active, set the base trade amount using current conditions
-    if amount_dynamic == True:
-        trade_amount = (trade_usdt_max * trade_proportion_initial) / Decimal(polo.returnTicker()[trade_market]['lowestAsk'])
-        
-    trade_amount_start = trade_amount
-
-    # Store initial value to allow reset after sell if adjustment occurred
-    trade_usdt_max_start = trade_usdt_max
-
     # Get and set user maker/taker fees
     user_fees = polo.returnFeeInfo()
     maker_fee = Decimal(user_fees['makerFee'])
     taker_fee = Decimal(user_fees['takerFee'])
     logger.info('Current Maker Fee: ' + "{:.4f}".format(maker_fee * Decimal(100)) + '%')
     logger.info('Current Taker Fee: ' + "{:.4f}".format(taker_fee * Decimal(100)) + '%')
+
+    # If dynamic amount calculation active, set the base trade amount using current conditions
+    if amount_dynamic == True:
+        #trade_amount = (trade_usdt_max * trade_proportion_initial) / Decimal(polo.returnTicker()[trade_market]['lowestAsk'])
+        trade_amount = (trade_usdt_max * trade_proportion_initial) / calc_limit_price((trade_usdt_max * trade_proportion_initial), 'buy', reverseLookup=True, withFees=True)
+
+    # Store initial values to allow reset after sell if adjustment occurred
+    trade_amount_start = trade_amount
+    trade_usdt_max_start = trade_usdt_max
 
     # Calculate base price
     base_price = calc_base()
