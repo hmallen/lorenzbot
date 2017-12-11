@@ -2,11 +2,7 @@
 Poloniex exchange trading bot
 
 TO DO:
-- Set initial trade amount to trade total of ~$0.50 based on current conditions
-- Fix trade amount calculation to work with increased trade minimum of $0.50
 - Add projected STR profit if in accumulate mode
-- Program went INSANE when API IP restrictions enabled from site
--- Fixed by adding AWS elastic ip to whitelist on site
 - Removed view-only API keys and must restore if required
 - Verify calculation of profit (seems wrong)
 - Tradable USDT balance is slightly below expected (noticed in accumulate mode)
@@ -54,8 +50,8 @@ IF TIME:
 - Add Poloniex coach?
 
 NEEDS TESTING:
-- Add date/time and anything else useful to exception log
-- Withdraw profit to STR address
+- Set initial trade amount to trade total of ~$0.50 based on current conditions
+- Fix trade amount calculation to work with increased trade minimum of $0.50
 - Fix csv profit calculation to work with "accumulate" mode
 - Add max sell amount that is ~5%? less than total bought to "accumulate" trade currency
 - Catch ALL exceptions with logger...some going completely uncaught/unhandled ****
@@ -110,6 +106,10 @@ DONE:
 -- Also, mismatch between calculated and executed order size?
 - /profit Telegram functions, but always returns 'No sell trades executed.'
 - No profit message sent
+- Add date/time and anything else useful to exception log
+- Withdraw profit to STR address
+- Program went INSANE when API IP restrictions enabled from site
+-- Fixed by adding AWS elastic ip to whitelist on site
 
 RESOURCES:
 - Exception Handling:
