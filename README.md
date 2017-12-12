@@ -9,6 +9,8 @@ To use:
 5) If you use '--withdraw' option, it will send to MY Stellar Lumens wallet unless you change the address at the top of 'lorenzbot.py'
 
 TO DO:
+- Make loop time ~30 sec if approaching sell point
+- Verify proper order of dynamic amount calculation to prevent hanging/missed trades
 - Add projected STR profit if in accumulate mode
 - Removed view-only API keys and must restore if required
 - Verify calculation of profit (seems wrong)
