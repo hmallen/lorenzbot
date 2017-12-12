@@ -543,7 +543,6 @@ def exec_trade(position, limit, amount):
                 # Should be --> {'response': 'Withdrew 1.00000000 STR.'}
                 logger.info('Withdraw successful.')
                 logger.debug('Response: ' + str(withdraw_response['response']))
-                sys.exit()
             except Exception as e:
                 logger.exception('Exception occurred while attempting withdraw of STR profit.')
                 logger.exception(e)
