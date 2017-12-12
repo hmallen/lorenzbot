@@ -6,6 +6,7 @@ To use:
 2) Command line options need clean-up, but you can find all the options with 'python lorenzbot.py -h'
 3) If Telegram setup and activated, connect to bot using '/connect'
 4) Telegram will alert on events and exceptions. Other commands include '/status' and '/profit'
+5) If you use '--withdraw' option, it will send to MY Stellar Lumens wallet unless you change the address at the top of 'lorenzbot.py'
 
 TO DO:
 - Add projected STR profit if in accumulate mode
