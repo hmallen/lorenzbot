@@ -9,7 +9,6 @@ To use:
 5) If you use '--withdraw' option, it will send to MY Stellar Lumens wallet unless you change the address at the top of 'lorenzbot.py'
 
 TO DO:
-- Make loop time ~30 sec if approaching sell point
 - Verify proper order of dynamic amount calculation to prevent hanging/missed trades
 - Add projected STR profit if in accumulate mode
 - Removed view-only API keys and must restore if required
@@ -59,6 +58,8 @@ IF TIME:
 - Add Poloniex coach?
 
 NEEDS TESTING:
+- Make loop time ~30 sec if approaching sell point
+- Fix trade execution to work with increased trade minimum of $0.50
 - Set initial trade amount to trade total of ~$0.50 based on current conditions
 - Fix trade amount calculation to work with increased trade minimum of $0.50
 - Fix csv profit calculation to work with "accumulate" mode
@@ -69,7 +70,6 @@ NEEDS TESTING:
 - Handle Telegram timeout exception
 - Telegram error/exception alerts
 - Very rarely, trades < 0.0001USDT total are still attempted, but exception is handled properly
-- Fix trade execution to work with increased trade minimum of $0.50
 
 DONE:
 - Add argument for trade amount
