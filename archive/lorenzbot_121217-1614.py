@@ -1064,7 +1064,7 @@ def verify_amounts():
     logger.debug('buy_amount_min: ' + "{:.8f}".format(buy_amount_min))
 
     if float(buy_amount_max) < float(buy_amount_min):
-        logger.warning('Tradable USDT balance too low to satisfy minimum buy amount. Skipping buy trade check.')
+        logger.warning('Tradable USDT balance too low to satisfy minimum buy amount. Skipping trade checks.')
 
         verification = False
     
@@ -1076,7 +1076,7 @@ def verify_amounts():
             logger.debug('[ADJ]trade_amount: ' + "{:.8f}".format(trade_amount))
             logger.warning('USDT balance low. Adjusting trade amount to ' + "{:.4f}".format(trade_amount))
         else:
-            logger.warning('Adjusted buy amount does not satisfy minimum trade amount. Skipping buy trade check.')
+            logger.warning('Adjusted buy amount does not satisfy minimum trade amount. Skipping trade checks.')
 
         verification = False
 
@@ -1343,81 +1343,83 @@ if __name__ == '__main__':
             trade_check_ready = verify_amounts()
             logger.debug('trade_check_ready: ' + str(trade_check_ready))
 
-            # Calculate minimum allowed buy amount based on current conditions
-            buy_amount_min = calc_limit_price(trade_minimum_allowed, 'buy', reverseLookup=True, withFees=True)
-            logger.debug('buy_amount_min: ' + "{:.8f}".format(buy_amount_min))
-            logger.info('Min. Buy Amount: ' + "{:.4f}".format(buy_amount_min))
-            
-            # Calculate buy amount based on current conditions
-            buy_amount_current = calc_dynamic('amount', base_price_target, calc_limit_price(trade_amount, 'buy', withFees=True))
-            logger.debug('buy_amount_current: ' + "{:.8f}".format(buy_amount_current))
-            logger.info('Current Buy Amount: ' + "{:.4f}".format(buy_amount_current))
-
-            # Display estimated trade total
-            trade_tot_estimated = buy_amount_current * Decimal(polo.returnTicker()[trade_market]['last'])
-            logger.debug('trade_tot_estimated: ' + "{:.8f}".format(trade_tot_estimated))
-            logger.info('Est. Trade Total: ' + "{:.4f}".format(trade_tot_estimated))
-
-            # Calculate true low ask (sufficient volume for buy)
-            low_ask_actual = calc_limit_price(buy_amount_current, 'buy', withFees=True)
-            logger.debug('low_ask_actual: ' + "{:.8f}".format(low_ask_actual))
-            logger.info('Low Ask (Actual): ' + "{:.6f}".format(low_ask_actual))
-
-            # Set sell amount based on total amount bought
-            if accumulate_active == False:
-                sell_amount_current = calc_trade_totals('bought')
-                logger.debug('[FULL] sell_amount_current: ' + "{:.8f}".format(sell_amount_current))
-            else:
-                sell_amount_current = calc_trade_totals('spent') / sell_price_target
-                logger.debug('[ACCUM] sell_amount_current: ' + "{:.8f}".format(sell_amount_current))
+            # If balances and trade logs agree, proceed with check for trade conditions
+            if trade_check_ready == True:
+                # Calculate minimum allowed buy amount based on current conditions
+                buy_amount_min = calc_limit_price(trade_minimum_allowed, 'buy', reverseLookup=True, withFees=True)
+                logger.debug('buy_amount_min: ' + "{:.8f}".format(buy_amount_min))
+                logger.info('Min. Buy Amount: ' + "{:.4f}".format(buy_amount_min))
                 
-            #logger.debug('sell_amount_current: ' + "{:.8f}".format(sell_amount_current))
-            logger.info('Current Sell Amount: ' + "{:.4f}".format(sell_amount_current))
+                # Calculate buy amount based on current conditions
+                buy_amount_current = calc_dynamic('amount', base_price_target, calc_limit_price(trade_amount, 'buy', withFees=True))
+                logger.debug('buy_amount_current: ' + "{:.8f}".format(buy_amount_current))
+                logger.info('Current Buy Amount: ' + "{:.4f}".format(buy_amount_current))
 
-            # Calculate true high bid (sufficient volume for sell)
-            high_bid_actual = calc_limit_price(sell_amount_current, 'sell', withFees=True)
-            logger.debug('high_bid_actual: ' + "{:.8f}".format(high_bid_actual))
-            logger.info('High Bid (Actual): ' + "{:.6f}".format(high_bid_actual))
+                # Display estimated trade total
+                trade_tot_estimated = buy_amount_current * Decimal(polo.returnTicker()[trade_market]['last'])
+                logger.debug('trade_tot_estimated: ' + "{:.8f}".format(trade_tot_estimated))
+                logger.info('Est. Trade Total: ' + "{:.4f}".format(trade_tot_estimated))
 
-            # Display % differences from base and sell targets
-            bt_diff = (low_ask_actual - base_price_target) / base_price_target
-            logger.debug('bt_diff: ' + "{:.8f}".format(bt_diff))
-            logger.info('Base/Ask Target Difference: ' + "{:.2f}".format(bt_diff * Decimal(100)) + '%')
-            
-            st_diff = (high_bid_actual - sell_price_target) / sell_price_target
-            logger.debug('st_diff: ' + "{:.8f}".format(st_diff))
-            logger.info('Sell/Bid Target Difference: ' + "{:.2f}".format(st_diff * Decimal(100)) + '%')
+                # Calculate true low ask (sufficient volume for buy)
+                low_ask_actual = calc_limit_price(buy_amount_current, 'buy', withFees=True)
+                logger.debug('low_ask_actual: ' + "{:.8f}".format(low_ask_actual))
+                logger.info('Low Ask (Actual): ' + "{:.6f}".format(low_ask_actual))
 
-            # Check for sell conditions
-            if float(high_bid_actual) >= float(sell_price_target):
-                # Check if sell total greater than minimum allowed
-                #if float(sell_amount_current * sell_price_target) <= 0.0001:
-                if float(sell_amount_current * sell_price_target) <= float(trade_minimum_allowed):
-                    #logger.warning('Trade total must be >= $0.0001. Skipping Trade.')
-                    logger.warning('Trade total must be >= $' + "{:.2f}".format(trade_minimum_allowed)  + '. Skipping Trade.')
-                    sell_skips += 1
+                # Set sell amount based on total amount bought
+                if accumulate_active == False:
+                    sell_amount_current = calc_trade_totals('bought')
+                    logger.debug('[FULL] sell_amount_current: ' + "{:.8f}".format(sell_amount_current))
                 else:
-                    logger.info('TRADE CONDITIONS MET --> SELLING')
-                    exec_trade('sell', sell_price_target, sell_amount_current)
+                    sell_amount_current = calc_trade_totals('spent') / sell_price_target
+                    logger.debug('[ACCUM] sell_amount_current: ' + "{:.8f}".format(sell_amount_current))
+                    
+                #logger.debug('sell_amount_current: ' + "{:.8f}".format(sell_amount_current))
+                logger.info('Current Sell Amount: ' + "{:.4f}".format(sell_amount_current))
 
-            # Check for buy conditions
-            elif float(low_ask_actual) <= float(base_price) and trade_check_ready == True:
-                # Check if buy total greater than minimum allowed
-                #if float(buy_amount_current * low_ask_actual) <= 0.0001:
-                if float(buy_amount_current * low_ask_actual) <= float(trade_minimum_allowed):
-                    #logger.warning('Trade total must be >= $0.0001. Skipping Trade.')
-                    logger.warning('Trade total must be >= $' + "{:.2f}".format(trade_minimum_allowed)  + '. Skipping Trade.')
-                    buy_skips += 1
-                else:
-                    logger.info('TRADE CONDITIONS MET --> BUYING')
-                    exec_trade('buy', base_price_target, buy_amount_current)
+                # Calculate true high bid (sufficient volume for sell)
+                high_bid_actual = calc_limit_price(sell_amount_current, 'sell', withFees=True)
+                logger.debug('high_bid_actual: ' + "{:.8f}".format(high_bid_actual))
+                logger.info('High Bid (Actual): ' + "{:.6f}".format(high_bid_actual))
 
-            # If balances and trade logs agree, proceed with check for buy trade conditions
-            elif float(low_ask_actual) <= float(base_price) and trade_check_ready == False:
-                logger.warning('Skipping trade check for buys until balance and trade log agrees.')
-            
-            # Calculate loop time based on current conditions
-            loop_time_dynamic = calc_dynamic('loop', base_price, low_ask_actual)
+                # Display % differences from base and sell targets
+                bt_diff = (low_ask_actual - base_price_target) / base_price_target
+                logger.debug('bt_diff: ' + "{:.8f}".format(bt_diff))
+                logger.info('Base/Ask Target Difference: ' + "{:.2f}".format(bt_diff * Decimal(100)) + '%')
+                
+                st_diff = (high_bid_actual - sell_price_target) / sell_price_target
+                logger.debug('st_diff: ' + "{:.8f}".format(st_diff))
+                logger.info('Sell/Bid Target Difference: ' + "{:.2f}".format(st_diff * Decimal(100)) + '%')
+
+                # Check for sell conditions
+                if float(high_bid_actual) >= float(sell_price_target):
+                    # Check if sell total greater than minimum allowed
+                    #if float(sell_amount_current * sell_price_target) <= 0.0001:
+                    if float(sell_amount_current * sell_price_target) <= float(trade_minimum_allowed):
+                        #logger.warning('Trade total must be >= $0.0001. Skipping Trade.')
+                        logger.warning('Trade total must be >= $' + "{:.2f}".format(trade_minimum_allowed)  + '. Skipping Trade.')
+                        sell_skips += 1
+                    else:
+                        logger.info('TRADE CONDITIONS MET --> SELLING')
+                        exec_trade('sell', sell_price_target, sell_amount_current)
+
+                # Check for buy conditions
+                elif float(low_ask_actual) <= float(base_price):
+                    # Check if buy total greater than minimum allowed
+                    #if float(buy_amount_current * low_ask_actual) <= 0.0001:
+                    if float(buy_amount_current * low_ask_actual) <= float(trade_minimum_allowed):
+                        #logger.warning('Trade total must be >= $0.0001. Skipping Trade.')
+                        logger.warning('Trade total must be >= $' + "{:.2f}".format(trade_minimum_allowed)  + '. Skipping Trade.')
+                        buy_skips += 1
+                    else:
+                        logger.info('TRADE CONDITIONS MET --> BUYING')
+                        exec_trade('buy', base_price_target, buy_amount_current)
+
+                # Calculate loop time based on current conditions
+                loop_time_dynamic = calc_dynamic('loop', base_price, low_ask_actual)
+
+            else:
+                logger.warning('Skipping trade check until balances and trade logs agree.')
+                loop_time_dynamic = loop_time
 
             logger.info('Trade loop complete. Sleeping for ' + "{:.2f}".format(loop_time_dynamic) + ' seconds.')
 
