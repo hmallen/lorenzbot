@@ -1,5 +1,11 @@
 # lorenzbot
-Poloniex exchange trading bot
+Poloniex exchange trading bot (Currently only for STRUSDT market)
+
+To use:
+1) In the config folder, you'll find example ini config files for Poloniex and Telegram. Create configs using your API information for each.
+2) Command line options need clean-up, but you can find all the options with 'python lorenzbot.py -h'
+3) If Telegram setup and activated, connect to bot using '/connect'
+4) Telegram will alert on events and exceptions. Other commands include '/status' and '/profit'
 
 TO DO:
 - Add projected STR profit if in accumulate mode
