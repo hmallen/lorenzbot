@@ -1060,10 +1060,10 @@ def verify_amounts():
     logger.info('Tradable USDT Remaining: ' + "{:.4f}".format(trade_usdt_remaining))
 
     # Verify that base trade amount can be covered by current USDT balance and adjust if necessary
-    buy_amount_max = calc_limit_price(trade_usdt_remaining, 'buy', reverseLookup=True, withFees=True) * trade_usdt_remaining
+    buy_amount_max = calc_limit_price(trade_usdt_remaining, 'buy', reverseLookup=True, withFees=True)# * trade_usdt_remaining
     logger.debug('buy_amount_max: ' + "{:.8f}".format(buy_amount_max))
 
-    buy_amount_min = calc_limit_price(trade_minimum_allowed, 'buy', reverseLookup=True, withFees=True) * trade_minimum_allowed
+    buy_amount_min = calc_limit_price(trade_minimum_allowed, 'buy', reverseLookup=True, withFees=True)# * trade_minimum_allowed
     logger.debug('buy_amount_min: ' + "{:.8f}".format(buy_amount_min))
 
     if float(buy_amount_max) < float(buy_amount_min):
