@@ -1348,13 +1348,15 @@ if __name__ == '__main__':
             trade_check_ready = verify_amounts()
             logger.debug('trade_check_ready: ' + str(trade_check_ready))
 
-            # Calculate minimum allowed buy amount based on current conditions
+            # Display minimum buy amount calculated in verify_amounts()
             #buy_amount_min = calc_limit_price(trade_minimum_allowed, 'buy', reverseLookup=True, withFees=True)
             logger.debug('buy_amount_min: ' + "{:.8f}".format(buy_amount_min))
             logger.info('Min. Buy Amount: ' + "{:.4f}".format(buy_amount_min))
             
-            # Calculate buy amount based on current conditions
-            buy_amount_current = calc_dynamic('amount', base_price_target, calc_limit_price(trade_amount, 'buy', withFees=True))
+            # Calculate buy amount based on current conditions [DELETED]
+            # Set current buy amount to trade_amount calculated in calc_dynamic() and adjusted in verify_amounts()
+            #buy_amount_current = calc_dynamic('amount', base_price_target, calc_limit_price(trade_amount, 'buy', withFees=True))
+            buy_amount_current = trade_amount
             logger.debug('buy_amount_current: ' + "{:.8f}".format(buy_amount_current))
             logger.info('Current Buy Amount: ' + "{:.4f}".format(buy_amount_current))
 
