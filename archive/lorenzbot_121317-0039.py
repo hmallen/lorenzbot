@@ -1347,7 +1347,7 @@ if __name__ == '__main__':
             logger.debug('trade_check_ready: ' + str(trade_check_ready))
 
             # Calculate minimum allowed buy amount based on current conditions
-            #buy_amount_min = calc_limit_price(trade_minimum_allowed, 'buy', reverseLookup=True, withFees=True)
+            buy_amount_min = calc_limit_price(trade_minimum_allowed, 'buy', reverseLookup=True, withFees=True)
             logger.debug('buy_amount_min: ' + "{:.8f}".format(buy_amount_min))
             logger.info('Min. Buy Amount: ' + "{:.4f}".format(buy_amount_min))
             
@@ -1417,7 +1417,7 @@ if __name__ == '__main__':
 
             # If balances and trade logs agree, proceed with check for buy trade conditions
             elif float(low_ask_actual) <= float(base_price) and trade_check_ready == False:
-                logger.warning('Skipping trade check for buys until balance and trade log agree.')
+                logger.warning('Skipping trade check for buys until balance and trade log agrees.')
             
             # Calculate loop time based on current conditions
             loop_time_dynamic = calc_dynamic('loop', base_price, low_ask_actual)
