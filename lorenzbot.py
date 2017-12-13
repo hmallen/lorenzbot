@@ -1083,7 +1083,7 @@ def verify_amounts():
 
         verification = False
 
-    if float(trade_amount) < float(buy_amount_min) and verification == True:
+    if float(trade_amount) < float(buy_amount_min):# and verification == True:
         trade_amount = buy_amount_min
         logger.debug('[ADJ]trade_amount: ' + "{:.8f}".format(trade_amount))
         logger.info('Trade amount too low to satisfy exchange minimum. Adjusting trade amount to ' + "{:.4f}".format(trade_amount))
