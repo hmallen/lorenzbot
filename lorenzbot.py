@@ -19,6 +19,7 @@ import time
 
 global coll_current
 global base_price, calc_base_initialized
+global buy_amount_min
 global trade_amount, trade_usdt_max, trade_usdt_remaining
 global trade_amount_start, trade_usdt_max_start
 global telegram_time_last
@@ -990,6 +991,7 @@ def calc_dynamic(selection, base, limit):
 
 def verify_amounts():
     global base_price
+    global buy_amount_min
     global trade_amount, trade_usdt_max, trade_usdt_remaining
     
     verification = True
