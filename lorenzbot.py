@@ -1376,6 +1376,9 @@ if __name__ == '__main__':
                 logger.debug('[FULL] sell_amount_current: ' + "{:.8f}".format(sell_amount_current))
             else:
                 sell_amount_current = calc_trade_totals('spent') / sell_price_target
+                if float(sell_amount_current * sell_price_target) < float(trade_minimum_allowed):
+                    sell_amount_current = calc_trade_totals('bought')
+                    logger.warning('Sell amount too low to satisfy minimum. Selling full bought amount.')
                 logger.debug('[ACCUM] sell_amount_current: ' + "{:.8f}".format(sell_amount_current))
                 
             #logger.debug('sell_amount_current: ' + "{:.8f}".format(sell_amount_current))
