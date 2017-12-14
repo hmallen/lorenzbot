@@ -20,6 +20,7 @@ import time
 global coll_current
 global base_price, calc_base_initialized
 global buy_amount_min
+global skip_withdraw
 global trade_amount, trade_usdt_max, trade_usdt_remaining
 global trade_amount_start, trade_usdt_max_start
 global telegram_time_last
@@ -83,6 +84,7 @@ sell_padding = Decimal(0.9975)  # Proportion of total amount bought to sell when
 
 # System variables (Do not change)
 calc_base_initialized = False   # Needed to prevent infinite loop b/w calc_base() and exec_trade() on entry buy
+skip_withdraw = False
 buy_skips = 0
 buy_failures = 0
 sell_skips = 0
@@ -524,7 +526,7 @@ def exec_trade(position, limit, amount):
             else:
                 logger.info('No users connected to Telegram. Skipping alert.')
 
-        if withdraw_active == True and position == 'sell' and float(amount_unfilled) == 0:
+        if withdraw_active == True and position == 'sell' and float(amount_unfilled) == 0 and skip_withdraw == False:
             withdraw_total = bought_initial - amount
             logger.debug('bought_initial: ' + "{:.8f}".format(bought_initial))
             logger.debug('amount: ' + "{:.8f}".format(amount))
@@ -557,6 +559,10 @@ def exec_trade(position, limit, amount):
                 telegram_send_message(updater.bot, telegram_message)
             except:
                 logger.debug('Withdraw failed. No Telegram message to send.')
+
+        elif withdraw_active == True and skip_withdraw == True:
+            logger.warning('No profit accumulated for withdraw. Skipping.')
+            skip_withdraw = False
 
 
 def process_trade_response(response, position):
@@ -1379,6 +1385,7 @@ if __name__ == '__main__':
                 if float(sell_amount_current * sell_price_target) < float(trade_minimum_allowed):
                     sell_amount_current = calc_trade_totals('bought')
                     logger.warning('Sell amount too low to satisfy minimum. Selling full bought amount.')
+                    skip_withdraw = True
                 logger.debug('[ACCUM] sell_amount_current: ' + "{:.8f}".format(sell_amount_current))
                 
             #logger.debug('sell_amount_current: ' + "{:.8f}".format(sell_amount_current))
