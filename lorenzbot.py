@@ -1385,7 +1385,7 @@ if __name__ == '__main__':
                 sell_amount_current = calc_trade_totals('spent') / sell_price_target
                 if float(sell_amount_current * sell_price_target) < float(trade_minimum_allowed):
                     sell_amount_current = calc_trade_totals('bought')
-                    logger.warning('Sell amount too low to satisfy minimum. Selling full bought amount.')
+                    logger.warning('Sell amount too low to satisfy minimum. Setting to full bought amount.')
                     skip_withdraw = True
                 logger.debug('[ACCUM] sell_amount_current: ' + "{:.8f}".format(sell_amount_current))
                 
