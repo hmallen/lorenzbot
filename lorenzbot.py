@@ -379,6 +379,7 @@ def calc_limit_price(amount, position, reverseLookup=None, withFees=None):
 
 def exec_trade(position, limit, amount):
     global calc_base_initialized
+    global skip_withdraw
     global telegram_time_last
     global mongo_failures, buy_failures, sell_failures
     
