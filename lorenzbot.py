@@ -1419,7 +1419,7 @@ if __name__ == '__main__':
                     exec_trade('sell', sell_price_target, sell_amount_current)
 
             # Check for buy conditions
-            elif float(low_ask_actual) <= float(base_price) and trade_check_ready == True:
+            elif float(low_ask_actual) <= float(base_price_target) and trade_check_ready == True:
                 # Check if buy total greater than minimum allowed
                 #if float(buy_amount_current * low_ask_actual) <= 0.0001:
                 if float(buy_amount_current * low_ask_actual) <= float(trade_minimum_allowed):
