@@ -9,6 +9,8 @@ To use:
 5) If you use '--withdraw' option, it will send to MY Stellar Lumens wallet unless you change the address at the top of 'lorenzbot.py'
 
 TO DO:
+- After sell, Telegram sell message is sent twice
+- No Telegram withdraw message is sent
 - Add some form of "heartbeat" for verification of program run status
 - Verify proper order of dynamic amount calculation to prevent hanging/missed trades
 - Add projected STR profit if in accumulate mode

@@ -9,3 +9,4 @@ exception_log.log
 *.ini
 *aws*
 api*
+hb.txt
