@@ -12,7 +12,6 @@ import poloniex
 import psutil
 from pymongo import MongoClient
 import shutil
-import subprocess
 import sys
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
 import textwrap
@@ -29,6 +28,7 @@ global mongo_failures, buy_failures, sell_failures, csv_failures, telegram_failu
 
 poloniex_config_path = 'config/poloniex.ini'
 telegram_config_path = 'config/telegram.ini'
+telegram_user_file = 'telegram_users.txt'
 
 withdraw_address = 'GBHB5IEQA7YMIGQ6J4B2S7T7AN5RJXRQZUTMUOFRP2OJBP3NBX67DDOC'
 
@@ -38,8 +38,6 @@ log_file = 'logs/lorenzbot_log.csv'
 log_file_last = './last_lorenzbot_log.csv'
 exception_log_file = './exception_log.log'
 exception_last_file = './exception_last.txt'
-telegram_user_file = 'telegram_users.txt'
-heartbeat_file = 'hb.txt'
 
 logger = logging.getLogger(__name__)
 formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
@@ -109,8 +107,6 @@ parser = argparse.ArgumentParser(
     epilog='\r')
 
 # Define arguments that can be passed to program
-parser.add_argument('--debug', action='store_true', default=False, help='Add flag to include debug level output to console.')
-
 parser.add_argument('-c', '--clean', action='store_true', default=False, help='Add argument to drop all collections and csv trade log to start fresh. [Default = False]')
 
 parser.add_argument('-a', '--amount', default=1.0, type=float, help='Set static base amount of quote product to trade. [Default = 1.0]')
@@ -126,14 +122,17 @@ parser.add_argument('--dynamicloop', action='store_true', default=False, help='A
 parser.add_argument('--live', action='store_true', default=False, help='Add flag to enable live trading API keys.')
 parser.add_argument('--accumulate', action='store_true', default=False, help='Add flag to limit sell amount so total equals exact amount spent, \"accumulating\" trade currency as profit.')
 parser.add_argument('--withdraw', action='store_true', default=False, help='Add flag to withdraw STR profits to external address.')
+#parser.add_argument('--cashout', action='store_true', default=False, help='Add flag to enable \"cash out\" of profits to alternate currency (ex. BTC)')
 
 parser.add_argument('--telegram', action='store_true', default=False, help='Add flag to enable Telegram alerts.')
+#parser.add_argument('--telegramexceptions', action='store_true', default=False, help='Add flag to save exceptions to file then send it connected users')
 
-parser.add_argument('--heartbeat', action='store_true', default=False, help='Activate heartbeat monitor server.')
 parser.add_argument('--nocsv', action='store_false', default=True, help='Add flag to disable csv logging.')
 parser.add_argument('--mongoalt', action='store_true', default=False, help='Add flag to use alternative database for use of multiple instances concurrently.')
+parser.add_argument('--debug', action='store_true', default=False, help='Add flag to include debug level output to console.')
 
 # Parse arguments passed to program
+logger.debug('Parsing arguments.')
 args = parser.parse_args()
 
 # Set variables from arguments passed to program
@@ -157,22 +156,12 @@ loop_dynamic = args.dynamicloop; logger.debug('loop_dynamic: ' + str(loop_dynami
 live_trading = args.live; logger.debug('live_trading: ' + str(live_trading))
 accumulate_active = args.accumulate; logger.debug('accumulate_active: ' + str(accumulate_active))
 withdraw_active = args.withdraw; logger.debug('withdraw_active: ' + str(withdraw_active))
+#cashout_active = args.cashout; logger.debug('cashout_active: ' + str(cashout_active))
 
 telegram_active = args.telegram; logger.debug('telegram_active: ' + str(telegram_active))
 
-heartbeat_active = args.heartbeat; logger.debug('heartbeat_active: ' + str(heartbeat_active))
 csv_logging = args.nocsv; logger.debug('csv_logging: ' + str(csv_logging))
 mongo_alt = args.mongoalt; logger.debug('mongo_alt: ' + str(mongo_alt))
-
-
-def heartbeat():
-    try:
-        with open(heartbeat_file, 'w') as hb:
-            hb.write(str(time.time()))
-        
-    except Exception as e:
-        logger.exception('Exception occurred while writing heartbeat to file.')
-        raise
 
 
 def modify_collections(action):
@@ -1201,16 +1190,13 @@ if __name__ == '__main__':
         logger.info('Dropping all collections from database.')
         modify_collections('drop')
         logger.info('Process complete. Restart program without boolean switch.')
-        
-        if os.path.isfile(heartbeat_file):
-            logger.info('Deleting heartbeat log file.')
-            os.remove(heartbeat_file)
 
-        if os.path.isfile(log_file):
-            logger.info('Archiving old csv trade log.')
-            os.rename(log_file, ('logs/old/' + 'lorenzbot_log_' + datetime.datetime.now().strftime('%m%d%Y-%H%M%S') + '.csv'))
-        else:
-            logger.info('No csv log found to archive.')
+        if csv_logging == True:
+            if os.path.isfile(log_file):
+                logger.info('Archiving old csv trade log.')
+                os.rename(log_file, ('logs/old/' + 'lorenzbot_log_' + datetime.datetime.now().strftime('%m%d%Y-%H%M%S') + '.csv'))
+            else:
+                logger.info('No csv log found to archive.')
         
         sys.exit()  # COULD JUST PROCEED WITH MAIN PROGRAM...
     
@@ -1325,23 +1311,6 @@ if __name__ == '__main__':
 
         updater.start_polling()
 
-    if heartbeat_active == True:
-        logger.info('Starting heartbeat server.')
-        try:
-            # Start heartbeat server
-            if debug == False:
-                proc = subprocess.Popen(['./heartbeat_monitor.py', '-t', str(loop_time)])
-            else:
-                proc = subprocess.Popen(['./heartbeat_monitor.py', '-t', str(loop_time), '-d'])
-
-            # Write initial heartbeat to file
-            heartbeat()
-        
-        except Exception as e:
-            logger.exception('Exception occurred while starting heartbeat server. Exiting.')
-            logger.exception(e)
-            sys.exit(1)
-
     if not os.path.isfile(poloniex_config_path):
         logger.error('No Poloniex config file found! Must create \".poloniex.ini\". Exiting.')
         sys.exit(1)
@@ -1401,6 +1370,7 @@ if __name__ == '__main__':
         logger.info('Initial balance/trade log amounts VERIFIED.')
     else:
         logger.info('Initial balance/trade log amounts ADJUSTED.')
+    
 
     # Functions Used/Arguments Required/Values Returned:
     #
@@ -1415,10 +1385,6 @@ if __name__ == '__main__':
     while (True):
         try:
             logger.info('----[LOOP START]----')
-
-            if heartbeat_active == True:
-                logger.debug('Triggering heartbeat.')
-                heartbeat() # Send heartbeat signal for monitor server
 
             # Calculate base price
             base_price = calc_base()
@@ -1557,9 +1523,6 @@ if __name__ == '__main__':
             logger.info('Buy trades failed: ' + str(buy_failures))
             logger.info('Sell trades skipped: ' + str(sell_skips))
             logger.info('Sell trades failed: ' + str(sell_failures))
-
-            if heartbeat_active == True:
-                proc.kill()
             
             if csv_logging == True:
                 logger.info('CSV write errors: ' + str(csv_failures))
