@@ -213,6 +213,23 @@ if __name__ == '__main__':
 
     connected_users = []
 
+    if os.path.isfile(telegram_user_file):
+        logger.info('Found Telegram user file. Loading connected users.')
+        with open(telegram_user_file, 'r') as user_file:
+            user_string = user_file.read()
+        user_array = user_string.split('\n')
+        for user in user_array:
+            if user != '' and connected_users.count(int(user)) == 0:
+                connected_users.append(int(user))
+                logger.info('Connected User: ' + user)
+    
+    else:
+        logger.info('No Telegram user file found. Creating empty file.')
+        with open(telegram_user_file, 'w') as user_file:
+            pass
+
+    logger.debug('connected_users: ' + str(connected_users))
+
     try:
         updater.start_polling()
 
