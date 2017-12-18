@@ -1,3 +1,5 @@
+#!../env/bin/python
+
 import argparse
 import logging
 import sys
@@ -7,11 +9,16 @@ logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
 parser = argparse.ArgumentParser()
+parser.add_argument('-d', '--debug', action='store_true', default=False, help='Include DEBUG level output.')
 parser.add_argument('-t', '--time', type=float, required=True, help='Loop time used on heartbeat client.')
 args = parser.parse_args()
 
+debug = args.debug
+if debug == False:
+    logger.setLevel(level=logging.INFO)
+logger.debug('[SERVER] debug: ' + str(debug))
 check_time = args.time
-logger.debug('check_time: ' + "{:.2f}".format(check_time))
+logger.debug('[SERVER] check_time: ' + "{:.2f}".format(check_time))
 
 heartbeat_file = 'hb.txt'
 
@@ -24,7 +31,7 @@ def heartbeat_check():
         return hb_time
 
     except Exception as e:
-        logger.exception('Exception occurred while checking heartbeat.')
+        logger.exception('[SERVER] Exception occurred while checking heartbeat.')
         raise
 
 
@@ -33,7 +40,7 @@ if __name__ == '__main__':
     try:
         while (True):
             heartbeat_diff = time.time() - heartbeat_check()
-            logger.info('Last heartbeat ' + "{:.2f}".format(heartbeat_diff) + ' seconds ago.')
+            logger.debug('[SERVER] Last heartbeat ' + "{:.2f}".format(heartbeat_diff) + ' seconds ago.')
 
             if heartbeat_diff > check_time:
                 heartbeat_still_count += 1
@@ -41,10 +48,10 @@ if __name__ == '__main__':
                 heartbeat_still_count = 0
 
             if heartbeat_still_count >= 3:
-                logger.error('Heartbeat not detected for at least 3 checks.')
+                logger.error('[SERVER] Heartbeat not detected for at least 3 checks.')
                 # Put some alert system here
                 
-            logger.debug('heartbeat_still_count: ' + str(heartbeat_still_count))
+            logger.debug('[SERVER] heartbeat_still_count: ' + str(heartbeat_still_count))
 
             time.sleep(check_time)
 
@@ -52,5 +59,5 @@ if __name__ == '__main__':
         logger.exception(e)
 
     except KeyboardInterrupt:
-        logger.info('Exit signal received.')
+        logger.debug('[SERVER] Exit signal received.')
         sys.exit()

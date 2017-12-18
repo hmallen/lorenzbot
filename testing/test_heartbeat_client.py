@@ -1,3 +1,4 @@
+import argparse
 import logging
 import subprocess
 import sys
@@ -5,6 +6,15 @@ import time
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
+
+parser = argparse.ArgumentParser()
+parser.add_argument('-d', '--debug', action='store_true', default=False, help='Include DEBUG level output.')
+args = parser.parse_args()
+
+debug = args.debug
+if debug == False:
+    logger.setLevel(level=logging.INFO)
+logger.debug('debug: ' + str(debug))
 
 heartbeat_file = 'hb.txt'
 loop_time = 10
@@ -26,19 +36,10 @@ def heartbeat():
 if __name__ == '__main__':
     try:
         # Start heartbeat server
-        proc = subprocess.Popen(['python', 'test_heartbeat_server.py', '-t', str(loop_time)], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        out, err = proc.communicate()
-        logger.debug('out: ' + out)
-        logger.debug('err: ' + err)
-
-        time.sleep(5)
-        
-        proc.kill()
-        out, err = proc.communicate()
-        logger.debug('out: ' + out)
-        logger.debug('err: ' + err)
-
-        sys.exit()
+        if debug == False:
+            proc = subprocess.Popen(['./test_heartbeat_server.py', '-t', str(loop_time)])
+        else:
+            proc = subprocess.Popen(['./test_heartbeat_server.py', '-t', str(loop_time), '-d'])
 
         # Write initial heartbeat to file
         heartbeat()
@@ -60,4 +61,5 @@ if __name__ == '__main__':
 
     except KeyboardInterrupt:
         logger.info('Exit signal received.')
+        proc.kill()
         sys.exit()
