@@ -11,7 +11,8 @@ global telegram_failures
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
-telegram_config_path = './.telegram_test.ini'
+telegram_config_path = '.telegram_test.ini'
+telegram_user_file = 'telegram_users.txt'
 
 telegram_failures = 0
 
@@ -30,6 +31,20 @@ def telegram_connect(bot, update):
 
         telegram_message = 'Subscribed to Lorenzbot alerts.'
 
+        try:
+            with open(telegram_user_file, 'w') as user_file:
+                for x in range(0, len(connected_users)):
+                    user_file.write(str(connected_users[x]))
+                    if x < (len(connected_users) - 1):
+                        user_file.write('\n')
+            with open(telegram_user_file, 'r') as user_file:
+                users = user_file.read()
+            logger.debug('[CONNECT] user_file: ' + users)
+        except Exception as e:
+            logger.exception('[CONNECT] Exception occurred while writing Telegram users to file.')
+            logger.exception(e)
+            raise
+
     else:
         telegram_message = 'Already subscribed to Lorenzbot alerts.'
         
@@ -37,9 +52,10 @@ def telegram_connect(bot, update):
     try:
         bot.send_message(chat_id=telegram_user, text=telegram_message)
     except Exception as e:
-        logger.error('[CONNECT] Exception occurred while sending telegram message.')
+        logger.exception('[CONNECT] Exception occurred while sending Telegram message.')
         logger.exception(e)
         telegram_failures += 1
+        raise
 
 
 def telegram_disconnect(bot, update):
@@ -56,6 +72,20 @@ def telegram_disconnect(bot, update):
         
         telegram_message = 'Unsubscribed from Lorenzbot alerts.'
 
+        try:
+            with open(telegram_user_file, 'w') as user_file:
+                for x in range(0, len(connected_users)):
+                    user_file.write(str(connected_users[x]))
+                    if x < (len(connected_users) - 1):
+                        user_file.write('\n')
+            with open(telegram_user_file, 'r') as user_file:
+                users = user_file.read()
+            logger.debug('[DISCONNECT] user_file: ' + users)
+        except Exception as e:
+            logger.exception('[CONNECT] Exception occurred while writing Telegram users to file.')
+            logger.exception(e)
+            raise
+
     else:
         telegram_message = 'Not currently subscribed to Lorenzbot alerts.'
 
@@ -63,9 +93,10 @@ def telegram_disconnect(bot, update):
     try:
         bot.send_message(chat_id=telegram_user, text=telegram_message)
     except Exception as e:
-        logger.error('[DISCONNECT] Exception occurred while sending telegram message.')
+        logger.exception('[DISCONNECT] Exception occurred while sending Telegram message.')
         logger.exception(e)
         telegram_failures += 1
+        raise
 
 
 def telegram_status(bot, update):
@@ -97,9 +128,10 @@ def telegram_status(bot, update):
     try:
         bot.send_message(chat_id=telegram_user, text=telegram_message)
     except Exception as e:
-        logger.error('[STATUS] Exception occurred while sending telegram message.')
+        logger.exception('[STATUS] Exception occurred while sending Telegram message.')
         logger.exception(e)
         telegram_failures += 1
+        raise
 
 
 def telegram_profit(bot, update):
@@ -124,9 +156,10 @@ def telegram_profit(bot, update):
     try:
         bot.send_message(chat_id=telegram_user, text=telegram_message)
     except Exception as e:
-        logger.error('[PROFIT] Exception occurred while sending telegram message.')
+        logger.exception('[PROFIT] Exception occurred while sending Telegram message.')
         logger.exception(e)
         telegram_failures += 1
+        raise
 
 
 def telegram_send_message(bot, trade_message):
@@ -140,9 +173,10 @@ def telegram_send_message(bot, trade_message):
                 bot.send_message(chat_id=user, text=trade_message)
                 logger.debug('Sent alert to user ' + str(user) + '.')
             except Exception as e:
-                logger.error('[SEND] Exception occurred while sending telegram message.')
+                logger.exception('[SEND] Exception occurred while sending Telegram message.')
                 logger.exception(e)
                 telegram_failures += 1
+                raise
     
     else:
         logger.debug('No Telegram users connected. Message not sent.')
