@@ -19,9 +19,6 @@ logger.debug('debug: ' + str(debug))
 heartbeat_file = 'hb.txt'
 loop_time = 10
 
-time_current = time.time()
-time_last = time_current
-
 
 def heartbeat():
     try:
@@ -34,6 +31,7 @@ def heartbeat():
 
 
 if __name__ == '__main__':
+    time_last = time.time()
     try:
         # Start heartbeat server
         if debug == False:

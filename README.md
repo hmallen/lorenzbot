@@ -9,8 +9,7 @@ To use:
 5) If you use '--withdraw' option, it will send to MY Stellar Lumens wallet unless you change the address at the top of 'lorenzbot.py'
 
 TO DO:
-- Add file to store users connected to Telegram
--- Reference for heartbeat timeout alert messages
+- Reference stored Telegram users for heartbeat timeout alert messages
 - After sell, Telegram sell message is sent twice
 - No Telegram withdraw message is sent
 - Add some form of "heartbeat" for verification of program run status
@@ -124,6 +123,7 @@ DONE:
 - Withdraw profit to STR address
 - Program went INSANE when API IP restrictions enabled from site
 -- Fixed by adding AWS elastic ip to whitelist on site
+- Add file to store users connected to Telegram and reconnect on restart
 
 RESOURCES:
 - Exception Handling:
