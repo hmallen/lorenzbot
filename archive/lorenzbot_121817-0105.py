@@ -1203,7 +1203,7 @@ if __name__ == '__main__':
         logger.info('Process complete. Restart program without boolean switch.')
         
         if os.path.isfile(heartbeat_file):
-            logger.info('Deleting heartbeat file.')
+            logger.info('Deleting heartbeat log file.')
             os.remove(heartbeat_file)
 
         if os.path.isfile(log_file):
