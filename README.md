@@ -9,10 +9,8 @@ To use:
 5) If you use '--withdraw' option, it will send to MY Stellar Lumens wallet unless you change the address at the top of 'lorenzbot.py'
 
 TO DO:
-- Reference stored Telegram users for heartbeat timeout alert messages
 - After sell, Telegram sell message is sent twice
 - No Telegram withdraw message is sent
-- Add some form of "heartbeat" for verification of program run status
 - Verify proper order of dynamic amount calculation to prevent hanging/missed trades
 - Add projected STR profit if in accumulate mode
 - Removed view-only API keys and must restore if required
@@ -27,7 +25,6 @@ TO DO:
 - Telegram command to retrieve most recent exception (from recent exception log)
 - Test if program functions without defining global variables
 - Change Telegram message to use list/dict of variables and loop to create string or send multiple lines
-- Delete all API keys, generate new, and make Github repository public
 - Clean up unnecessary logging output, especially for INFO level
 -- Move INFO level to bottom of main loop and improve order
 
@@ -62,10 +59,7 @@ IF TIME:
 - Add Poloniex coach?
 
 NEEDS TESTING:
-- Make loop time ~30 sec if approaching sell point
-- Fix trade execution to work with increased trade minimum of $0.50
-- Set initial trade amount to trade total of ~$0.50 based on current conditions
-- Fix trade amount calculation to work with increased trade minimum of $0.50
+- Add some form of "heartbeat" for verification of program run status
 - Fix csv profit calculation to work with "accumulate" mode
 - Add max sell amount that is ~5%? less than total bought to "accumulate" trade currency
 - Catch ALL exceptions with logger...some going completely uncaught/unhandled ****
@@ -124,6 +118,12 @@ DONE:
 - Program went INSANE when API IP restrictions enabled from site
 -- Fixed by adding AWS elastic ip to whitelist on site
 - Add file to store users connected to Telegram and reconnect on restart
+- Make loop time ~30 sec if approaching sell point
+- Fix trade execution to work with increased trade minimum of $0.50
+- Set initial trade amount to trade total of ~$0.50 based on current conditions
+- Fix trade amount calculation to work with increased trade minimum of $0.50
+- Reference stored Telegram users for heartbeat timeout alert messages
+- Delete all API keys, generate new, and make Github repository public
 
 RESOURCES:
 - Exception Handling:
