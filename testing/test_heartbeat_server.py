@@ -49,7 +49,9 @@ if __name__ == '__main__':
 
             if heartbeat_still_count >= 3:
                 logger.error('[SERVER] Heartbeat not detected for at least 3 checks.')
-                # Put some alert system here
+
+                # Alert user of heartbeat timeout
+                logger.debug('ALERT!')
                 
             logger.debug('[SERVER] heartbeat_still_count: ' + str(heartbeat_still_count))
 
