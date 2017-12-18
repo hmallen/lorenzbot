@@ -82,7 +82,7 @@ def telegram_disconnect(bot, update):
                 users = user_file.read()
             logger.debug('[DISCONNECT] user_file: ' + users)
         except Exception as e:
-            logger.exception('[CONNECT] Exception occurred while writing Telegram users to file.')
+            logger.exception('[DISCONNECT] Exception occurred while writing Telegram users to file.')
             logger.exception(e)
             raise
 

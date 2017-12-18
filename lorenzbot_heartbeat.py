@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!./env/bin/python
 # -*- coding: utf-8 -*-
 
 import argparse
@@ -28,6 +28,7 @@ global mongo_failures, buy_failures, sell_failures, csv_failures, telegram_failu
 
 poloniex_config_path = 'config/poloniex.ini'
 telegram_config_path = 'config/telegram.ini'
+telegram_user_file = 'telegram_users.txt'
 
 withdraw_address = 'GBHB5IEQA7YMIGQ6J4B2S7T7AN5RJXRQZUTMUOFRP2OJBP3NBX67DDOC'
 
@@ -710,6 +711,21 @@ def telegram_connect(bot, update):
 
         telegram_message = 'Subscribed to Lorenzbot alerts.'
 
+        try:
+            with open(telegram_user_file, 'w') as user_file:
+                for x in range(0, len(connected_users)):
+                    user_file.write(str(connected_users[x]))
+                    if x < (len(connected_users) - 1):
+                        user_file.write('\n')
+            with open(telegram_user_file, 'r') as user_file:
+                users = user_file.read()
+            logger.debug('[CONNECT] user_file: ' + users)
+        
+        except Exception as e:
+            logger.exception('[CONNECT] Exception occurred while writing Telegram users to file.')
+            logger.exception(e)
+            raise
+
     else:
         telegram_message = 'Already subscribed to Lorenzbot alerts.'
         
@@ -737,6 +753,21 @@ def telegram_disconnect(bot, update):
         #logger.debug('Connected Users: ' + str(connected_users))
         
         telegram_message = 'Unsubscribed from Lorenzbot alerts.'
+
+        try:
+            with open(telegram_user_file, 'w') as user_file:
+                for x in range(0, len(connected_users)):
+                    user_file.write(str(connected_users[x]))
+                    if x < (len(connected_users) - 1):
+                        user_file.write('\n')
+            with open(telegram_user_file, 'r') as user_file:
+                users = user_file.read()
+            logger.debug('[DISCONNECT] user_file: ' + users)
+        
+        except Exception as e:
+            logger.exception('[DISCONNECT] Exception occurred while writing Telegram users to file.')
+            logger.exception(e)
+            raise
 
     else:
         telegram_message = 'Not currently subscribed to Lorenzbot alerts.'
@@ -1259,9 +1290,26 @@ if __name__ == '__main__':
         profit_handler = CommandHandler('profit', telegram_profit)
         dispatcher.add_handler(profit_handler)
 
-        updater.start_polling()
-
         connected_users = []
+
+        if os.path.isfile(telegram_user_file):
+            logger.info('Found Telegram user file. Loading connected users.')
+            with open(telegram_user_file, 'r') as user_file:
+                user_string = user_file.read()
+            user_array = user_string.split('\n')
+            for user in user_array:
+                if user != '' and connected_users.count(int(user)) == 0:
+                    connected_users.append(int(user))
+                    logger.info('Connected User: ' + user)
+        
+        else:
+            logger.info('No Telegram user file found. Creating empty file.')
+            with open(telegram_user_file, 'w') as user_file:
+                pass
+
+        logger.debug('connected_users: ' + str(connected_users))
+
+        updater.start_polling()
 
     if not os.path.isfile(poloniex_config_path):
         logger.error('No Poloniex config file found! Must create \".poloniex.ini\". Exiting.')
