@@ -1515,7 +1515,7 @@ if __name__ == '__main__':
 
             # If balances and trade logs agree, proceed with check for buy trade conditions
             elif float(low_ask_actual) <= float(base_price) and trade_check_ready == False:
-                logger.warning('Skipping trade check for buys until balance and trade log agree.')
+                logger.warning('Skipping buy trade check until balance and trade log agree.')
             
             # Calculate loop time based on current conditions
             loop_time_dynamic = calc_dynamic('loop', base_price, low_ask_actual)
