@@ -79,7 +79,7 @@ if not os.path.exists('logs/old'):
 
 # Variable modifiers
 product = trade_market
-trade_minimum_allowed = Decimal(0.5)
+trade_minimum_allowed = Decimal(1)    # Minimum trade total required by Poloniex
 loop_time_min = Decimal(6)  # Minimum allowed loop time with dynamic adjustment (seconds)
 
 buy_threshold = Decimal(0.000105)
