@@ -533,8 +533,8 @@ def exec_trade(position, limit, amount):
                 try:
                     telegram_send_message(updater.bot, telegram_message)
                 except Exception as e:
-                    logger.debug('Exception occurred while sending Telegram trade alert.')
-                    logger.debug(e)
+                    logger.exception('Exception occurred while sending Telegram trade alert.')
+                    logger.exception(e)
                     raise
 
             else:
@@ -571,8 +571,10 @@ def exec_trade(position, limit, amount):
 
                 telgram_message = 'Withdrew STR profit of ' + "{:.4f}".format(withdraw_total) + ' to address ' + withdraw_address + '.'
                 telegram_send_message(updater.bot, telegram_message)
-            except:
-                logger.debug('Withdraw failed. No Telegram message to send.')
+            except Exception as e:
+                logger.exception('Withdraw failed. Not sending Telegram message.')
+                logger.exception(e)
+                raise
 
         elif withdraw_active == True and skip_withdraw == True:
             logger.warning('No profit accumulated for withdraw. Skipping.')
