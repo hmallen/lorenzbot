@@ -5,7 +5,8 @@ import configparser
 import logging
 import os
 import sys
-from telegram.ext import Updater
+#from telegram.ext import Updater
+import telegram
 import time
 
 logging.basicConfig(level=logging.DEBUG)
@@ -91,17 +92,12 @@ if __name__ == '__main__':
             config.read(telegram_config_path)
             telegram_token = config['lorenzbot']['token']
             
-            updater = Updater(token=telegram_token)
-            dispatcher = updater.dispatcher
+            #updater = Updater(token=telegram_token)
+            #dispatcher = updater.dispatcher
 
             #updater.start_polling()
-            wh_url = 'https://34.238.182.42:443/' + telegram_token
-            updater.start_webhook(listen='34.238.182.42',
-                                  port=443,
-                                  url_path=telegram_token,
-                                  key='private.key',
-                                  cert='cert.pem',
-                                  webhook_url=wh_url)
+
+            bot = telegram.Bot(telegram_token)
 
             connected_users = []
         
@@ -127,7 +123,7 @@ if __name__ == '__main__':
                         
                         # Alert user of heartbeat timeout
                         logger.debug('[SERVER] Heartbeat timeout. Sending Telegram alert.')
-                        telegram_send_alert(updater.bot, connected_users)
+                        telegram_send_alert(bot, connected_users)
 
                         telegram_time_last = time.time()
                 

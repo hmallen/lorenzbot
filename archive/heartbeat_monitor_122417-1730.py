@@ -5,7 +5,7 @@ import configparser
 import logging
 import os
 import sys
-import telegram
+from telegram.ext import Updater
 import time
 
 logging.basicConfig(level=logging.DEBUG)
@@ -90,9 +90,12 @@ if __name__ == '__main__':
             config = configparser.ConfigParser()
             config.read(telegram_config_path)
             telegram_token = config['lorenzbot']['token']
-
-            bot = telegram.Bot(telegram_token)
             
+            updater = Updater(token=telegram_token)
+            dispatcher = updater.dispatcher
+
+            updater.start_polling()
+
             connected_users = []
             
         while (True):
@@ -117,7 +120,7 @@ if __name__ == '__main__':
                         
                         # Alert user of heartbeat timeout
                         logger.debug('[SERVER] Heartbeat timeout. Sending Telegram alert.')
-                        telegram_send_alert(bot, connected_users)
+                        telegram_send_alert(updater.bot, connected_users)
 
                         telegram_time_last = time.time()
 
@@ -130,4 +133,6 @@ if __name__ == '__main__':
 
     except KeyboardInterrupt:
         logger.debug('[SERVER] Exit signal received.')
+        if telegram_disable == False:
+            updater.stop()
         sys.exit()
