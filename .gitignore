@@ -11,3 +11,4 @@ exception_log.log
 api*
 hb.txt
 telegram_users.txt
+cert.pem
