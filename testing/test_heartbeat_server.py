@@ -94,7 +94,14 @@ if __name__ == '__main__':
             updater = Updater(token=telegram_token)
             dispatcher = updater.dispatcher
 
-            updater.start_polling()
+            #updater.start_polling()
+            wh_url = 'https://47.185.146.37.com:88/' + telegram_token
+            updater.start_webhook(listen='47.185.146.37',
+                                  port=88,
+                                  url_path=telegram_token,
+                                  key='private.key',
+                                  cert='cert.pem',
+                                  webhook_url=wh_url)
 
             connected_users = []
         
