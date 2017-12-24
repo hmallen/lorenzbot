@@ -1340,7 +1340,7 @@ if __name__ == '__main__':
             if debug == True:
                 proc_list.append('-d')
 
-            if telegram_disable == True:
+            if telegram_active == False:
                 proc_list.append('--notelegram')
 
             proc = subprocess.Popen(proc_list)
