@@ -1331,11 +1331,20 @@ if __name__ == '__main__':
         logger.info('Starting heartbeat server.')
         try:
             # Start heartbeat server
-            if debug == False:
-                proc = subprocess.Popen(['./heartbeat_monitor.py', '-t', str(loop_time)])
-            else:
-                proc = subprocess.Popen(['./heartbeat_monitor.py', '-t', str(loop_time), '-d'])
+            proc_list = []
+            proc_list.append('./heartbeat_monitor.py')
 
+            proc_list.append('-t')
+            proc_list.append(str(loop_time))
+
+            if debug == True:
+                proc_list.append('-d')
+
+            if telegram_disable == True:
+                proc_list.append('--notelegram')
+
+            proc = subprocess.Popen(proc_list)
+            
             # Write initial heartbeat to file
             heartbeat()
         

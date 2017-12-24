@@ -9,12 +9,15 @@ logger = logging.getLogger(__name__)
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-d', '--debug', action='store_true', default=False, help='Include DEBUG level output.')
+parser.add_argument('--notelegram', action='store_true', default=False, help='Disable Telegram alerts.')
 args = parser.parse_args()
 
 debug = args.debug
 if debug == False:
     logger.setLevel(level=logging.INFO)
 logger.debug('debug: ' + str(debug))
+
+telegram_disable = args.notelegram
 
 heartbeat_file = 'hb.txt'
 loop_time = 10
