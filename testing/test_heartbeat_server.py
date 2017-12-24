@@ -30,7 +30,7 @@ logger.debug('[SERVER] telegram_disable: ' + str(telegram_disable))
 
 heartbeat_file = 'hb.txt'
 
-config_path = '../config/telegram.ini'
+telegram_config_path = '../config/telegram.ini'
 telegram_user_file = 'telegram_users.txt'
 
 telegram_time_last = time.time() - 900
@@ -88,7 +88,7 @@ if __name__ == '__main__':
     try:
         if telegram_disable == False:
             config = configparser.ConfigParser()
-            config.read(config_path)
+            config.read(telegram_config_path)
             telegram_token = config['lorenzbot']['token']
             
             updater = Updater(token=telegram_token)
