@@ -95,9 +95,9 @@ if __name__ == '__main__':
             dispatcher = updater.dispatcher
 
             #updater.start_polling()
-            wh_url = 'https://47.185.146.37.com:88/' + telegram_token
-            updater.start_webhook(listen='47.185.146.37',
-                                  port=88,
+            wh_url = 'https://34.238.182.42:443/' + telegram_token
+            updater.start_webhook(listen='34.238.182.42',
+                                  port=443,
                                   url_path=telegram_token,
                                   key='private.key',
                                   cert='cert.pem',
