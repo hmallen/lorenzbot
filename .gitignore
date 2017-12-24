@@ -12,3 +12,4 @@ api*
 hb.txt
 telegram_users.txt
 cert.pem
+private.key
