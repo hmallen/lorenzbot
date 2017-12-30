@@ -72,7 +72,7 @@ def telegram_load_users():
         for user in user_array:
             if user != '' and telegram_users.count(int(user)) == 0:
                 telegram_users.append(int(user))
-                logger.info('Connected User: ' + user)
+                logger.info('[SERVER] Connected User: ' + user)
     
     else:
         logger.info('[SERVER] No Telegram user file found. Creating empty file.')
@@ -89,7 +89,7 @@ if __name__ == '__main__':
         if telegram_disable == False:
             config = configparser.ConfigParser()
             config.read(telegram_config_path)
-            telegram_token = config['lorenzbot']['token']
+            telegram_token = config['heartbeat']['token']
 
             bot = telegram.Bot(telegram_token)
             
