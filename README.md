@@ -9,6 +9,7 @@ To use:
 5) If you use '--withdraw' option, it will send to MY Stellar Lumens wallet unless you change the address at the top of 'lorenzbot.py'
 
 TO DO:
+- Make Telegram messages always send after sell
 - "Logger object has no attribute: critical"
 - Buy skip counter no longer increments
 - Look into 2 buys being made back-to-back on first run
