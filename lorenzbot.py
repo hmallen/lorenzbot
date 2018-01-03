@@ -981,7 +981,10 @@ def calc_dynamic(selection, base, limit):
             logger.debug('Calculating loop time.')
             if diff < Decimal(-0.025):
                 logger.debug('diff < -0.025')
-                lt = 30  # Set loop time to 30 seconds to check for sell conditions more quickly
+                if loop_time > 30:
+                    lt = 30  # Set loop time to 30 seconds to check for sell conditions more quickly
+                else:
+                    lt = loop_time
                 
             elif Decimal(-0.025) <= diff <= Decimal(0.0001): # To exclude tiny values
                 logger.debug('-0.025 <= diff <= 0.0001')
