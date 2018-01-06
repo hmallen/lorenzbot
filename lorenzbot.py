@@ -30,7 +30,6 @@ global mongo_failures, buy_failures, sell_failures, csv_failures, telegram_failu
 poloniex_config_path = 'config/poloniex.ini'
 telegram_config_path = 'config/telegram.ini'
 
-#withdraw_address = 'GBHB5IEQA7YMIGQ6J4B2S7T7AN5RJXRQZUTMUOFRP2OJBP3NBX67DDOC'   # Desktop wallet
 withdraw_address = 'GAVPJKYWDQ22UOT6PBIEZLGXQ5T3OQPSMPJNRXE35B6WN3KKDKJD7J3U'   # Ledger wallet
 
 log_out = 'logs/' + datetime.datetime.now().strftime('%m%d%Y-%H%M%S') + '.log'
