@@ -1514,7 +1514,7 @@ if __name__ == '__main__':
             logger.info('Bailout Difference: ' + "{:.4f}".format(bailout_diff))
 
             # Check for bailout conditions
-            if float(bt_diff) < bailout_threshold:
+            if bailout_diff > 0:
                 # Sell everything and start fresh
                 logger.info('BAILOUT CONDITIONS MET --> SELLING')
                 
