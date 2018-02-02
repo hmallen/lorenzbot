@@ -1510,12 +1510,21 @@ if __name__ == '__main__':
             logger.debug('st_diff: ' + "{:.8f}".format(st_diff))
             logger.info('Sell/Bid Target Difference: ' + "{:.2f}".format(st_diff * Decimal(100)) + '%')
 
+            bailout_diff = bailout_threshold - float(bt_diff)
+            logger.info('Bailout Difference: ' + "{:.4f}".format(bailout_diff))
+
             # Check for bailout conditions
             if float(bt_diff) < bailout_threshold:
                 # Sell everything and start fresh
                 logger.info('BAILOUT CONDITIONS MET --> SELLING')
+                
                 sell_amount_current = calc_trade_totals('bought')
-                exec_trade('sell', calc_limit_price(sell_amount_current, 'sell'), sell_amount_current)
+                sell_price_current = calc_limit_price(sell_amount_current, 'sell')
+
+                logger.info('Selling ' + "{:.2f}".format(sell_amount_current) + ' at ' + "{:.8f}".format(sell_price_current))
+                sys.exit()
+                
+                #exec_trade('sell', sell_price_current, sell_amount_current)
 
             # Check for sell conditions
             if float(high_bid_actual) >= float(sell_price_target):
