@@ -1521,10 +1521,8 @@ if __name__ == '__main__':
                 sell_amount_current = calc_trade_totals('bought')
                 sell_price_current = calc_limit_price(sell_amount_current, 'sell')
 
-                logger.info('Selling ' + "{:.2f}".format(sell_amount_current) + ' at ' + "{:.8f}".format(sell_price_current))
-                sys.exit()
-                
-                #exec_trade('sell', sell_price_current, sell_amount_current)
+                logger.info('Selling ' + "{:.2f}".format(sell_amount_current) + ' at ' + "{:.8f}".format(sell_price_current))                
+                exec_trade('sell', sell_price_current, sell_amount_current)
 
             # Check for sell conditions
             if float(high_bid_actual) >= float(sell_price_target):
