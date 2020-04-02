@@ -3,7 +3,7 @@ chardet==3.0.4
 future==0.16.0
 idna==2.6
 #poloniex==0.4.6 (Install manually)
-psutil==5.4.1
+psutil==5.6.6
 pymongo==3.5.1
 python-telegram-bot==8.1.1
 requests==2.18.4
